@@ -1,0 +1,78 @@
+<div class="ion-page">
+  <div class="notifications-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+
+      <div>
+        <h1>Notifikasi</h1>
+
+        <p>
+          {{ unread }} notifikasi belum dibaca
+        </p>
+      </div>
+
+
+      <button *ngIf="unread > 0" type="button" class="btn-outline" (click)="markAllRead()">
+        Tandai Semua Dibaca
+      </button>
+
+    </div>
+
+
+    <!-- NOTIFICATION LIST -->
+    <div class="notification-list">
+
+      <div *ngFor="let notification of filteredNotifications" class="notification-card"
+        [class.unread]="!notification.read" (click)="markAsRead(notification.id)">
+
+        <!-- ICON -->
+        <span class="notification-icon">
+          {{ typeIcon[notification.type] }}
+        </span>
+
+
+        <!-- CONTENT -->
+        <div class="notification-content">
+
+          <div class="notification-header">
+
+            <p class="notification-title" [class.unread-title]="!notification.read">
+              {{ notification.title }}
+            </p>
+
+            <span class="notification-date">
+              {{ formatDate(notification.date) }}
+            </span>
+
+          </div>
+
+
+          <p class="notification-message">
+            {{ notification.message }}
+          </p>
+
+        </div>
+
+
+        <!-- UNREAD DOT -->
+        <div *ngIf="!notification.read" class="unread-dot"></div>
+
+      </div>
+
+      <div *ngIf="filteredNotifications.length === 0" class="empty-card">
+
+        <p class="empty-icon">
+          🔔
+        </p>
+
+        <p>
+          Tidak ada notifikasi
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,595 @@
+<div class="ion-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1>Manajemen Pendaftaran</h1>
+      <p>Kelola pendaftaran calon penghuni</p>
+    </div>
+  </div>
+
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+
+    <div class="summary-card">
+      <p class="summary-value">{{ totalCount }}</p>
+      <p class="summary-label">Total</p>
+    </div>
+
+    <div class="summary-card">
+      <p class="summary-value">{{ waitingCount }}</p>
+      <p class="summary-label">Menunggu</p>
+    </div>
+
+    <div class="summary-card">
+      <p class="summary-value">{{ approvedCount }}</p>
+      <p class="summary-label">Disetujui</p>
+    </div>
+
+    <div class="summary-card">
+      <p class="summary-value">{{ rejectedCount }}</p>
+      <p class="summary-label">Ditolak</p>
+    </div>
+
+  </div>
+
+
+  <!-- Tabs -->
+  <div class="tabs-container">
+
+    <button class="tab-button" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
+      Semua
+      <span class="tab-count">
+        {{ totalCount }}
+      </span>
+    </button>
+
+    <button class="tab-button" [class.active]="activeTab === 'MENUNGGU'" (click)="activeTab = 'MENUNGGU'">
+      Menunggu
+      <span class="tab-count">
+        {{ waitingCount }}
+      </span>
+    </button>
+
+    <button class="tab-button" [class.active]="activeTab === 'DISETUJUI'" (click)="activeTab = 'DISETUJUI'">
+      Disetujui
+      <span class="tab-count">
+        {{ approvedCount }}
+      </span>
+    </button>
+
+    <button class="tab-button" [class.active]="activeTab === 'DITOLAK'" (click)="activeTab = 'DITOLAK'">
+      Ditolak
+      <span class="tab-count">
+        {{ rejectedCount }}
+      </span>
+    </button>
+
+  </div>
+
+
+  <!-- Search -->
+  <div class="search-container">
+
+    <div class="search-box">
+
+      <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+
+      <input type="text" [(ngModel)]="search" placeholder="Cari nama atau kode..." />
+
+      <button *ngIf="search" class="clear-search" (click)="search = ''">
+        ×
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- Registration Table -->
+  <div class="table-card">
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Penghuni</th>
+            <th>Properti</th>
+            <th>Kamar</th>
+            <th>Tgl Daftar</th>
+            <th>Rencana Masuk</th>
+            <th>Durasi</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let reg of filteredRegistrations" class="registration-row" (click)="selectRegistration(reg)">
+
+            <!-- Kode -->
+            <td>
+              <span class="registration-code">
+                {{ reg.code }}
+              </span>
+            </td>
+
+
+            <!-- Penghuni -->
+            <td>
+
+              <div class="tenant-cell">
+
+                <div class="avatar">
+                  {{ getTenant(reg)?.name?.charAt(0) }}
+                </div>
+
+                <span class="tenant-name">
+                  {{ getTenant(reg)?.name }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Properti -->
+            <td>
+              <span class="property-name">
+                {{ getProperty(reg)?.name }}
+              </span>
+            </td>
+
+
+            <!-- Kamar -->
+            <td>
+
+              <span class="room-info">
+                Kamar {{ getRoom(reg)?.number }}
+                ({{ getRoomType(reg)?.name }})
+              </span>
+
+            </td>
+
+
+            <!-- Tanggal Daftar -->
+            <td>
+              <span class="date-text">
+                {{ formatDate(reg.registrationDate) }}
+              </span>
+            </td>
+
+
+            <!-- Rencana Masuk -->
+            <td>
+              <span class="date-text">
+                {{ formatDate(reg.plannedMoveIn) }}
+              </span>
+            </td>
+
+            <td>
+              <span class="date-text">
+                {{ reg.duration }} bulan
+              </span>
+            </td>
+
+
+            <!-- Status -->
+            <td>
+
+              <span class="status-badge" [ngClass]="{
+                  'status-waiting': reg.status === 'MENUNGGU',
+                  'status-approved': reg.status === 'DISETUJUI',
+                  'status-rejected': reg.status === 'DITOLAK'
+                }">
+                {{ reg.status === 'MENUNGGU'
+                ? 'Menunggu'
+                : reg.status === 'DISETUJUI'
+                ? 'Disetujui'
+                : 'Ditolak'
+                }}
+              </span>
+
+            </td>
+
+
+            <!-- Aksi -->
+            <td (click)="$event.stopPropagation()">
+
+              <div *ngIf="reg.status === 'MENUNGGU'; else detailButton" class="action-buttons">
+
+                <button class="action-button approve" (click)="openConfirm(reg, 'approve')">
+                  Setujui
+                </button>
+
+                <button class="action-button reject" (click)="openConfirm(reg, 'reject')">
+                  Tolak
+                </button>
+
+              </div>
+
+
+              <ng-template #detailButton>
+
+                <button class="detail-button" (click)="selectRegistration(reg)">
+                  Detail
+                </button>
+
+              </ng-template>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty State -->
+          <tr *ngIf="filteredRegistrations.length === 0">
+
+            <td colspan="9" class="empty-state">
+              Tidak ada data pendaftaran
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+
+
+  <!-- ===================================================== -->
+  <!-- DETAIL MODAL -->
+  <!-- ===================================================== -->
+
+  <div *ngIf="selected" class="modal-backdrop" (click)="closeDetail()">
+
+    <div class="modal modal-large" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+
+        <div>
+          <h2>Detail Pendaftaran</h2>
+        </div>
+
+        <button class="modal-close" (click)="closeDetail()">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Registration Header -->
+        <div class="registration-detail-header">
+
+          <div>
+
+            <p class="detail-code">
+              {{ selected.code }}
+            </p>
+
+            <p class="detail-date">
+              Didaftarkan
+              {{ formatDate(selected.registrationDate) }}
+            </p>
+
+          </div>
+
+
+          <span class="status-badge" [ngClass]="{
+            'status-waiting': selected.status === 'MENUNGGU',
+            'status-approved': selected.status === 'DISETUJUI',
+            'status-rejected': selected.status === 'DITOLAK'
+          }">
+            {{ selected.status === 'MENUNGGU'
+            ? 'Menunggu'
+            : selected.status === 'DISETUJUI'
+            ? 'Disetujui'
+            : 'Ditolak'
+            }}
+          </span>
+
+        </div>
+
+
+        <!-- Tenant Information -->
+        <div class="detail-section">
+
+          <p class="section-title">
+            Informasi Calon Penghuni
+          </p>
+
+
+          <div class="tenant-profile">
+
+            <div class="large-avatar">
+              {{ getTenant(selected)?.name?.charAt(0) }}
+            </div>
+
+            <div>
+
+              <p class="profile-name">
+                {{ getTenant(selected)?.name }}
+              </p>
+
+              <p class="profile-contact">
+                {{ getTenant(selected)?.email }}
+                ·
+                {{ getTenant(selected)?.phone }}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="info-list">
+
+            <div class="info-row">
+
+              <span class="info-label">
+                NIK
+              </span>
+
+              <span class="info-value">
+                {{ getTenant(selected)?.nik }}
+              </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Jenis Kelamin
+              </span>
+
+              <span class="info-value">
+                {{
+                getTenant(selected)?.gender === 'L'
+                ? 'Laki-laki'
+                : 'Perempuan'
+                }}
+              </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Alamat
+              </span>
+
+              <span class="info-value">
+                {{ getTenant(selected)?.address }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Room Information -->
+        <div class="detail-section">
+
+          <p class="section-title">
+            Informasi Kamar
+          </p>
+
+
+          <div class="info-list">
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Properti
+              </span>
+
+              <span class="info-value">
+                {{ getProperty(selected)?.name }}
+              </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Kamar
+              </span>
+
+              <span class="info-value">
+
+                Kamar {{ getRoom(selected)?.number }}
+                (Lantai {{ getRoom(selected)?.floor }})
+
+              </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Tipe Kamar
+              </span>
+
+              <span class="info-value">
+                {{ getRoomType(selected)?.name }}
+              </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Harga/Bulan
+              </span>
+
+              <span class="info-value price">
+                {{
+                getRoom(selected)
+                ? formatRupiah(getRoom(selected)!.price)
+                : '—'
+                }}
+              </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Rencana Masuk
+              </span>
+
+              <span class="info-value">
+                {{ formatDate(selected.plannedMoveIn) }}
+              </span>
+
+            </div>
+
+            <div class="info-row">
+
+              <span class="info-label">
+                Durasi Sewa
+              </span>
+
+              <span class="info-value">
+                {{ selected.duration }} bulan
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Notes -->
+        <div *ngIf="selected.notes" class="notes-section">
+
+          <p class="notes-title">
+            Catatan Penghuni
+          </p>
+
+          <p class="notes-text">
+            {{ selected.notes }}
+          </p>
+
+        </div>
+
+
+        <!-- Action Buttons -->
+        <div *ngIf="selected.status === 'MENUNGGU'" class="modal-actions">
+
+          <button class="modal-action reject" (click)="openConfirm(selected, 'reject')">
+            Tolak Pendaftaran
+          </button>
+
+          <button class="modal-action approve" (click)="openConfirm(selected, 'approve')">
+            Setujui Pendaftaran
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONFIRMATION MODAL -->
+  <!-- ===================================================== -->
+
+  <div *ngIf="confirmAction" class="modal-backdrop" (click)="closeConfirm()">
+
+    <div class="modal modal-small" (click)="$event.stopPropagation()">
+
+      <div class="confirm-content">
+
+        <!-- Icon -->
+        <div class="confirm-icon">
+
+          {{
+          confirmAction.action === 'approve'
+          ? '✓'
+          : '×'
+          }}
+
+        </div>
+
+
+        <!-- Title -->
+        <h3>
+
+          {{
+          confirmAction.action === 'approve'
+          ? 'Setujui Pendaftaran?'
+          : 'Tolak Pendaftaran?'
+          }}
+
+        </h3>
+
+
+        <!-- Description -->
+        <p>
+
+          {{
+          confirmAction.action === 'approve'
+          ? 'Pendaftaran akan disetujui dan pesanan akan dibuat otomatis.'
+          : 'Pendaftaran akan ditolak dan penghuni akan diberitahu.'
+          }}
+
+        </p>
+
+
+        <!-- Buttons -->
+        <div class="confirm-actions">
+
+          <button class="confirm-button cancel" (click)="closeConfirm()">
+            Batal
+          </button>
+
+
+          <button class="confirm-button" [ngClass]="{
+            'confirm-approve':
+              confirmAction.action === 'approve',
+            'confirm-reject':
+              confirmAction.action === 'reject'
+          }" (click)="handleAction()">
+
+            {{
+            confirmAction.action === 'approve'
+            ? 'Ya, Setujui'
+            : 'Ya, Tolak'
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

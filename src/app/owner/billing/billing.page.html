@@ -1,0 +1,669 @@
+<div class="ion-page">
+  <div class="billing-page">
+
+    <!-- =========================
+       HEADER
+  ========================= -->
+
+    <div class="page-header">
+
+      <div>
+        <h1>Manajemen Tagihan</h1>
+
+        <p>
+          Kelola tagihan dan pembayaran penghuni
+        </p>
+      </div>
+
+      <button type="button" class="primary-button" (click)="openGenerate()">
+        Generate Tagihan
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+       SUMMARY
+  ========================= -->
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+
+        <p class="summary-value neutral">
+          {{ countAll }}
+        </p>
+
+        <p class="summary-label">
+          Total Tagihan
+        </p>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p class="summary-value green">
+          {{ countLunas }}
+        </p>
+
+        <p class="summary-label">
+          Lunas
+        </p>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p class="summary-value amber">
+          {{ countSebagian + countBelumBayar }}
+        </p>
+
+        <p class="summary-label">
+          Belum Lunas
+        </p>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p class="summary-value red currency">
+          {{ formatRupiah(totalUnpaid) }}
+        </p>
+
+        <p class="summary-label">
+          Total Belum Terbayar
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+       TABS
+  ========================= -->
+
+    <div class="tabs">
+
+      <button type="button" class="tab" [class.active]="tab === 'all'" (click)="setTab('all')">
+        Semua
+        <span>
+          {{ countAll }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'BELUM_BAYAR'" (click)="setTab('BELUM_BAYAR')">
+        Belum Bayar
+        <span>
+          {{ countBelumBayar }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'SEBAGIAN'" (click)="setTab('SEBAGIAN')">
+        Sebagian
+        <span>
+          {{ countSebagian }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'LUNAS'" (click)="setTab('LUNAS')">
+        Lunas
+        <span>
+          {{ countLunas }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'TERLAMBAT'" (click)="setTab('TERLAMBAT')">
+        Terlambat
+        <span>
+          {{ countTerlambat }}
+        </span>
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+       SEARCH
+  ========================= -->
+
+    <div class="search-wrapper">
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          <ion-icon name="search-outline"></ion-icon>
+        </span>
+
+        <input type="text" [(ngModel)]="search" placeholder="Cari nomor tagihan atau nama penghuni..." />
+
+        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+       TABLE
+  ========================= -->
+
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Nomor Tagihan
+              </th>
+
+              <th>
+                Penghuni
+              </th>
+
+              <th>
+                Kamar
+              </th>
+
+              <th>
+                Periode
+              </th>
+
+              <th>
+                Jatuh Tempo
+              </th>
+
+              <th>
+                Total
+              </th>
+
+              <th>
+                Terbayar
+              </th>
+
+              <th>
+                Sisa
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Aksi
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr *ngFor="let bill of filteredBills" (click)="openDetail(bill)">
+
+              <td>
+                <span class="invoice-number">
+                  {{ bill.number }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="tenant-name">
+                  {{ getTenant(bill)?.name || 'Penghuni' }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="room-name">
+                  Kamar {{ getRoomNumber(bill) }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="period">
+                  {{ formatMonthYear(bill.period) }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="due-date">
+                  {{ formatDate(bill.dueDate) }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="amount total">
+                  {{ formatRupiah(bill.total) }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="amount paid">
+                  {{ formatRupiah(bill.paidAmount) }}
+                </span>
+              </td>
+
+
+              <td>
+                <span class="amount remaining">
+                  {{ formatRupiah(bill.total - bill.paidAmount) }}
+                </span>
+              </td>
+
+
+              <td>
+
+                <span class="status-badge" [ngClass]="{
+                  'status-lunas': bill.status === 'LUNAS',
+                  'status-belum': bill.status === 'BELUM_BAYAR',
+                  'status-sebagian': bill.status === 'SEBAGIAN',
+                  'status-terlambat': bill.status === 'TERLAMBAT'
+                }">
+                  {{ bill.status }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <button type="button" class="detail-button" (click)="$event.stopPropagation(); openDetail(bill)">
+                  Detail
+                </button>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY -->
+
+            <tr *ngIf="filteredBills.length === 0">
+
+              <td colspan="10">
+
+                <div class="empty-state">
+
+                  <div class="empty-icon">
+                    🧾
+                  </div>
+
+                  <p>
+                    Tidak ada tagihan
+                  </p>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================================================
+     DETAIL TAGIHAN MODAL
+================================================== -->
+
+  <div class="modal-backdrop" *ngIf="selectedBill" (click)="closeDetail()">
+
+    <div class="modal large" (click)="$event.stopPropagation()">
+
+      <!-- HEADER -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+            Detail Tagihan
+          </h2>
+
+          <p>
+            Informasi lengkap tagihan penghuni
+          </p>
+
+        </div>
+
+
+        <button type="button" class="close-button" (click)="closeDetail()">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- BODY -->
+
+      <div class="modal-body" *ngIf="selectedBill">
+
+        <!-- BILL HEADER -->
+
+        <div class="bill-header">
+
+          <div>
+
+            <p class="bill-number">
+              {{ selectedBill.number }}
+            </p>
+
+            <p class="bill-period">
+              Periode:
+              {{ formatMonthYear(selectedBill.period) }}
+            </p>
+
+          </div>
+
+
+          <span class="status-badge" [ngClass]="{
+            'status-lunas': selectedBill.status === 'LUNAS',
+            'status-belum': selectedBill.status === 'BELUM_BAYAR',
+            'status-sebagian': selectedBill.status === 'SEBAGIAN',
+            'status-terlambat': selectedBill.status === 'TERLAMBAT'
+          }">
+            {{ selectedBill.status }}
+          </span>
+
+        </div>
+
+
+        <!-- TENANT + DUE DATE -->
+
+        <div class="info-grid">
+
+          <div class="info-card">
+
+            <p class="info-title">
+              Penghuni
+            </p>
+
+            <p class="info-main">
+              {{ getTenant(selectedBill)?.name }}
+            </p>
+
+            <p class="info-sub">
+              Kamar {{ getRoomNumber(selectedBill) }}
+            </p>
+
+          </div>
+
+
+          <div class="info-card">
+
+            <p class="info-title">
+              Jatuh Tempo
+            </p>
+
+            <p class="info-main">
+              {{ formatDate(selectedBill.dueDate) }}
+            </p>
+
+            <p class="info-sub">
+              {{ getProperty(selectedBill)?.name }}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- BILL DETAILS -->
+
+        <div class="detail-section">
+
+          <p class="section-title">
+            Rincian Tagihan
+          </p>
+
+
+          <div class="details-card">
+
+            <div class="detail-item" *ngFor="
+              let detail of selectedBill.details;
+              let i = index
+            " [class.last]="
+              i === selectedBill.details.length - 1
+            ">
+
+              <div>
+
+                <p class="detail-description">
+                  {{ detail.description }}
+                </p>
+
+                <p class="detail-quantity" *ngIf="detail.quantity > 1">
+                  {{ detail.quantity }}
+                  ×
+                  {{ formatRupiah(detail.unitPrice) }}
+                </p>
+
+              </div>
+
+
+              <p class="detail-subtotal">
+                {{ formatRupiah(
+                detail.quantity * detail.unitPrice
+                ) }}
+              </p>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="total-row">
+
+              <span>
+                Total
+              </span>
+
+              <strong>
+                {{ formatRupiah(selectedBill.total) }}
+              </strong>
+
+            </div>
+
+
+            <!-- PAID -->
+
+            <div class="paid-row">
+
+              <span>
+                Terbayar
+              </span>
+
+              <strong>
+                {{ formatRupiah(selectedBill.paidAmount) }}
+              </strong>
+
+            </div>
+
+
+            <!-- REMAINING -->
+
+            <div class="remaining-row">
+
+              <span>
+                Sisa Tagihan
+              </span>
+
+              <strong>
+                {{ formatRupiah(
+                selectedBill.total -
+                selectedBill.paidAmount
+                ) }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PAYMENT PROGRESS -->
+
+        <div class="progress-section">
+
+          <div class="progress-header">
+
+            <span>
+              Progress Pembayaran
+            </span>
+
+            <strong>
+              {{ getPaymentProgress(selectedBill) }}%
+            </strong>
+
+          </div>
+
+
+          <div class="progress-track">
+
+            <div class="progress-fill" [class.complete]="selectedBill.status === 'LUNAS'" [style.width.%]="
+              getPaymentProgress(selectedBill)
+            "></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="modal-actions">
+
+          <button type="button" class="outline-button" (click)="sendReminder()">
+            📨 Kirim Pengingat
+          </button>
+
+
+          <button type="button" class="primary-button action-button" (click)="viewPayments()">
+            Lihat Pembayaran
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================================================
+     GENERATE TAGIHAN MODAL
+================================================== -->
+
+  <div class="modal-backdrop" *ngIf="showGenerate" (click)="closeGenerate()">
+
+    <div class="modal medium" (click)="$event.stopPropagation()">
+
+      <!-- HEADER -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+            Generate Tagihan Bulanan
+          </h2>
+
+          <p>
+            Buat tagihan untuk penghuni aktif
+          </p>
+
+        </div>
+
+
+        <button type="button" class="close-button" (click)="closeGenerate()">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- BODY -->
+
+      <div class="modal-body">
+
+        <div class="generate-info">
+          Pilih kontrak yang belum memiliki tagihan.
+          Tagihan akan dibuat berdasarkan harga sewa,
+          durasi kontrak, dan deposit.
+        </div>
+
+        <div class="form-group">
+          <label>Kontrak</label>
+
+          <select [(ngModel)]="generateContractId" [disabled]="loadingContracts || generating">
+
+            <option value="">
+              {{ loadingContracts
+              ? 'Memuat kontrak...'
+              : 'Pilih Kontrak' }}
+            </option>
+
+            <option *ngFor="let contract of contracts" [value]="contract.id">
+              {{ contract.number }} -
+              {{ contract.tenantName }} -
+              Kamar {{ contract.roomNumber }}
+              ({{ contract.propertyName }})
+            </option>
+          </select>
+        </div>
+
+        <p *ngIf="!loadingContracts && contracts.length === 0">
+          Semua kontrak yang menunggu pembayaran sudah memiliki
+          tagihan, atau belum ada kontrak yang memenuhi syarat.
+        </p>
+
+        <div class="modal-actions">
+
+          <button type="button" class="outline-button" (click)="closeGenerate()" [disabled]="generating">
+            Batal
+          </button>
+
+          <button type="button" class="primary-button action-button" (click)="generateBills()" [disabled]="loadingContracts ||
+                       generating ||
+                       !generateContractId">
+            {{ generating ? 'Memproses...' : 'Generate' }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

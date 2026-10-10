@@ -1,0 +1,251 @@
+<div class="ion-page">
+  <div class="income-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+
+      <div>
+        <h1>Manajemen Pendapatan</h1>
+        <p>Riwayat pendapatan dari pembayaran terverifikasi</p>
+      </div>
+
+      <button class="btn-outline" type="button" (click)="exportData()">
+        Export
+      </button>
+
+    </div>
+
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid">
+
+      <!-- Total Pendapatan -->
+      <div class="stat-card">
+
+        <div class="stat-content">
+
+          <div>
+            <p class="stat-title">
+              Total Pendapatan
+            </p>
+
+            <h2>
+              {{ formatRupiah(totalIncome) }}
+            </h2>
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- Bulan Ini -->
+      <div class="stat-card">
+
+        <div class="stat-content">
+
+          <div>
+            <p class="stat-title">
+              Bulan Ini
+            </p>
+
+            <h2>
+              {{ formatRupiah(thisMonthIncome) }}
+            </h2>
+
+            <span class="stat-sub green">
+              {{ thisMonthLabel }}
+            </span>
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- Bulan Lalu -->
+      <div class="stat-card">
+
+        <div class="stat-content">
+
+          <div>
+            <p class="stat-title">
+              Bulan Lalu
+            </p>
+
+            <h2>
+              {{ formatRupiah(lastMonthIncome) }}
+            </h2>
+
+            <span class="stat-sub blue">
+              {{ lastMonthLabel }}
+            </span>
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FILTER -->
+    <div class="filter-card">
+
+      <!-- Search -->
+      <div class="search-wrapper">
+
+        <span class="search-icon">
+          <ion-icon name="search-outline"></ion-icon>
+        </span>
+
+        <input type="text" [(ngModel)]="search" placeholder="Cari deskripsi atau penghuni..." />
+
+        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Property Filter -->
+      <div class="select-wrapper">
+
+        <select [(ngModel)]="propFilter">
+
+          <option value="">
+            Semua Properti
+          </option>
+
+          <option *ngFor="let property of properties" [value]="property.id">
+            {{ property.name }}
+          </option>
+
+        </select>
+
+        <span class="select-arrow">
+          ▼
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+
+              <th>Tanggal</th>
+
+              <th>Penghuni</th>
+
+              <th>Properti</th>
+
+              <th>Sumber</th>
+
+              <th>Deskripsi</th>
+
+              <th>Jumlah</th>
+
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            <!-- DATA -->
+            <tr *ngFor="let income of filteredIncomes">
+
+              <!-- Tanggal -->
+              <td class="date-cell">
+                {{ formatDate(income.date) }}
+              </td>
+
+
+              <!-- Penghuni -->
+              <td class="tenant-cell">
+                {{ getTenantName(income.tenantId) }}
+              </td>
+
+
+              <!-- Properti -->
+              <td class="property-cell">
+                {{ getPropertyName(income.propertyId) }}
+              </td>
+
+
+              <!-- Sumber -->
+              <td>
+
+                <span class="source-badge">
+                  {{ income.source }}
+                </span>
+
+              </td>
+
+
+              <!-- Deskripsi -->
+              <td class="description-cell">
+                {{ income.description }}
+              </td>
+
+
+              <!-- Jumlah -->
+              <td class="amount-cell">
+                {{ formatRupiah(income.amount) }}
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY STATE -->
+            <tr *ngIf="filteredIncomes.length === 0">
+
+              <td colspan="6" class="empty-state">
+
+                <div class="empty-icon">
+                  💰
+                </div>
+
+                <p>
+                  Tidak ada data pendapatan
+                </p>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+
+        <span>
+          Total: {{ filteredIncomes.length }} transaksi
+        </span>
+
+        <strong>
+          {{ formatRupiah(totalIncome) }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

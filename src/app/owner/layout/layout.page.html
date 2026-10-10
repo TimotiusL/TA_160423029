@@ -1,0 +1,149 @@
+<div class="ion-page">
+  <div class="owner-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+
+      <!-- HEADER -->
+      <div class="sidebar-header">
+
+        <div class="logo-box">
+          K
+        </div>
+
+        @if (sidebarOpen) {
+        <span class="logo-text">
+          KostManager
+        </span>
+        }
+
+      </div>
+
+      <!-- PROPERTY SELECTOR -->
+      @if (sidebarOpen) {
+      <div class="property-selector">
+
+        <p>Pilih Properti</p>
+
+        <select [(ngModel)]="selectedProperty" (change)="selectProperty()">
+
+          @for (property of properties; track property.id) {
+          <option [value]="property.id">
+            {{ property.name }}
+          </option>
+          }
+
+        </select>
+
+      </div>
+      }
+
+      <!-- NAVIGATION -->
+      <div class="sidebar-navigation">
+
+        @for (section of navSections; track section.title) {
+
+        <div class="nav-section">
+
+          @if (sidebarOpen) {
+          <p class="section-title">
+            {{ section.title }}
+          </p>
+          }
+
+          @for (item of section.items; track item.id) {
+
+          <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-item" [title]="!sidebarOpen ? item.label : ''">
+
+            <span class="nav-icon">
+              <ion-icon [name]="item.icon"></ion-icon>
+            </span>
+
+            @if (sidebarOpen) {
+            <span class="nav-label">
+              {{ item.label }}
+            </span>
+            }
+
+            @if (
+            sidebarOpen &&
+            item.id === 'notifications' &&
+            notifCount > 0
+            ) {
+            <span class="notification-badge">
+              {{ notifCount }}
+            </span>
+            }
+
+          </a>
+
+          }
+
+        </div>
+
+        }
+
+      </div>
+
+
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper" [class.sidebar-collapsed]="!sidebarOpen">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <button class="sidebar-toggle" (click)="toggleSidebar()">
+
+          @if (sidebarOpen) {
+          <ion-icon name="chevron-back-outline"></ion-icon>
+          } @else {
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+          }
+
+        </button>
+
+        <div class="topbar-spacer"></div>
+
+        <!-- NOTIFICATION -->
+        <button class="topbar-notification" [routerLink]="'/owner/notifications'">
+
+          <ion-icon name="notifications-outline"></ion-icon>
+
+          @if (notifCount > 0) {
+          <span class="top-notification-badge">
+            {{ notifCount }}
+          </span>
+          }
+
+        </button>
+
+        <!-- USER -->
+        <a class="topbar-user" routerLink="/owner/profile">
+
+          <div class="top-avatar">
+            {{ user.name.charAt(0) }}
+          </div>
+
+          <span>
+            {{ user.name }}
+          </span>
+
+        </a>
+
+      </header>
+
+
+      <!-- PAGE CONTENT -->
+      <main class="page-content">
+        <ion-router-outlet [animated]="false"></ion-router-outlet>
+      </main>
+
+    </div>
+
+  </div>
+</div>

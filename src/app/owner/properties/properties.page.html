@@ -1,0 +1,575 @@
+<div class="ion-page">
+  <div class="properties-page">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <div>
+        <h1>Boarding House</h1>
+
+        <p>
+          Kelola semua properti kos Anda
+        </p>
+      </div>
+
+      <button class="primary-button" (click)="openAddModal()">
+        Tambah Kos
+      </button>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="stats-grid">
+
+      <div class="stat-card teal">
+
+        <div>
+          <span>Total Properti</span>
+          <strong>{{ properties.length }}</strong>
+        </div>
+      </div>
+
+
+      <div class="stat-card blue">
+
+        <div>
+          <span>Total Kamar</span>
+          <strong>{{ totalRooms }}</strong>
+        </div>
+      </div>
+
+
+      <div class="stat-card green">
+
+        <div>
+          <span>Terisi</span>
+
+          <strong>
+            {{ totalOccupied }}/{{ totalRooms }}
+          </strong>
+
+          <small>
+            {{ occupancyPercentage }}% okupansi
+          </small>
+        </div>
+      </div>
+
+
+      <div class="stat-card amber">
+
+        <div>
+          <span>Total Pendapatan</span>
+
+          <strong>
+            {{ formatRupiah(totalIncome) }}
+          </strong>
+
+          <small>Bulan ini</small>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="search-wrapper">
+
+      <span class="search-icon">
+        <ion-icon name="search-outline"></ion-icon>
+      </span>
+
+      <input type="text" [(ngModel)]="search" placeholder="Cari nama atau alamat kos..." />
+
+    </div>
+
+
+    <!-- PROPERTY GRID -->
+
+    <div class="property-grid">
+
+      @for (property of filteredProperties; track property.id) {
+
+      <div class="property-card">
+
+        <!-- PHOTO -->
+
+        <div class="property-image">
+
+          <img [src]="property.photo" [alt]="property.name" />
+
+          <span class="status-badge">
+            {{ property.status }}
+          </span>
+
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div class="property-content">
+
+          <h3>
+            {{ property.name }}
+          </h3>
+
+          <p class="address">
+            📍 {{ property.address }}
+          </p>
+
+
+          <!-- ROOM SUMMARY -->
+
+          <div class="room-grid">
+
+            <div>
+              <strong>
+                {{ property.totalRooms }}
+              </strong>
+
+              <span>Total</span>
+            </div>
+
+            <div class="occupied">
+              <strong>
+                {{ property.occupiedRooms }}
+              </strong>
+
+              <span>Terisi</span>
+            </div>
+
+            <div class="reserved">
+              <strong>
+                {{ property.reservedRooms }}
+              </strong>
+
+              <span>Dipesan</span>
+            </div>
+
+            <div class="available">
+              <strong>
+                {{ property.availableRooms }}
+              </strong>
+
+              <span>Tersedia</span>
+            </div>
+
+          </div>
+
+
+          <!-- OCCUPANCY -->
+
+          <div class="occupancy">
+
+            <div class="occupancy-header">
+
+              <span>
+                Tingkat Hunian
+              </span>
+
+              <strong>
+                {{ getOccupancy(property) }}%
+              </strong>
+
+            </div>
+
+            <div class="progress-track">
+
+              <div class="progress-value" [style.width.%]="getOccupancy(property)"></div>
+
+            </div>
+
+          </div>
+
+
+          <!-- FINANCIAL -->
+
+          <div class="financial-info">
+
+            <div>
+              <span>Penghuni</span>
+
+              <strong>
+                {{ property.tenantCount }} orang
+              </strong>
+            </div>
+
+            <div>
+              <span>Pendapatan</span>
+
+              <strong class="income">
+                {{ formatRupiah(property.monthlyIncome) }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Pengeluaran</span>
+
+              <strong class="expense">
+                {{ formatRupiah(property.monthlyExpense) }}
+              </strong>
+            </div>
+
+            <div class="profit-row">
+
+              <span>
+                Laba Bersih
+              </span>
+
+              <strong>
+                {{ formatRupiah(getProfit(property)) }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ACTIONS -->
+
+          <div class="property-actions">
+            <button class="outline-button" (click)="openDetail(property)">
+              Detail
+            </button>
+
+            <button class="outline-button" (click)="editProperty(property)">
+              Edit
+            </button>
+
+            <button class="outline-button delete-button" (click)="deleteProperty(property)">
+              Hapus
+            </button>
+
+            <button class="outline-button" (click)="navigate('rooms')">
+              Kamar
+            </button>
+
+            <button class="primary-small-button" (click)="navigate('financial-analysis')">
+              Analisis
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      }
+
+    </div>
+
+
+    <!-- EMPTY SEARCH -->
+
+    @if (filteredProperties.length === 0) {
+
+    <div class="empty-state">
+
+      <div>
+        <ion-icon name="search-outline"></ion-icon>
+      </div>
+
+      <h3>
+        Kos tidak ditemukan
+      </h3>
+
+      <p>
+        Coba gunakan nama atau alamat yang berbeda.
+      </p>
+
+    </div>
+
+    }
+
+
+    <!-- =====================================================
+       ADD PROPERTY MODAL
+  ====================================================== -->
+
+    @if (showAdd) {
+
+    <div class="modal-overlay" (click)="closeAddModal()">
+
+      <div class="modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+            <h2>
+              {{ editingProperty ? 'Edit Boarding House' : 'Tambah Boarding House' }}
+            </h2>
+
+            <p>
+              {{ editingProperty ? 'Perbarui informasi properti' : 'Masukkan informasi properti baru' }}
+            </p>
+          </div>
+
+          <button class="close-button" (click)="closeAddModal()">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="form-grid">
+
+            <!-- NAME -->
+
+            <div class="form-group">
+
+              <label>
+                Nama Kos <span>*</span>
+              </label>
+
+              <input type="text" [(ngModel)]="form.name" placeholder="Kost Griya 21" />
+
+            </div>
+
+
+            <!-- FLOORS -->
+
+            <div class="form-group">
+
+              <label>
+                Jumlah Lantai <span>*</span>
+              </label>
+
+              <input type="number" [(ngModel)]="form.floors" placeholder="3" />
+
+            </div>
+
+            <!-- DEPOSIT -->
+
+            <div class="form-group">
+
+              <label>
+                Deposit
+              </label>
+
+              <input type="number" [(ngModel)]="form.deposit" placeholder="Contoh: 500000" min="0" />
+
+              <small class="form-hint">
+                Isi 0 jika kos tidak memerlukan deposit.
+              </small>
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="form-group">
+
+              <label>
+                Nomor Telepon
+              </label>
+
+              <input type="text" [(ngModel)]="form.phone" placeholder="021-xxxxxxx" />
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="form-group">
+
+              <label>
+                Email
+              </label>
+
+              <input type="email" [(ngModel)]="form.email" placeholder="kos@email.com" />
+
+            </div>
+
+
+            <!-- ADDRESS -->
+
+            <div class="form-group full">
+
+              <label>
+                Alamat <span>*</span>
+              </label>
+
+              <input type="text" [(ngModel)]="form.address" placeholder="Jl. Nama Jalan No. XX, Kota" />
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group full">
+
+              <label>
+                Deskripsi
+              </label>
+
+              <textarea [(ngModel)]="form.description" rows="3"
+                placeholder="Deskripsi singkat boarding house..."></textarea>
+
+            </div>
+
+
+            <!-- PHOTO -->
+
+            <div class="form-group full">
+
+              <label>
+                Foto Kos
+              </label>
+
+              <div class="upload-box" (click)="triggerPhotoUpload()">
+
+                <div class="upload-icon">
+                  📷
+                </div>
+
+                <p>
+                  Klik untuk upload foto
+                </p>
+
+                <span>
+                  Max 5MB, JPG/PNG
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button class="outline-button large" (click)="closeAddModal()">
+            Batal
+          </button>
+
+          <button class="primary-button large" (click)="saveProperty()">
+            Simpan
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    }
+
+
+    <!-- =====================================================
+       DETAIL MODAL
+  ====================================================== -->
+
+    @if (selectedProperty) {
+
+    <div class="modal-overlay" (click)="closeDetail()">
+
+      <div class="modal detail-modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+            <h2>
+              {{ selectedProperty.name }}
+            </h2>
+          </div>
+
+          <button class="close-button" (click)="closeDetail()">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <img class="detail-image" [src]="selectedProperty.photo" [alt]="selectedProperty.name" />
+
+
+          <div class="detail-grid">
+
+            <div>
+              <span>Alamat</span>
+              <strong>
+                {{ selectedProperty.address }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Telepon</span>
+              <strong>
+                {{ selectedProperty.phone }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Email</span>
+              <strong>
+                {{ selectedProperty.email }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Jumlah Lantai</span>
+              <strong>
+                {{ selectedProperty.floors }} lantai
+              </strong>
+            </div>
+
+            <div>
+              <span>Deposit</span>
+              <strong>
+                {{ formatRupiah(selectedProperty.deposit) }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Total Kamar</span>
+              <strong>
+                {{ selectedProperty.totalRooms }} kamar
+              </strong>
+            </div>
+
+            <div>
+              <span>Penghuni</span>
+              <strong>
+                {{ selectedProperty.tenantCount }} orang
+              </strong>
+            </div>
+
+          </div>
+
+
+          <p class="detail-description">
+            {{ selectedProperty.description }}
+          </p>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button class="outline-button large" (click)="closeDetail(); navigate('rooms')">
+            Kelola Kamar
+          </button>
+
+          <button class="primary-button large" (click)="closeDetail(); navigate('financial-analysis')">
+            Analisis Keuangan
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    }
+
+  </div>
+</div>

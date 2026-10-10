@@ -1,0 +1,366 @@
+<div class="ion-page">
+  <div class="investments-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+
+      <div>
+        <h1>Manajemen Investasi</h1>
+
+        <p>
+          Data investasi properti untuk kalkulasi ROI
+        </p>
+      </div>
+
+      <button type="button" class="btn-primary" (click)="openAddModal()">
+        Tambah Investasi
+      </button>
+
+    </div>
+
+
+    <!-- PROPERTY SUMMARY -->
+    <div class="property-summary-grid">
+
+      <div class="property-card" *ngFor="let property of properties">
+
+        <h3>
+          {{ property.name }}
+        </h3>
+
+        <p class="property-total">
+          {{ formatRupiah(
+          getPropertyTotal(property.id)
+          ) }}
+        </p>
+
+        <p class="investment-count">
+          {{
+          getPropertyInvestments(property.id).length
+          }}
+          item investasi
+        </p>
+
+
+        <!-- Investment items -->
+        <div class="investment-items">
+
+          <div class="investment-item" *ngFor="
+            let investment
+            of getPropertyInvestments(property.id)
+          ">
+
+            <span>
+              {{ investment.category }}
+            </span>
+
+            <strong>
+              {{ formatRupiah(investment.amount) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FILTER + TOTAL -->
+    <div class="toolbar">
+
+      <div class="select-wrapper">
+
+        <select [(ngModel)]="propFilter">
+
+          <option value="">
+            Semua Properti
+          </option>
+
+          <option *ngFor="let property of properties" [value]="property.id">
+            {{ property.name }}
+          </option>
+
+        </select>
+
+        <span class="select-arrow">
+          ▼
+        </span>
+
+      </div>
+
+
+      <p class="toolbar-total">
+
+        Total:
+
+        <strong>
+          {{ formatRupiah(totalInvestment) }}
+        </strong>
+
+      </p>
+
+    </div>
+
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Tanggal</th>
+
+              <th>Properti</th>
+
+              <th>Kategori</th>
+
+              <th>Deskripsi</th>
+
+              <th>Jumlah</th>
+
+              <th>Aksi</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr *ngFor="
+              let investment
+              of filteredInvestments
+            ">
+
+              <td class="date-cell">
+                {{ formatDate(investment.date) }}
+              </td>
+
+
+              <td class="property-cell">
+                {{ getPropertyName(
+                investment.propertyId
+                ) }}
+              </td>
+
+
+              <td>
+
+                <span class="category-badge" [ngClass]="
+                  getCategoryClass(
+                    investment.category
+                  )
+                ">
+                  {{ investment.category }}
+                </span>
+
+              </td>
+
+
+              <td class="description-cell">
+                {{ investment.description }}
+              </td>
+
+
+              <td class="amount-cell">
+                {{ formatRupiah(
+                investment.amount
+                ) }}
+              </td>
+
+
+              <td>
+
+                <button type="button" class="btn-ghost" (click)="
+                  editInvestment(investment)
+                ">
+                  Edit
+                </button>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY -->
+            <tr *ngIf="
+              filteredInvestments.length === 0
+            ">
+
+              <td colspan="6" class="empty-state">
+                Tidak ada data investasi
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- ADD MODAL -->
+    <div class="modal-overlay" *ngIf="showAdd" (click)="closeAddModal()">
+
+      <div class="modal" (click)="$event.stopPropagation()">
+
+        <!-- MODAL HEADER -->
+        <div class="modal-header">
+
+          <div>
+
+            <h2>
+              Tambah Data Investasi
+            </h2>
+
+            <p>
+              Tambahkan data investasi properti
+            </p>
+
+          </div>
+
+
+          <button type="button" class="close-button" (click)="closeAddModal()">
+            ×
+          </button>
+
+        </div>
+
+
+        <!-- MODAL BODY -->
+        <div class="modal-body">
+
+          <!-- PROPERTY -->
+          <div class="form-group">
+
+            <label>
+              Properti
+              <span>*</span>
+            </label>
+
+            <div class="select-wrapper full">
+
+              <select [(ngModel)]="form.propertyId">
+
+                <option value="">
+                  Pilih properti
+                </option>
+
+                <option *ngFor="let property of properties" [value]="property.id">
+                  {{ property.name }}
+                </option>
+
+              </select>
+
+              <span class="select-arrow">
+                ▼
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- CATEGORY + DATE -->
+          <div class="form-grid">
+
+            <div class="form-group">
+
+              <label>
+                Kategori
+                <span>*</span>
+              </label>
+
+              <div class="select-wrapper full">
+
+                <select [(ngModel)]="form.category">
+
+                  <option value="">
+                    Pilih
+                  </option>
+
+                  <option *ngFor="let category of categories" [value]="category">
+                    {{ category }}
+                  </option>
+
+                </select>
+
+                <span class="select-arrow">
+                  ▼
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                Tanggal
+                <span>*</span>
+              </label>
+
+              <input type="date" [(ngModel)]="form.date" />
+
+            </div>
+
+          </div>
+
+
+          <!-- AMOUNT -->
+          <div class="form-group">
+
+            <label>
+              Jumlah (Rp)
+              <span>*</span>
+            </label>
+
+            <input type="number" [(ngModel)]="form.amount" placeholder="10000000" />
+
+          </div>
+
+
+          <!-- DESCRIPTION -->
+          <div class="form-group">
+
+            <label>
+              Deskripsi
+            </label>
+
+            <textarea [(ngModel)]="form.description" placeholder="Keterangan investasi..." rows="4"></textarea>
+
+          </div>
+
+        </div>
+
+
+        <!-- MODAL FOOTER -->
+        <div class="modal-footer">
+
+          <button type="button" class="btn-outline" (click)="closeAddModal()">
+            Batal
+          </button>
+
+          <button type="button" class="btn-primary" (click)="saveInvestment()">
+            Simpan
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

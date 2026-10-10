@@ -1,0 +1,232 @@
+<div class="ion-page">
+  <div class="facilities-page">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+      <div>
+        <h1>Fasilitas</h1>
+        <p>Kelola fasilitas yang tersedia pada kamar</p>
+      </div>
+
+      <button class="primary-button" (click)="openAdd()">
+        Tambah Fasilitas
+      </button>
+
+    </div>
+
+
+    <!-- MAIN CONTENT CARD -->
+    <div class="content-card">
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+
+        <div class="search-box">
+
+          <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+
+          <input type="text" [(ngModel)]="search" placeholder="Cari fasilitas..." />
+
+          <button *ngIf="search" class="clear-search" (click)="search = ''">
+            ×
+          </button>
+
+        </div>
+
+        <div class="total-info">
+          {{ filteredFacilities.length }} fasilitas
+        </div>
+
+      </div>
+
+
+      <!-- FACILITY GRID -->
+      <div class="facility-grid">
+
+        @for (
+        facility of filteredFacilities;
+        track facility.id
+        ) {
+
+        <div class="facility-card">
+
+
+          <div class="facility-content">
+
+            <div class="facility-title">
+
+              <h3>
+                {{ facility.name }}
+              </h3>
+
+              <span>
+                {{ facility.usageCount }} kamar
+              </span>
+
+            </div>
+
+
+            <p>
+              {{ facility.description }}
+            </p>
+
+
+            <div class="facility-actions">
+
+              <button class="edit-button" (click)="openEdit(facility)">
+                Edit
+              </button>
+
+              <button class="delete-button" (click)="deleteFacility(facility)">
+                Hapus
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+
+      <!-- EMPTY STATE -->
+      @if (filteredFacilities.length === 0) {
+
+      <div class="empty-state">
+
+        <h3>
+          Fasilitas tidak ditemukan
+        </h3>
+
+        <p>
+          Coba gunakan kata pencarian lain.
+        </p>
+
+      </div>
+
+      }
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- FORM MODAL -->
+    <!-- ============================= -->
+
+    @if (showForm) {
+
+    <div class="modal-overlay" (click)="closeForm()">
+
+      <div class="modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+
+            <h2>
+              {{
+              editingFacility
+              ? 'Edit Fasilitas'
+              : 'Tambah Fasilitas'
+              }}
+            </h2>
+
+            <p>
+              Masukkan informasi fasilitas
+            </p>
+
+          </div>
+
+          <button class="close-button" (click)="closeForm()">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="form-group">
+
+            <label>
+              Nama Fasilitas *
+            </label>
+
+            <input type="text" [(ngModel)]="form.name" placeholder="Contoh: AC" />
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Deskripsi
+            </label>
+
+            <textarea [(ngModel)]="form.description" rows="4" placeholder="Deskripsi fasilitas..."></textarea>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button class="outline-button" (click)="closeForm()">
+            Batal
+          </button>
+
+          <button class="primary-button" (click)="saveFacility()">
+            Simpan
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    }
+  </div>
+
+  @if (showDeleteModal) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+
+    <div class="modal delete-modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div>
+          <h2>Hapus Fasilitas</h2>
+          <p>Konfirmasi penghapusan data</p>
+        </div>
+
+        <button class="close-button" (click)="closeDeleteModal()">
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>
+          Apakah kamu yakin ingin menghapus fasilitas
+          <strong>{{ facilityToDelete?.name }}</strong>?
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="outline-button" (click)="closeDeleteModal()">
+          Batal
+        </button>
+
+        <button class="delete-button" (click)="confirmDeleteFacility()">
+          Hapus
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+  }
+</div>

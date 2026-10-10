@@ -1,0 +1,512 @@
+<div class="ion-page">
+  <div class="complaints-page">
+
+    <!-- TOAST -->
+    <div class="toast" *ngIf="showToast" [class.success]="toastType === 'success'" [class.info]="toastType === 'info'">
+      <span>
+        {{ toastType === 'success' ? '✓' : 'ℹ' }}
+      </span>
+
+      {{ toastMessage }}
+    </div>
+
+
+    <!-- HEADER -->
+    <div class="page-header">
+
+      <div>
+        <h1>Manajemen Komplain</h1>
+
+        <p>
+          Kelola pengaduan dan respons penghuni
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <p class="summary-value total">
+          {{ totalCount }}
+        </p>
+
+        <p class="summary-label">
+          Total
+        </p>
+      </div>
+
+
+      <div class="summary-card">
+        <p class="summary-value baru">
+          {{ newCount }}
+        </p>
+
+        <p class="summary-label">
+          Baru
+        </p>
+      </div>
+
+
+      <div class="summary-card">
+        <p class="summary-value diproses">
+          {{ processedCount }}
+        </p>
+
+        <p class="summary-label">
+          Diproses
+        </p>
+      </div>
+
+
+      <div class="summary-card">
+        <p class="summary-value selesai">
+          {{ completedCount }}
+        </p>
+
+        <p class="summary-label">
+          Selesai
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- TABS -->
+    <div class="tabs">
+
+      <button type="button" [class.active]="tab === 'all'" (click)="tab = 'all'">
+        Semua
+
+        <span>
+          {{ totalCount }}
+        </span>
+      </button>
+
+
+      <button type="button" [class.active]="tab === 'BARU'" (click)="tab = 'BARU'">
+        Baru
+
+        <span>
+          {{ newCount }}
+        </span>
+      </button>
+
+
+      <button type="button" [class.active]="tab === 'DIPROSES'" (click)="tab = 'DIPROSES'">
+        Diproses
+
+        <span>
+          {{ processedCount }}
+        </span>
+      </button>
+
+
+      <button type="button" [class.active]="tab === 'SELESAI'" (click)="tab = 'SELESAI'">
+        Selesai
+
+        <span>
+          {{ completedCount }}
+        </span>
+      </button>
+
+    </div>
+
+
+    <!-- SEARCH -->
+    <div class="search-wrapper">
+
+      <span class="search-icon">
+        <ion-icon name="search-outline"></ion-icon>
+      </span>
+
+      <input type="text" [(ngModel)]="search" placeholder="Cari judul atau nama penghuni..." />
+
+    </div>
+
+
+    <!-- COMPLAINT LIST -->
+    <div class="complaint-list">
+
+      <div class="complaint-card" *ngFor="let complaint of filteredComplaints" (click)="selectComplaint(complaint)">
+
+        <!-- AVATAR -->
+        <div class="complaint-avatar">
+
+          {{
+          getInitial(
+          getTenantName(complaint.tenantId)
+          )
+          }}
+
+        </div>
+
+
+        <!-- CONTENT -->
+        <div class="complaint-content">
+
+          <div class="complaint-top">
+
+            <div class="complaint-main">
+
+              <h4>
+                {{ complaint.title }}
+              </h4>
+
+              <p class="complaint-meta">
+                {{ getTenantName(complaint.tenantId) }}
+
+                · Kamar
+                {{ getRoomNumber(complaint.roomId) }}
+
+                ·
+                {{ getPropertyName(complaint.propertyId) }}
+              </p>
+
+            </div>
+
+
+            <div class="complaint-badges">
+
+              <span class="priority-badge" [ngClass]="{
+                'priority-low':
+                  complaint.priority === 'RENDAH',
+
+                'priority-medium':
+                  complaint.priority === 'SEDANG',
+
+                'priority-high':
+                  complaint.priority === 'TINGGI'
+              }">
+                {{ complaint.priority }}
+              </span>
+
+
+              <span class="status-badge" [ngClass]="{
+                'status-new':
+                  complaint.status === 'BARU',
+
+                'status-processing':
+                  complaint.status === 'DIPROSES',
+
+                'status-completed':
+                  complaint.status === 'SELESAI'
+              }">
+                {{ complaint.status }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <p class="complaint-description">
+            {{ complaint.description }}
+          </p>
+
+
+          <div class="complaint-footer">
+
+            <span>
+              📅
+              {{ formatDate(complaint.date) }}
+            </span>
+
+            <span>
+              💬
+              {{ complaint.responses.length }}
+              respons
+            </span>
+
+            <span>
+              🏷️
+              {{ complaint.category }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- EMPTY -->
+      <div class="empty-state" *ngIf="filteredComplaints.length === 0">
+
+        <div>
+          🎉
+        </div>
+
+        <p>
+          Tidak ada komplain
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="selected" (click)="closeModal()">
+
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <!-- MODAL HEADER -->
+      <div class="modal-header">
+
+        <h2>
+          Detail Komplain
+        </h2>
+
+        <button type="button" class="close-button" (click)="closeModal()">
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body" *ngIf="selected">
+
+        <!-- TITLE -->
+        <div class="detail-title">
+
+          <h3>
+            {{ selected.title }}
+          </h3>
+
+          <div class="detail-badges">
+
+            <span class="status-badge" [ngClass]="{
+              'status-new':
+                selected.status === 'BARU',
+
+              'status-processing':
+                selected.status === 'DIPROSES',
+
+              'status-completed':
+                selected.status === 'SELESAI'
+            }">
+              {{ selected.status }}
+            </span>
+
+
+            <span class="priority-badge" [ngClass]="{
+              'priority-low':
+                selected.priority === 'RENDAH',
+
+              'priority-medium':
+                selected.priority === 'SEDANG',
+
+              'priority-high':
+                selected.priority === 'TINGGI'
+            }">
+              {{ selected.priority }}
+            </span>
+
+
+            <span class="category-label">
+              🏷️
+              {{ selected.category }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- SUBMITTER INFO -->
+        <div class="submitter-info">
+
+          <div>
+            <p>Penghuni</p>
+
+            <strong>
+              {{ getTenantName(selected.tenantId) }}
+            </strong>
+          </div>
+
+
+          <div>
+            <p>Kamar</p>
+
+            <strong>
+              Kamar
+              {{ getRoomNumber(selected.roomId) }}
+              ·
+              {{ getPropertyName(selected.propertyId) }}
+            </strong>
+          </div>
+
+
+          <div>
+            <p>Tanggal Lapor</p>
+
+            <strong>
+              {{ formatDate(selected.date) }}
+            </strong>
+          </div>
+
+
+          <div>
+            <p>Kategori</p>
+
+            <strong>
+              {{ selected.category }}
+            </strong>
+          </div>
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+        <div class="description-box">
+
+          <p>
+            Deskripsi Komplain
+          </p>
+
+          <span>
+            {{ selected.description }}
+          </span>
+
+        </div>
+
+
+        <!-- TIMELINE -->
+        <div class="timeline-section">
+
+          <p class="timeline-title">
+            Riwayat Respons
+          </p>
+
+
+          <!-- ORIGINAL COMPLAINT -->
+          <div class="message-row">
+
+            <div class="message-avatar tenant-avatar">
+
+              {{
+              getInitial(
+              getTenantName(selected.tenantId)
+              )
+              }}
+
+            </div>
+
+
+            <div class="message-content">
+
+              <div class="message-bubble tenant-bubble">
+
+                <div class="message-header">
+
+                  <strong>
+                    {{ getTenantName(selected.tenantId) }}
+                  </strong>
+
+                  <span>
+                    {{ formatDate(selected.date) }}
+                  </span>
+
+                </div>
+
+                <p>
+                  {{ selected.description }}
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- RESPONSES -->
+          <div class="message-row" *ngFor="let resp of selected.responses"
+            [class.owner-message]="resp.authorRole === 'owner'">
+
+            <div class="message-avatar" [class.owner-avatar]="resp.authorRole === 'owner'"
+              [class.tenant-avatar]="resp.authorRole !== 'owner'">
+              {{ getInitial(resp.authorName) }}
+            </div>
+
+
+            <div class="message-content">
+
+              <div class="message-bubble" [class.owner-bubble]="resp.authorRole === 'owner'"
+                [class.tenant-bubble]="resp.authorRole !== 'owner'">
+
+                <div class="message-header">
+
+                  <strong [class.owner-name]="
+                    resp.authorRole === 'owner'
+                  ">
+                    {{ resp.authorName }}
+
+                    <span *ngIf="resp.authorRole === 'owner'">
+                      (Pemilik)
+                    </span>
+                  </strong>
+
+                  <span>
+                    {{ formatDate(resp.date) }}
+                  </span>
+
+                </div>
+
+                <p>
+                  {{ resp.content }}
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RESPONSE FORM -->
+        <div class="response-section" *ngIf="selected.status !== 'SELESAI'">
+
+          <label>
+            Tulis Respons
+          </label>
+
+          <textarea [(ngModel)]="response" rows="3" placeholder="Tulis respons untuk penghuni..."></textarea>
+
+
+          <div class="response-actions">
+
+            <button type="button" class="btn-outline" (click)="markCompleted()">
+              ✅ Tandai Selesai
+            </button>
+
+
+            <button type="button" class="btn-secondary" *ngIf="selected.status === 'BARU'" (click)="markProcessed()">
+              ⚙️ Tandai Diproses
+            </button>
+
+
+            <div class="action-spacer"></div>
+
+
+            <button type="button" class="btn-primary" [disabled]="!response.trim()" (click)="sendResponse()">
+              Kirim Respons
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

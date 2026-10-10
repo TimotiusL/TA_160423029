@@ -1,0 +1,439 @@
+<div class="ion-page">
+  <div class="contracts-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>Manajemen Kontrak</h1>
+        <p>Kelola kontrak sewa penghuni</p>
+      </div>
+    </div>
+
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <div class="summary-value active">
+          {{ activeCount }}
+        </div>
+        <div class="summary-label">
+          Aktif
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-value completed">
+          {{ completedCount }}
+        </div>
+        <div class="summary-label">
+          Selesai
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-value cancelled">
+          {{ cancelledCount }}
+        </div>
+        <div class="summary-label">
+          Dibatalkan
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-value waiting">
+          {{ waitingPaymentCount }}
+        </div>
+        <div class="summary-label">
+          Menunggu Pembayaran
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- TABS -->
+    <div class="tabs">
+
+      <button type="button" class="tab" [class.active]="tab === 'all'" (click)="setTab('all')">
+        Semua
+        <span>{{ contracts.length }}</span>
+      </button>
+
+      <button type="button" class="tab" [class.active]="tab === 'MENUNGGU_PEMBAYARAN'"
+        (click)="setTab('MENUNGGU_PEMBAYARAN')">
+        Menunggu Pembayaran
+        <span>{{ waitingPaymentCount }}</span>
+      </button>
+
+      <button type="button" class="tab" [class.active]="tab === 'AKTIF'" (click)="setTab('AKTIF')">
+        Aktif
+        <span>{{ activeCount }}</span>
+      </button>
+
+      <button type="button" class="tab" [class.active]="tab === 'SELESAI'" (click)="setTab('SELESAI')">
+        Selesai
+        <span>{{ completedCount }}</span>
+      </button>
+
+    </div>
+
+
+    <!-- SEARCH -->
+    <div class="search-wrapper">
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          <ion-icon name="search-outline"></ion-icon>
+        </span>
+
+        <input type="text" [(ngModel)]="search" placeholder="Cari nomor kontrak atau penghuni..." />
+
+        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>No. Kontrak</th>
+              <th>Penghuni</th>
+              <th>Properti</th>
+              <th>Kamar</th>
+              <th>Mulai</th>
+              <th>Berakhir</th>
+              <th>Harga/Bulan</th>
+              <th>Durasi</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let contract of filteredContracts" (click)="openDetail(contract)">
+
+              <td>
+                <span class="contract-number">
+                  {{ contract.number }}
+                </span>
+              </td>
+
+              <td>
+                <span class="tenant-name">
+                  {{ getTenant(contract)?.name }}
+                </span>
+              </td>
+
+              <td>
+                <span class="property-name">
+                  {{ getProperty(contract)?.name }}
+                </span>
+              </td>
+
+              <td>
+                <span class="room-name">
+                  Kamar {{ getRoom(contract)?.number }}
+                </span>
+              </td>
+
+              <td>
+                <span class="date-text">
+                  {{ formatDate(contract.startDate) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="date-text">
+                  {{ formatDate(contract.endDate) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="rental-price">
+                  {{ formatRupiah(contract.rentalPrice) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="date-text">
+                  {{ contract.duration }} bulan
+                </span>
+              </td>
+
+              <td>
+                <span class="status-badge" [class.status-waiting]="contract.status === 'MENUNGGU_PEMBAYARAN'"
+                  [class.status-active]="contract.status === 'AKTIF'"
+                  [class.status-completed]="contract.status === 'SELESAI'"
+                  [class.status-cancelled]="contract.status === 'DIBATALKAN'">
+                  {{ getStatusLabel(contract.status) }}
+                </span>
+              </td>
+
+              <td>
+
+                <button type="button" class="detail-button" (click)="$event.stopPropagation(); openDetail(contract)">
+                  Detail
+                </button>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY -->
+            <tr *ngIf="filteredContracts.length === 0">
+
+              <td colspan="9">
+
+                <div class="empty-state">
+
+                  <div class="empty-icon">
+                    <ion-icon name="search-outline"></ion-icon>
+                  </div>
+
+                  <p>
+                    Tidak ada kontrak
+                  </p>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-backdrop" *ngIf="selectedContract" (click)="closeDetail()">
+
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <!-- MODAL HEADER -->
+      <div class="modal-header">
+
+        <div>
+          <h2>Detail Kontrak</h2>
+          <p>Informasi lengkap kontrak sewa</p>
+        </div>
+
+        <button type="button" class="close-button" (click)="closeDetail()">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- MODAL BODY -->
+      <div class="modal-body" *ngIf="selectedContract">
+
+        <!-- CONTRACT HEADER -->
+        <div class="contract-header">
+
+          <div>
+            <div class="contract-title-number">
+              {{ selectedContract.number }}
+            </div>
+
+            <div class="contract-subtitle">
+              Kontrak Sewa Kamar
+            </div>
+          </div>
+
+          <span class="status-badge" [class.status-waiting]="selectedContract.status === 'MENUNGGU_PEMBAYARAN'"
+            [class.status-active]="selectedContract.status === 'AKTIF'"
+            [class.status-completed]="selectedContract.status === 'SELESAI'"
+            [class.status-cancelled]="selectedContract.status === 'DIBATALKAN'">
+            {{ getStatusLabel(selectedContract.status) }}
+          </span>
+
+        </div>
+
+
+        <!-- TIMELINE -->
+        <div class="timeline-card">
+
+          <div class="section-title">
+            Alur Proses
+          </div>
+
+          <div class="timeline">
+
+            <div class="timeline-step" *ngFor="let step of timeline; let i = index">
+
+              <div class="timeline-point-wrapper">
+
+                <div class="timeline-point" [class.completed]="i <= getStatusIndex(selectedContract.status)"
+                  [class.current]="i === getStatusIndex(selectedContract.status)">
+                  <span *ngIf="i < getStatusIndex(selectedContract.status)">
+                    ✓
+                  </span>
+
+                  <span *ngIf="i >= getStatusIndex(selectedContract.status)">
+                    {{ i + 1 }}
+                  </span>
+                </div>
+
+                <div *ngIf="i < timeline.length - 1" class="timeline-line"
+                  [class.completed]="i < getStatusIndex(selectedContract.status)"></div>
+
+              </div>
+
+              <div class="timeline-label" [class.completed]="i <= getStatusIndex(selectedContract.status)">
+                {{ step }}
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- TENANT & ROOM -->
+        <div class="two-column">
+
+          <div class="detail-box">
+
+            <div class="section-title">
+              Penghuni
+            </div>
+
+            <div class="box-title">
+              {{ getTenant(selectedContract)?.name }}
+            </div>
+
+            <span class="status-badge" [class.status-waiting]="selectedContract.status === 'MENUNGGU_PEMBAYARAN'"
+              [class.status-active]="selectedContract.status === 'AKTIF'"
+              [class.status-completed]="selectedContract.status === 'SELESAI'"
+              [class.status-cancelled]="selectedContract.status === 'DIBATALKAN'">
+              {{ getStatusLabel(selectedContract.status) }}
+            </span>
+
+          </div>
+
+
+          <div class="detail-box">
+
+            <div class="section-title">
+              Properti & Kamar
+            </div>
+
+            <div class="box-title">
+              {{ getProperty(selectedContract)?.name }}
+            </div>
+
+            <div class="box-subtitle">
+              Kamar {{ getRoom(selectedContract)?.number }}
+
+              <span *ngIf="getRoomType(selectedContract)">
+                · {{ getRoomType(selectedContract)?.name }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- DETAIL KONTRAK -->
+        <div class="detail-box contract-detail-box">
+
+          <div class="section-title">
+            Detail Kontrak
+          </div>
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Periode
+            </span>
+
+            <span class="info-value">
+              {{ formatDate(selectedContract.startDate) }}
+              –
+              {{ formatDate(selectedContract.endDate) }}
+            </span>
+
+          </div>
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Harga Sewa/Bulan
+            </span>
+
+            <span class="info-value rental-highlight">
+              {{ formatRupiah(selectedContract.rentalPrice) }}
+            </span>
+
+          </div>
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Durasi Sewa
+            </span>
+
+            <span class="info-value">
+              {{ selectedContract.duration }} bulan
+            </span>
+
+          </div>
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Deposit
+            </span>
+
+            <span class="info-value">
+              {{ formatRupiah(selectedContract.deposit) }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+        <div class="modal-actions">
+
+          <button type="button" class="outline-button" (click)="downloadContract()">
+            📄 Download Kontrak
+          </button>
+
+          <button *ngIf="selectedContract.status === 'AKTIF'" type="button" class="danger-button"
+            (click)="endContract()">
+            Akhiri Kontrak
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

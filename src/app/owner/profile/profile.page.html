@@ -1,0 +1,180 @@
+<div class="ion-page">
+  <div class="profile-page">
+
+    <!-- TOAST -->
+    <div class="toast" *ngIf="showToast">
+      <span>✓</span>
+      {{ toastMessage }}
+    </div>
+
+
+    <!-- HEADER -->
+    <div class="page-header">
+
+      <div>
+        <h1>Profil & Pengaturan</h1>
+
+        <p>
+          Kelola informasi akun Anda
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- PROFILE -->
+    <div class="profile-card">
+
+      <!-- USER HEADER -->
+      <div class="user-header">
+
+        <div class="avatar">
+          {{ user.name.charAt(0) }}
+        </div>
+
+        <div class="user-info">
+
+          <h3>
+            {{ user.name }}
+          </h3>
+
+          <p>
+            {{ user.email }}
+          </p>
+
+          <span class="role-badge">
+            👑 Pemilik Kos
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- PROFILE FORM -->
+      <div class="form-grid">
+
+        <div class="form-field">
+
+          <label>
+            Nama Lengkap
+          </label>
+
+          <input type="text" [(ngModel)]="user.name" />
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Email
+          </label>
+
+          <input type="email" [(ngModel)]="user.email" />
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Telepon
+          </label>
+
+          <input type="text" [(ngModel)]="user.phone" />
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Kota
+          </label>
+
+          <input type="text" [(ngModel)]="user.city" />
+
+        </div>
+
+      </div>
+
+
+      <button type="button" class="btn-primary" (click)="saveProfile()">
+        Simpan Perubahan
+      </button>
+
+    </div>
+
+
+    <!-- CHANGE PASSWORD -->
+    <div class="profile-card">
+
+      <h3 class="card-title">
+        Ubah Password
+      </h3>
+
+
+      <div class="password-form">
+
+        <div class="form-field">
+
+          <label>
+            Password Lama
+          </label>
+
+          <input type="password" [(ngModel)]="oldPassword" placeholder="••••••••" />
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Password Baru
+          </label>
+
+          <input type="password" [(ngModel)]="newPassword" placeholder="••••••••" />
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Konfirmasi Password
+          </label>
+
+          <input type="password" [(ngModel)]="confirmPassword" placeholder="••••••••" />
+
+        </div>
+
+
+        <button type="button" class="btn-primary" (click)="changePassword()">
+          Ubah Password
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- LOGOUT -->
+    <div class="profile-card logout-card">
+
+      <h3>
+        Keluar
+      </h3>
+
+      <p>
+        Anda akan keluar dari sesi ini.
+      </p>
+
+      <button type="button" class="btn-danger" (click)="logout()">
+        Keluar dari Akun
+      </button>
+
+    </div>
+
+  </div>
+</div>

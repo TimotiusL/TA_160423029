@@ -1,0 +1,574 @@
+<div class="ion-page">
+  <div class="payments-page">
+
+    <!-- =========================
+       HEADER
+  ========================= -->
+
+    <div class="page-header">
+
+      <div>
+        <h1>Verifikasi Pembayaran</h1>
+
+        <p>
+          Verifikasi bukti pembayaran dari penghuni
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+       SUMMARY
+  ========================= -->
+
+    <div class="summary-grid">
+
+      <div class="summary-card waiting">
+
+        <p class="summary-value">
+          {{ countWaiting }}
+        </p>
+
+        <p class="summary-label">
+          Menunggu Verifikasi
+        </p>
+
+        <p class="summary-note" *ngIf="countWaiting > 0">
+          Perlu tindakan segera
+        </p>
+
+      </div>
+
+
+      <div class="summary-card verified">
+
+        <p class="summary-value">
+          {{ countVerified }}
+        </p>
+
+        <p class="summary-label">
+          Terverifikasi
+        </p>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p class="summary-value teal currency">
+          {{ formatRupiah(totalConfirmed) }}
+        </p>
+
+        <p class="summary-label">
+          Total Terkonfirmasi
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+       TABS
+  ========================= -->
+
+    <div class="tabs">
+
+      <button type="button" class="tab" [class.active]="tab === 'all'" (click)="setTab('all')">
+        Semua
+        <span>
+          {{ countAll }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'MENUNGGU'" (click)="setTab('MENUNGGU')">
+        Menunggu
+        <span>
+          {{ countWaiting }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'DIVERIFIKASI'" (click)="setTab('DIVERIFIKASI')">
+        Diverifikasi
+        <span>
+          {{ countVerified }}
+        </span>
+      </button>
+
+
+      <button type="button" class="tab" [class.active]="tab === 'DITOLAK'" (click)="setTab('DITOLAK')">
+        Ditolak
+        <span>
+          {{ countRejected }}
+        </span>
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+       SEARCH
+  ========================= -->
+
+    <div class="search-wrapper">
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          <ion-icon name="search-outline"></ion-icon>
+        </span>
+
+        <input type="text" [(ngModel)]="search" placeholder="Cari nama penghuni..." />
+
+        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+       WAITING HIGHLIGHT
+  ========================= -->
+
+    <div class="waiting-box" *ngIf="
+      tab === 'all' &&
+      waitingPayments.length > 0
+    ">
+
+      <p class="waiting-title">
+        ⚠️ Pembayaran menunggu verifikasi
+      </p>
+
+
+      <div class="waiting-list">
+
+        <div class="waiting-item" *ngFor="
+          let payment of waitingPayments
+        ">
+
+          <div class="avatar">
+
+            {{
+            (
+            getTenant(payment)?.name ||
+            'P'
+            ).charAt(0)
+            }}
+
+          </div>
+
+
+          <div class="waiting-info">
+
+            <p>
+              {{ getTenant(payment)?.name }}
+            </p>
+
+            <span>
+              {{ formatDate(payment.date) }}
+              ·
+              {{ payment.method }}
+            </span>
+
+          </div>
+
+
+          <div class="waiting-action">
+
+            <strong>
+              {{ formatRupiah(payment.amount) }}
+            </strong>
+
+
+            <div class="waiting-buttons">
+
+              <button type="button" class="proof-small" (click)="openProof(payment)">
+                Bukti
+              </button>
+
+
+              <button type="button" class="verify-small" (click)="verify(payment)">
+                Verifikasi
+              </button>
+
+
+              <button type="button" class="reject-small" (click)="reject(payment)">
+                Tolak
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+       TABLE
+  ========================= -->
+
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Penghuni
+              </th>
+
+              <th>
+                Properti
+              </th>
+
+              <th>
+                Tagihan
+              </th>
+
+              <th>
+                Jumlah
+              </th>
+
+              <th>
+                Tanggal
+              </th>
+
+              <th>
+                Metode
+              </th>
+
+              <th>
+                Bukti
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Aksi
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr *ngFor="
+              let payment of filteredPayments
+            " (click)="openDetail(payment)">
+
+              <td>
+
+                <span class="tenant-name">
+                  {{ getTenant(payment)?.name }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span class="property-name">
+                  {{ getProperty(payment)?.name }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span class="bill-number">
+                  {{ getBill(payment)?.number }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span class="payment-amount">
+                  {{ formatRupiah(payment.amount) }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span class="date">
+                  {{ formatDate(payment.date) }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span class="method">
+                  {{ payment.method }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <button type="button" class="proof-link" (click)="
+                  $event.stopPropagation();
+                  openProof(payment)
+                ">
+                  Lihat Bukti
+                </button>
+
+              </td>
+
+
+              <td>
+
+                <span class="status-badge" [ngClass]="{
+                  'status-waiting':
+                    payment.status === 'MENUNGGU',
+
+                  'status-verified':
+                    payment.status === 'DIVERIFIKASI',
+
+                  'status-rejected':
+                    payment.status === 'DITOLAK'
+                }">
+                  {{ payment.status }}
+                </span>
+
+              </td>
+
+
+              <td (click)="$event.stopPropagation()">
+
+                <ng-container *ngIf="
+                  payment.status === 'MENUNGGU'
+                ">
+
+                  <div class="action-buttons">
+
+                    <button type="button" class="verify-button" (click)="verify(payment)">
+                      Verifikasi
+                    </button>
+
+                    <button type="button" class="reject-button" (click)="reject(payment)">
+                      Tolak
+                    </button>
+
+                  </div>
+
+                </ng-container>
+
+
+                <span *ngIf="
+                  payment.status !== 'MENUNGGU'
+                " class="verified-date">
+                  {{
+                  payment.verifiedAt
+                  ? formatDate(payment.verifiedAt)
+                  : '—'
+                  }}
+                </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY -->
+
+            <tr *ngIf="
+              filteredPayments.length === 0
+            ">
+
+              <td colspan="9" class="empty-cell">
+                Tidak ada pembayaran
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================================================
+     BUKTI PEMBAYARAN MODAL
+================================================== -->
+
+  <div class="modal-backdrop" *ngIf="
+    selectedPayment &&
+    showProof
+  " (click)="closeProof()">
+
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <!-- HEADER -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+            Bukti Pembayaran
+          </h2>
+
+          <p>
+            Detail pembayaran dari penghuni
+          </p>
+
+        </div>
+
+
+        <button type="button" class="close-button" (click)="closeProof()">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- BODY -->
+
+      <div class="modal-body" *ngIf="selectedPayment">
+
+        <!-- INFO -->
+
+        <div class="payment-info-card">
+
+          <div class="info-row">
+
+            <span>
+              Penghuni
+            </span>
+
+            <strong>
+              {{ getTenant(selectedPayment)?.name }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span>
+              Jumlah
+            </span>
+
+            <strong class="teal-text">
+              {{
+              formatRupiah(
+              selectedPayment.amount
+              )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span>
+              Tanggal
+            </span>
+
+            <strong>
+              {{ formatDate(selectedPayment.date) }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span>
+              Metode
+            </span>
+
+            <strong>
+              {{ selectedPayment.method }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span>
+              Status
+            </span>
+
+            <span class="status-badge" [ngClass]="{
+              'status-waiting':
+                selectedPayment.status === 'MENUNGGU',
+
+              'status-verified':
+                selectedPayment.status === 'DIVERIFIKASI',
+
+              'status-rejected':
+                selectedPayment.status === 'DITOLAK'
+            }">
+              {{ selectedPayment.status }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROOF IMAGE -->
+
+        <div class="proof-image-wrapper">
+
+          <img [src]="selectedPayment.proofUrl" alt="Bukti Pembayaran" />
+
+        </div>
+
+
+        <!-- ACTION -->
+
+        <div class="modal-actions" *ngIf="
+          selectedPayment.status === 'MENUNGGU'
+        ">
+
+          <button type="button" class="modal-reject" (click)="reject(selectedPayment)">
+            Tolak
+          </button>
+
+
+          <button type="button" class="modal-verify" (click)="verify(selectedPayment)">
+            ✅ Verifikasi
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

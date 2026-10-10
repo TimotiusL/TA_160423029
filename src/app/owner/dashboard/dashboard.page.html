@@ -1,0 +1,728 @@
+<div class="ion-page">
+  <div class="dashboard-page">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="dashboard-header">
+
+      <div>
+        <h1>Dashboard</h1>
+
+        <p>
+          Selamat datang kembali,
+          <strong>{{ user.name }}</strong>
+        </p>
+      </div>
+
+      <select [(ngModel)]="month">
+        <option>September 2026</option>
+        <option>Agustus 2026</option>
+        <option>Juli 2026</option>
+      </select>
+
+    </div>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <div class="stats-grid">
+
+      <!-- TOTAL KOS -->
+      <div class="stat-card teal">
+
+        <div>
+          <span>Total Kos</span>
+          <strong>
+            {{ properties.length }}
+          </strong>
+        </div>
+      </div>
+
+
+      <!-- TOTAL KAMAR -->
+      <div class="stat-card blue">
+
+        <div>
+          <span>Total Kamar</span>
+          <strong>
+            {{ totalRooms }}
+          </strong>
+        </div>
+      </div>
+
+
+      <!-- KAMAR TERISI -->
+      <div class="stat-card green">
+
+        <div>
+          <span>Kamar Terisi</span>
+
+          <strong>
+            {{ totalOccupied }}
+          </strong>
+
+          <small>
+            {{ occupancyPercentage }}% okupansi
+          </small>
+        </div>
+      </div>
+
+
+      <!-- KAMAR TERSEDIA -->
+      <div class="stat-card slate">
+
+        <div>
+          <span>Kamar Tersedia</span>
+
+          <strong>
+            {{ totalAvailable }}
+          </strong>
+        </div>
+      </div>
+
+
+      <!-- TOTAL PENGHUNI -->
+      <div class="stat-card purple">
+
+        <div>
+          <span>Total Penghuni</span>
+
+          <strong>
+            {{ totalTenants }}
+          </strong>
+        </div>
+      </div>
+
+
+      <!-- PENDAPATAN -->
+      <div class="stat-card green">
+
+        <div>
+          <span>Pendapatan Bulan Ini</span>
+
+          <strong>
+            {{ formatRupiah(totalIncome) }}
+          </strong>
+        </div>
+      </div>
+
+
+      <!-- PENGELUARAN -->
+      <div class="stat-card amber">
+
+        <div>
+          <span>Pengeluaran Bulan Ini</span>
+
+          <strong>
+            {{ formatRupiah(totalExpense) }}
+          </strong>
+        </div>
+      </div>
+
+
+      <!-- LABA -->
+      <div class="stat-card teal">
+
+        <div>
+          <span>Laba Bulan Ini</span>
+
+          <strong>
+            {{ formatRupiah(totalProfit) }}
+          </strong>
+
+          <small>
+            Margin {{ profitMargin }}%
+          </small>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ================= CHARTS ================= -->
+
+    <div class="charts-grid">
+
+      <!-- ================= STATUS KAMAR ================= -->
+
+      <div class="dashboard-card occupancy-card">
+
+        <div class="card-title">
+          <h2>Status Kamar</h2>
+        </div>
+
+
+        <div class="donut-wrapper">
+
+          <div class="donut-chart-container">
+
+            <canvas #roomStatusChart></canvas>
+
+            <div class="donut-center">
+
+              <strong>
+                {{ totalOccupied }}
+              </strong>
+
+              <span>
+                Terisi
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="legend">
+
+          <div>
+            <span>
+              <i class="dot teal-dot"></i>
+              Terisi
+            </span>
+
+            <strong>
+              {{ totalOccupied }} kamar
+            </strong>
+          </div>
+
+
+          <div>
+            <span>
+              <i class="dot amber-dot"></i>
+              Dipesan
+            </span>
+
+            <strong>
+              {{ totalReserved }} kamar
+            </strong>
+          </div>
+
+
+          <div>
+            <span>
+              <i class="dot gray-dot"></i>
+              Tersedia
+            </span>
+
+            <strong>
+              {{ totalAvailable }} kamar
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= FINANCIAL CHART ================= -->
+
+      <div class="dashboard-card financial-card">
+
+        <div class="card-title">
+          <h2>
+            Pendapatan vs Pengeluaran
+          </h2>
+        </div>
+
+
+        <div class="bar-chart">
+
+          <canvas #financialChart></canvas>
+
+        </div>
+
+
+        <div class="chart-legend">
+
+          <span>
+            <i class="dot teal-dot"></i>
+            Pendapatan
+          </span>
+
+          <span>
+            <i class="dot amber-dot"></i>
+            Pengeluaran
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= PROFIT TREND ================= -->
+
+    <div class="dashboard-card">
+
+      <div class="card-title">
+        <h2>
+          Tren Laba Bersih
+        </h2>
+      </div>
+
+
+      <div class="profit-chart">
+
+        <canvas #profitChart></canvas>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= PROPERTY SUMMARY ================= -->
+
+    <div class="section-header">
+
+      <div>
+        <h2>
+          Ringkasan Setiap Kos
+        </h2>
+      </div>
+
+      <button class="outline-button" (click)="navigate('properties')">
+        Lihat Semua
+      </button>
+
+    </div>
+
+
+    <div class="property-grid">
+
+      @for (
+      property of properties;
+      track property.id
+      ) {
+
+      <div class="property-card">
+
+        <div class="property-header">
+
+          <div>
+
+            <h3>
+              {{ property.name }}
+            </h3>
+
+            <p>
+              {{ property.address }}
+            </p>
+
+          </div>
+
+          <span class="active-badge">
+            AKTIF
+          </span>
+
+        </div>
+
+
+        <div class="room-summary">
+
+          <div>
+            <strong>
+              {{ property.occupiedRooms }}
+            </strong>
+
+            <span>
+              Terisi
+            </span>
+          </div>
+
+
+          <div class="reserved">
+
+            <strong>
+              {{ property.reservedRooms }}
+            </strong>
+
+            <span>
+              Dipesan
+            </span>
+
+          </div>
+
+
+          <div class="available">
+
+            <strong>
+              {{ property.availableRooms }}
+            </strong>
+
+            <span>
+              Tersedia
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="occupancy">
+
+          <div class="occupancy-header">
+
+            <span>
+              Okupansi
+            </span>
+
+            <strong>
+              {{ getOccupancy(property) }}%
+            </strong>
+
+          </div>
+
+
+          <div class="progress">
+
+            <div [style.width.%]="
+                getOccupancy(property)
+              "></div>
+
+          </div>
+
+        </div>
+
+
+        <div class="property-financial">
+
+          <div>
+
+            <span>
+              Pendapatan
+            </span>
+
+            <strong>
+              {{
+              formatRupiah(
+              property.monthlyIncome
+              )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Pengeluaran
+            </span>
+
+            <strong>
+              {{
+              formatRupiah(
+              property.monthlyExpense
+              )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="profit-row">
+
+            <span>
+              Laba
+            </span>
+
+            <strong>
+              {{
+              formatRupiah(
+              getProfit(property)
+              )
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <button class="outline-button full" (click)="navigate('properties')">
+          Lihat Detail
+        </button>
+
+      </div>
+
+      }
+
+    </div>
+
+
+    <!-- ================= BOTTOM ================= -->
+
+    <div class="bottom-grid">
+
+      <!-- PAYMENT -->
+
+      <div class="dashboard-card">
+
+        <div class="card-title with-action">
+
+          <h2>
+            Pembayaran Perlu Diverifikasi
+          </h2>
+
+          <button class="text-button" (click)="navigate('payments')">
+            Lihat Semua
+          </button>
+
+        </div>
+
+
+        @if (
+        pendingPayments.length === 0
+        ) {
+
+        <p class="empty">
+          Tidak ada pembayaran tertunda
+        </p>
+
+        } @else {
+
+        <div class="payment-list">
+
+          @for (
+          payment of pendingPayments;
+          track payment.id
+          ) {
+
+          <div class="payment-item">
+
+            <div class="avatar">
+              {{ payment.tenant.charAt(0) }}
+            </div>
+
+
+            <div class="payment-info">
+
+              <strong>
+                {{ payment.tenant }}
+              </strong>
+
+              <span>
+                Kamar {{ payment.room }}
+                · Tagihan
+                {{ payment.period }}
+              </span>
+
+            </div>
+
+
+            <div class="payment-action">
+
+              <strong>
+                {{
+                formatRupiah(
+                payment.amount
+                )
+                }}
+              </strong>
+
+
+              <div>
+
+                <button class="verify-button" (click)="
+                      verifyPayment(payment)
+                    ">
+                  Verifikasi
+                </button>
+
+
+                <button class="reject-button" (click)="
+                      rejectPayment(payment)
+                    ">
+                  Tolak
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          }
+
+        </div>
+
+        }
+
+      </div>
+
+
+      <!-- RECENT ACTIVITY -->
+
+      <div class="dashboard-card">
+
+        <div class="card-title">
+
+          <h2>
+            Aktivitas Terbaru
+          </h2>
+
+        </div>
+
+
+        <div class="activity-list">
+
+          @for (
+          activity of recentActivity;
+          track activity.text
+          ) {
+
+          <div class="activity-item">
+
+            <div class="activity-icon">
+              {{ activity.icon }}
+            </div>
+
+            <div>
+
+              <p>
+                {{ activity.text }}
+              </p>
+
+              <span>
+                {{ activity.time }}
+              </span>
+
+            </div>
+
+          </div>
+
+          }
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= OVERDUE ================= -->
+
+    @if (
+    overdueBills.length > 0
+    ) {
+
+    <div class="dashboard-card overdue-card">
+
+      <div class="card-title with-action">
+
+        <h2>
+          Tagihan Mendekati Jatuh Tempo
+        </h2>
+
+        <button class="text-button" (click)="navigate('billing')">
+          Lihat Semua
+        </button>
+
+      </div>
+
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Nomor Tagihan
+              </th>
+
+              <th>
+                Penghuni
+              </th>
+
+              <th>
+                Kamar
+              </th>
+
+              <th>
+                Periode
+              </th>
+
+              <th>
+                Jatuh Tempo
+              </th>
+
+              <th>
+                Total
+              </th>
+
+              <th>
+                Status
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+            bill of overdueBills;
+            track bill.number
+            ) {
+
+            <tr>
+
+              <td class="invoice">
+                {{ bill.number }}
+              </td>
+
+              <td>
+                {{ bill.tenant }}
+              </td>
+
+              <td>
+                Kamar {{ bill.room }}
+              </td>
+
+              <td>
+                {{ bill.period }}
+              </td>
+
+              <td>
+                {{ formatDate(bill.dueDate) }}
+              </td>
+
+              <td class="amount">
+                {{ formatRupiah(bill.total) }}
+              </td>
+
+              <td>
+
+                <span class="status-badge" [class.late]="
+                      bill.status ===
+                      'TERLAMBAT'
+                    ">
+                  {{ bill.status }}
+                </span>
+
+              </td>
+
+            </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    }
+
+  </div>
+</div>

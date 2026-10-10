@@ -1,0 +1,403 @@
+<div class="ion-page">
+  <div class="tenants-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>Manajemen Penghuni</h1>
+        <p>Data semua penghuni aktif dan non-aktif</p>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <div class="summary-value neutral">
+          {{ tenants.length }}
+        </div>
+        <div class="summary-label">
+          Total Penghuni
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-value active">
+          {{ activeTenants.length }}
+        </div>
+        <div class="summary-label">
+          Aktif
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-value inactive">
+          {{ inactiveTenants.length }}
+        </div>
+        <div class="summary-label">
+          Non-Aktif
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button type="button" class="tab" [class.active]="activeTab === 'all'" (click)="setTab('all')">
+        Semua
+        <span class="tab-count">
+          {{ tenants.length }}
+        </span>
+      </button>
+
+      <button type="button" class="tab" [class.active]="activeTab === 'aktif'" (click)="setTab('aktif')">
+        Aktif
+        <span class="tab-count">
+          {{ activeTenants.length }}
+        </span>
+      </button>
+
+      <button type="button" class="tab" [class.active]="activeTab === 'nonaktif'" (click)="setTab('nonaktif')">
+        Non-Aktif
+        <span class="tab-count">
+          {{ inactiveTenants.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-wrapper">
+      <div class="search-box">
+        <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+
+        <input type="text" [(ngModel)]="search" placeholder="Cari nama, email, atau telepon..." />
+
+        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
+          ×
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Penghuni</th>
+              <th>NIK</th>
+              <th>Telepon</th>
+              <th>Kamar</th>
+              <th>Properti</th>
+              <th>Status Kontrak</th>
+              <th>Tgl Daftar</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let tenant of filteredTenants" (click)="openDetail(tenant)">
+
+              <!-- PENGHUNI -->
+              <td>
+                <div class="tenant-cell">
+
+                  <div class="avatar">
+                    {{ getInitial(tenant.name) }}
+                  </div>
+
+                  <div class="tenant-info">
+                    <div class="tenant-name">
+                      {{ tenant.name }}
+                    </div>
+
+                    <div class="tenant-email">
+                      {{ tenant.email }}
+                    </div>
+                  </div>
+
+                </div>
+              </td>
+
+              <!-- NIK -->
+              <td>
+                <span class="nik">
+                  {{ tenant.nik }}
+                </span>
+              </td>
+
+              <!-- TELEPON -->
+              <td>
+                <span class="phone">
+                  {{ tenant.phone }}
+                </span>
+              </td>
+
+              <!-- KAMAR -->
+              <td>
+                <span class="room-name">
+                  <ng-container *ngIf="getRoom(tenant); else noRoom">
+                    Kamar {{ getRoom(tenant)?.number }}
+                  </ng-container>
+
+                  <ng-template #noRoom>
+                    —
+                  </ng-template>
+                </span>
+              </td>
+
+              <!-- PROPERTI -->
+              <td>
+                <span class="property-name">
+                  {{ getProperty(tenant)?.name || '—' }}
+                </span>
+              </td>
+
+              <!-- STATUS -->
+              <td>
+                <span class="status-badge" [class.status-active]="tenant.contractStatus === 'AKTIF'"
+                  [class.status-inactive]="tenant.contractStatus !== 'AKTIF'">
+                  {{ tenant.contractStatus || 'BELUM ADA KONTRAK' }}
+                </span>
+              </td>
+
+              <!-- TANGGAL -->
+              <td>
+                <span class="date-text">
+                  {{ formatDate(tenant.registrationDate) }}
+                </span>
+              </td>
+
+              <!-- AKSI -->
+              <td>
+                <button type="button" class="detail-button" (click)="$event.stopPropagation(); openDetail(tenant)">
+                  Detail
+                </button>
+              </td>
+
+            </tr>
+
+            <!-- EMPTY -->
+            <tr *ngIf="filteredTenants.length === 0">
+
+              <td colspan="8">
+                <div class="empty-state">
+                  <div class="empty-icon"><ion-icon name="search-outline"></ion-icon></div>
+                  <h3>Tidak ada data penghuni</h3>
+                  <p>
+                    Coba ubah kata kunci pencarian atau pilih tab lainnya.
+                  </p>
+                </div>
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-backdrop" *ngIf="selectedTenant" (click)="closeDetail()">
+
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <!-- MODAL HEADER -->
+      <div class="modal-header">
+
+        <div>
+          <h2>Detail Penghuni</h2>
+          <p>Informasi lengkap penghuni</p>
+        </div>
+
+        <button type="button" class="close-button" (click)="closeDetail()">
+          ×
+        </button>
+
+      </div>
+
+      <!-- MODAL BODY -->
+      <div class="modal-body" *ngIf="selectedTenant">
+
+        <!-- PROFILE -->
+        <div class="profile-header">
+
+          <div class="profile-avatar">
+            {{ getInitial(selectedTenant.name) }}
+          </div>
+
+          <div class="profile-info">
+
+            <h3>
+              {{ selectedTenant.name }}
+            </h3>
+
+            <p>
+              {{ selectedTenant.email }}
+              <span>·</span>
+              {{ selectedTenant.phone }}
+            </p>
+
+            <span class="status-badge" [class.status-active]="selectedTenant.activeContractId"
+              [class.status-inactive]="!selectedTenant.activeContractId">
+              {{ selectedTenant.activeContractId ? 'AKTIF' : 'SELESAI' }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- INFORMASI PRIBADI -->
+        <div class="info-section personal-section">
+
+          <div class="section-title">
+            Informasi Pribadi
+          </div>
+
+          <div class="info-list">
+
+            <div class="info-row">
+              <span class="info-label">NIK</span>
+              <span class="info-value mono">
+                {{ selectedTenant.nik }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Jenis Kelamin</span>
+              <span class="info-value">
+                {{
+                selectedTenant.gender === 'L'
+                ? 'Laki-laki'
+                : 'Perempuan'
+                }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Tanggal Lahir</span>
+              <span class="info-value">
+                {{ formatDate(selectedTenant.birthDate) }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Tanggal Daftar</span>
+              <span class="info-value">
+                {{ formatDate(selectedTenant.registrationDate) }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- KONTRAK AKTIF -->
+        <div class="info-section contract-section" *ngIf="getContract(selectedTenant) as contract">
+
+          <div class="section-title">
+            Kontrak
+          </div>
+
+          <div class="info-list">
+
+            <div class="info-row">
+              <span class="info-label">Nomor Kontrak</span>
+              <span class="info-value mono contract-number">
+                {{ contract.number }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Properti</span>
+              <span class="info-value">
+                {{ getProperty(selectedTenant)?.name }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Kamar</span>
+              <span class="info-value">
+                Kamar {{ getRoom(selectedTenant)?.number }}
+                <span *ngIf="getRoomType(selectedTenant)">
+                  ({{ getRoomType(selectedTenant)?.name }})
+                </span>
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Periode</span>
+              <span class="info-value">
+                {{ formatDate(contract.startDate) }}
+                –
+                {{ formatDate(contract.endDate) }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-value">
+                <span class="status-badge" [class.status-active]="contract.status === 'AKTIF'"
+                  [class.status-inactive]="contract.status !== 'AKTIF'">
+                  {{ contract.status }}
+                </span>
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RIWAYAT KONTRAK -->
+        <div class="history-section" *ngIf="getTenantContracts(selectedTenant).length > 1">
+
+          <div class="section-title">
+            Riwayat Kontrak
+          </div>
+
+          <div class="history-list">
+
+            <div class="history-item" *ngFor="let contract of getTenantContracts(selectedTenant)">
+
+              <div>
+                <div class="history-number">
+                  {{ contract.number }}
+                </div>
+
+                <div class="history-date">
+                  {{ formatDate(contract.startDate) }}
+                  –
+                  {{ formatDate(contract.endDate) }}
+                </div>
+              </div>
+
+              <span class="status-badge" [class.status-active]="contract.status === 'AKTIF'"
+                [class.status-inactive]="contract.status !== 'AKTIF'">
+                {{ contract.status }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
