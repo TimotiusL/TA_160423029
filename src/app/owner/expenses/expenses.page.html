@@ -47,7 +47,7 @@
           </h2>
 
           <span class="stat-sub">
-            September 2026
+            {{ currentMonthLabel }}
           </span>
         </div>
 
@@ -150,6 +150,7 @@
               <th>Kategori</th>
               <th>Deskripsi</th>
               <th>Jumlah</th>
+              <th>Kwitansi</th>
               <th>Aksi</th>
 
             </tr>
@@ -186,6 +187,15 @@
 
               <td class="amount-cell">
                 {{ formatRupiah(expense.amount) }}
+              </td>
+
+              <td>
+                <button *ngIf="expense.proof" type="button" class="btn-ghost"
+                  (click)="viewProof(getProofUrl(expense.proof))">
+                  Lihat Kwitansi
+                </button>
+
+                <span *ngIf="!expense.proof">Tidak ada</span>
               </td>
 
 
@@ -379,8 +389,10 @@
                 ↑
               </div>
 
-              <p>
-                Klik untuk upload foto kwitansi
+              <input type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)" />
+
+              <p *ngIf="selectedFile">
+                {{ selectedFile.name }}
               </p>
 
             </div>

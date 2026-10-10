@@ -15,10 +15,6 @@
         </p>
       </div>
 
-      <button type="button" class="primary-button" (click)="openGenerate()">
-        Generate Tagihan
-      </button>
-
     </div>
 
 
@@ -569,94 +565,6 @@
 
           <button type="button" class="primary-button action-button" (click)="viewPayments()">
             Lihat Pembayaran
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ==================================================
-     GENERATE TAGIHAN MODAL
-================================================== -->
-
-  <div class="modal-backdrop" *ngIf="showGenerate" (click)="closeGenerate()">
-
-    <div class="modal medium" (click)="$event.stopPropagation()">
-
-      <!-- HEADER -->
-
-      <div class="modal-header">
-
-        <div>
-
-          <h2>
-            Generate Tagihan Bulanan
-          </h2>
-
-          <p>
-            Buat tagihan untuk penghuni aktif
-          </p>
-
-        </div>
-
-
-        <button type="button" class="close-button" (click)="closeGenerate()">
-          ×
-        </button>
-
-      </div>
-
-
-      <!-- BODY -->
-
-      <div class="modal-body">
-
-        <div class="generate-info">
-          Pilih kontrak yang belum memiliki tagihan.
-          Tagihan akan dibuat berdasarkan harga sewa,
-          durasi kontrak, dan deposit.
-        </div>
-
-        <div class="form-group">
-          <label>Kontrak</label>
-
-          <select [(ngModel)]="generateContractId" [disabled]="loadingContracts || generating">
-
-            <option value="">
-              {{ loadingContracts
-              ? 'Memuat kontrak...'
-              : 'Pilih Kontrak' }}
-            </option>
-
-            <option *ngFor="let contract of contracts" [value]="contract.id">
-              {{ contract.number }} -
-              {{ contract.tenantName }} -
-              Kamar {{ contract.roomNumber }}
-              ({{ contract.propertyName }})
-            </option>
-          </select>
-        </div>
-
-        <p *ngIf="!loadingContracts && contracts.length === 0">
-          Semua kontrak yang menunggu pembayaran sudah memiliki
-          tagihan, atau belum ada kontrak yang memenuhi syarat.
-        </p>
-
-        <div class="modal-actions">
-
-          <button type="button" class="outline-button" (click)="closeGenerate()" [disabled]="generating">
-            Batal
-          </button>
-
-          <button type="button" class="primary-button action-button" (click)="generateBills()" [disabled]="loadingContracts ||
-                       generating ||
-                       !generateContractId">
-            {{ generating ? 'Memproses...' : 'Generate' }}
           </button>
 
         </div>

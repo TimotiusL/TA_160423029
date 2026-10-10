@@ -418,38 +418,6 @@ export class BillingPage implements OnInit {
     this.showGenerate = false;
   }
 
-  generateBills(): void {
-    if (!this.generateContractId) {
-      alert('Pilih kontrak terlebih dahulu.');
-      return;
-    }
-
-    const contractId = Number(this.generateContractId);
-
-    this.generating = true;
-
-    this.apiService.generateTagihan(contractId).subscribe({
-      next: response => {
-        this.generating = false;
-        this.showGenerate = false;
-        alert(response.message || 'Tagihan berhasil dibuat.');
-        this.loadBills();
-      },
-      error: error => {
-        this.generating = false;
-        console.error('Gagal membuat tagihan:', error);
-
-        const message = error.error?.message ||
-          'Tagihan gagal dibuat. Silakan coba lagi.';
-
-        alert(message);
-        this.loadBills();
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-
   /* =========================
      OTHER ACTIONS
   ========================= */

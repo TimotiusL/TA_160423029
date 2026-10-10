@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { searchOutline } from 'ionicons/icons';
+import { ApiService } from '../../services/api';
 
 addIcons({
   searchOutline
@@ -15,12 +16,13 @@ interface Property {
 }
 
 interface Expense {
-  id: string;
+  id: number;
   propertyId: string;
   category: string;
   date: string;
   amount: number;
   description: string;
+  proof?: string;
 }
 
 @Component({
@@ -30,13 +32,20 @@ interface Expense {
   templateUrl: './expenses.page.html',
   styleUrls: ['./expenses.page.scss']
 })
-export class ExpensesPage {
+export class ExpensesPage implements OnInit {
+  constructor(
+    private api: ApiService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   search = '';
   propFilter = '';
   catFilter = '';
-
+  currentProof: string | null = null;
   showAdd = false;
+  editingId: number | null = null;
+  selectedFile: File | null = null;
+  loading = false;
 
   form = {
     propertyId: '',
@@ -46,20 +55,7 @@ export class ExpensesPage {
     description: ''
   };
 
-  properties: Property[] = [
-    {
-      id: 'p1',
-      name: 'Kost Griya 21'
-    },
-    {
-      id: 'p2',
-      name: 'Kost Melati Residence'
-    },
-    {
-      id: 'p3',
-      name: 'Kost Mawar Residence'
-    }
-  ];
+  properties: Property[] = [];
 
   categories = [
     'Listrik',
@@ -72,76 +68,59 @@ export class ExpensesPage {
     'Lainnya'
   ];
 
-  expenses: Expense[] = [
-    {
-      id: 'exp1',
-      propertyId: 'p1',
-      category: 'Listrik',
-      date: '2026-09-01',
-      amount: 1200000,
-      description: 'Tagihan listrik PLN September 2026'
-    },
-    {
-      id: 'exp2',
-      propertyId: 'p1',
-      category: 'Internet',
-      date: '2026-09-01',
-      amount: 450000,
-      description: 'Langganan WiFi Indihome September'
-    },
-    {
-      id: 'exp3',
-      propertyId: 'p1',
-      category: 'Kebersihan',
-      date: '2026-09-05',
-      amount: 500000,
-      description: 'Gaji petugas kebersihan September'
-    },
-    {
-      id: 'exp4',
-      propertyId: 'p1',
-      category: 'Perawatan',
-      date: '2026-09-10',
-      amount: 350000,
-      description: 'Perbaikan AC kamar 201'
-    },
-    {
-      id: 'exp5',
-      propertyId: 'p1',
-      category: 'Air',
-      date: '2026-09-01',
-      amount: 250000,
-      description: 'Tagihan air PDAM September'
-    },
-    {
-      id: 'exp6',
-      propertyId: 'p2',
-      category: 'Listrik',
-      date: '2026-09-01',
-      amount: 2100000,
-      description: 'Tagihan listrik PLN September 2026'
-    },
-    {
-      id: 'exp7',
-      propertyId: 'p2',
-      category: 'Internet',
-      date: '2026-09-01',
-      amount: 450000,
-      description: 'Langganan WiFi September'
-    },
-    {
-      id: 'exp8',
-      propertyId: 'p2',
-      category: 'Gaji',
-      date: '2026-09-25',
-      amount: 3000000,
-      description: 'Gaji pengelola Kost Melati September'
-    }
-  ];
+  expenses: Expense[] = [];
+
+  ngOnInit(): void {
+    this.loadProperties();
+    this.loadExpenses();
+  }
+
+  loadProperties(): void {
+    this.api.getKos().subscribe({
+      next: (data: any[]) => {
+        this.properties = data.map(kos => ({
+          id: String(kos.id_kos),
+          name: kos.nama_kos
+        }));
+
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Gagal mengambil data kos:', error);
+        alert('Gagal mengambil daftar properti.');
+      }
+    });
+  }
+
+  loadExpenses(): void {
+    this.loading = true;
+
+    this.api.getPengeluaran().subscribe({
+      next: (data: any[]) => {
+        this.expenses = data.map(item => ({
+          id: Number(item.id_pengeluaran),
+          propertyId: String(item.tKos_id_kos),
+          category: item.nama_pengeluaran,
+          date: String(item.tgl_pengeluaran).substring(0, 10),
+          amount: Number(item.jumlah),
+          description: item.catatan || '-',
+          proof: item.bukti_pengeluaran
+        }));
+
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Gagal mengambil pengeluaran:', error);
+        this.loading = false;
+        alert('Gagal mengambil data pengeluaran.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   get filteredExpenses(): Expense[] {
     return this.expenses.filter(expense => {
-
       if (
         this.propFilter &&
         expense.propertyId !== this.propFilter
@@ -158,9 +137,9 @@ export class ExpensesPage {
 
       if (
         this.search &&
-        !expense.description
-          .toLowerCase()
-          .includes(this.search.toLowerCase())
+        !expense.description.toLowerCase().includes(
+          this.search.toLowerCase()
+        )
       ) {
         return false;
       }
@@ -177,14 +156,21 @@ export class ExpensesPage {
   }
 
   get thisMonthExpense(): number {
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, '0')}`;
+
     return this.expenses
-      .filter(expense =>
-        expense.date.startsWith('2026-09')
-      )
-      .reduce(
-        (sum, expense) => sum + expense.amount,
-        0
-      );
+      .filter(expense => expense.date.startsWith(month))
+      .reduce((sum, expense) => sum + expense.amount, 0);
+  }
+
+  get currentMonthLabel(): string {
+    return new Intl.DateTimeFormat('id-ID', {
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date());
   }
 
   getPropertyName(propertyId: string): string {
@@ -208,7 +194,7 @@ export class ExpensesPage {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
-    }).format(new Date(date));
+    }).format(new Date(date + 'T00:00:00'));
   }
 
   getCategoryClass(category: string): string {
@@ -227,6 +213,10 @@ export class ExpensesPage {
   }
 
   openAddModal(): void {
+    this.editingId = null;
+    this.currentProof = null;
+    this.selectedFile = null;
+
     this.form = {
       propertyId: '',
       category: '',
@@ -240,6 +230,31 @@ export class ExpensesPage {
 
   closeAddModal(): void {
     this.showAdd = false;
+    this.editingId = null;
+    this.selectedFile = null;
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedFile = input.files?.[0] || null;
+  }
+
+  editExpense(expense: Expense): void {
+    this.editingId = expense.id;
+    this.selectedFile = null;
+    this.currentProof = expense.proof || null;
+
+    this.form = {
+      propertyId: expense.propertyId,
+      category: expense.category,
+      date: expense.date,
+      amount: String(expense.amount),
+      description: expense.description === '-'
+        ? ''
+        : expense.description
+    };
+
+    this.showAdd = true;
   }
 
   saveExpense(): void {
@@ -247,35 +262,54 @@ export class ExpensesPage {
       !this.form.propertyId ||
       !this.form.category ||
       !this.form.date ||
-      !this.form.amount
+      !this.form.amount ||
+      Number(this.form.amount) <= 0
     ) {
+      alert('Lengkapi data pengeluaran terlebih dahulu.');
       return;
     }
 
-    const newExpense: Expense = {
-      id: `exp${this.expenses.length + 1}`,
-      propertyId: this.form.propertyId,
-      category: this.form.category,
-      date: this.form.date,
-      amount: Number(this.form.amount),
-      description:
-        this.form.description || '-'
-    };
+    if (this.editingId === null && !this.selectedFile) {
+      alert('Silakan pilih bukti atau kwitansi pengeluaran.');
+      return;
+    }
 
-    this.expenses = [
-      ...this.expenses,
-      newExpense
-    ];
+    const data = new FormData();
 
-    this.showAdd = false;
+    data.append('tKos_id_kos', this.form.propertyId);
+    data.append('tgl_pengeluaran', this.form.date);
+    data.append('nama_pengeluaran', this.form.category);
+    data.append('jumlah', this.form.amount);
+    data.append('catatan', this.form.description.trim() || '-');
 
-    alert('Pengeluaran berhasil dicatat!');
-  }
+    if (this.selectedFile) {
+      data.append('bukti_pengeluaran', this.selectedFile);
+    }
 
-  editExpense(expense: Expense): void {
-    alert(
-      `Edit pengeluaran "${expense.description}"`
-    );
+    const request = this.editingId !== null
+      ? this.api.updatePengeluaran(this.editingId, data)
+      : this.api.createPengeluaran(data);
+
+    request.subscribe({
+      next: () => {
+        alert(
+          this.editingId !== null
+            ? 'Pengeluaran berhasil diperbarui.'
+            : 'Pengeluaran berhasil dicatat.'
+        );
+
+        this.closeAddModal();
+        this.loadExpenses();
+      },
+      error: error => {
+        console.error('Gagal menyimpan pengeluaran:', error);
+
+        const message = error.error?.message ||
+          'Gagal menyimpan pengeluaran. Periksa kembali data dan API Laravel.';
+
+        alert(message);
+      }
+    });
   }
 
   deleteExpense(expense: Expense): void {
@@ -287,8 +321,30 @@ export class ExpensesPage {
       return;
     }
 
-    this.expenses = this.expenses.filter(
-      item => item.id !== expense.id
-    );
+    this.api.deletePengeluaran(expense.id).subscribe({
+      next: () => {
+        alert('Pengeluaran berhasil dihapus.');
+        this.loadExpenses();
+      },
+      error: error => {
+        console.error('Gagal menghapus pengeluaran:', error);
+        alert(
+          error.error?.message ||
+          'Gagal menghapus pengeluaran.'
+        );
+      }
+    });
+  }
+
+  getProofUrl(proof: string): string {
+    if (proof.startsWith('http')) {
+      return proof;
+    }
+
+    return `http://127.0.0.1:8000/storage/${proof}`;
+  }
+
+  viewProof(proof: string): void {
+    window.open(this.getProofUrl(proof), '_blank');
   }
 }

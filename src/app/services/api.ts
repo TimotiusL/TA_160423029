@@ -426,22 +426,6 @@ export class ApiService {
     );
   }
 
-  generateTagihan(kontrakId: number): Observable<any> {
-    const token = localStorage.getItem('token');
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
-    });
-
-    return this.http.post<any>(
-      `${this.baseUrl}/kontrak/${kontrakId}/generate-tagihan`,
-      {},
-      { headers }
-    );
-  }
-
-
   getPembayaran(): Observable<any[]> {
     const token = localStorage.getItem('token');
 
@@ -489,4 +473,60 @@ export class ApiService {
       { headers }
     );
   }
+
+
+  getPengeluaran(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}/pengeluaran`,
+      { headers }
+    );
+  }
+
+
+  createPengeluaran(data: FormData): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.post<any>(
+      `${this.baseUrl}/pengeluaran`,
+      data,
+      { headers }
+    );
+  }
+
+  updatePengeluaran(id: number, data: FormData): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    data.append('_method', 'PUT');
+
+    return this.http.post<any>(
+      `${this.baseUrl}/pengeluaran/${id}`,
+      data,
+      { headers }
+    );
+  }
+
+
+  deletePengeluaran(id: number): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.delete<any>(
+      `${this.baseUrl}/pengeluaran/${id}`,
+      { headers }
+    );
+  }
+
 }

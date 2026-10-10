@@ -265,18 +265,4 @@ export class PaymentsPage implements OnInit {
       year: 'numeric'
     }).format(new Date(date));
   }
-
-  getPemasukan(): Observable<any[]> {
-    const token = localStorage.getItem('token');
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
-    });
-
-    return this.http.get<any[]>(
-      `${this.baseUrl}/pemasukan`,
-      { headers }
-    );
-  }
 }
