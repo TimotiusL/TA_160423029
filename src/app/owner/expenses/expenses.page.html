@@ -195,7 +195,7 @@
                   Lihat Kwitansi
                 </button>
 
-                <span *ngIf="!expense.proof">Tidak ada</span>
+                <span *ngIf="!expense.proof" class="muted-text">Tidak ada</span>
               </td>
 
 
@@ -221,7 +221,7 @@
             <!-- EMPTY -->
             <tr *ngIf="filteredExpenses.length === 0">
 
-              <td colspan="6" class="empty-state">
+              <td colspan="7" class="empty-state">
                 Tidak ada data pengeluaran
               </td>
 
@@ -251,9 +251,10 @@
 
 
     <!-- ADD MODAL -->
-    <div class="modal-overlay" *ngIf="showAdd" (click)="closeAddModal()">
+    <ion-modal class="owner-page-modal" *ngIf="showAdd" [isOpen]="true" (didDismiss)="closeAddModal()">
+      <ng-template>
 
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal">
 
         <!-- MODAL HEADER -->
         <div class="modal-header">
@@ -263,7 +264,7 @@
             <p>Tambahkan data pengeluaran operasional</p>
           </div>
 
-          <button type="button" class="close-button" (click)="closeAddModal()">
+          <button type="button" class="close-button" aria-label="Tutup" (click)="closeAddModal()">
             ×
           </button>
 
@@ -295,14 +296,13 @@
 
               </select>
 
-              <span class="select-arrow">
-                ▼
-              </span>
-
-            </div>
+            <span class="select-arrow">
+              ▼
+            </span>
 
           </div>
 
+          </div>
 
           <!-- Category + Date -->
           <div class="form-grid">
@@ -385,9 +385,7 @@
 
             <div class="upload-box">
 
-              <div class="upload-icon">
-                ↑
-              </div>
+              <div class="upload-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg></div>
 
               <input type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)" />
 
@@ -417,7 +415,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
-  </div>
+</div>
 </div>

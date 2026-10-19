@@ -71,7 +71,7 @@
 
           <!-- PRICE -->
           <div class="price">
-            {{ formatRupiah(roomType.price) }}
+            Rp {{ formatRupiah(roomType.price) }}
             <span>/bulan</span>
           </div>
 
@@ -119,9 +119,10 @@
     <!-- ADD / EDIT MODAL -->
     @if (showAdd) {
 
-    <div class="modal-overlay" (click)="closeAdd()">
+    <ion-modal class="owner-page-modal" [isOpen]="showAdd" (didDismiss)="closeAdd()">
+      <ng-template>
 
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal">
 
         <!-- MODAL HEADER -->
         <div class="modal-header">
@@ -140,7 +141,7 @@
             </p>
           </div>
 
-          <button class="close-button" (click)="closeAdd()">
+          <button class="close-button" aria-label="Tutup" (click)="closeAdd()">
             ×
           </button>
 
@@ -223,7 +224,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
     }
 

@@ -1,4 +1,5 @@
 <div class="ion-page">
+<div class="registrations-page">
   <!-- Page Header -->
   <div class="page-header">
     <div>
@@ -250,9 +251,13 @@
   <!-- DETAIL MODAL -->
   <!-- ===================================================== -->
 
-  <div *ngIf="selected" class="modal-backdrop" (click)="closeDetail()">
+  </div>
 
-    <div class="modal modal-large" (click)="$event.stopPropagation()">
+<ion-modal class="owner-page-modal owner-page-modal--large" *ngIf="selected" [isOpen]="true"
+    (didDismiss)="closeDetail()">
+    <ng-template>
+
+    <div class="modal modal-large">
 
       <!-- Modal Header -->
       <div class="modal-header">
@@ -261,7 +266,7 @@
           <h2>Detail Pendaftaran</h2>
         </div>
 
-        <button class="modal-close" (click)="closeDetail()">
+        <button class="modal-close" aria-label="Tutup" (click)="closeDetail()">
           ×
         </button>
 
@@ -513,16 +518,18 @@
 
     </div>
 
-  </div>
-
+  </ng-template>
+  </ion-modal>
 
   <!-- ===================================================== -->
   <!-- CONFIRMATION MODAL -->
   <!-- ===================================================== -->
 
-  <div *ngIf="confirmAction" class="modal-backdrop" (click)="closeConfirm()">
+  <ion-modal class="owner-page-modal owner-page-modal--small" *ngIf="confirmAction" [isOpen]="true"
+    (didDismiss)="closeConfirm()">
+    <ng-template>
 
-    <div class="modal modal-small" (click)="$event.stopPropagation()">
+    <div class="modal modal-small">
 
       <div class="confirm-content">
 
@@ -536,7 +543,6 @@
           }}
 
         </div>
-
 
         <!-- Title -->
         <h3>
@@ -591,5 +597,6 @@
 
     </div>
 
-  </div>
+    </ng-template>
+  </ion-modal>
 </div>

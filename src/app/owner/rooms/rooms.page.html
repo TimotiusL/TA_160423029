@@ -201,7 +201,7 @@
               </strong>
 
               <span>
-                {{ statusLabel(room.status) }}
+                {{ room.status | titlecase }}
               </span>
 
             </button>
@@ -261,7 +261,7 @@
 
           <span class="status-badge" [class.available]="room.status === 'TERSEDIA'"
             [class.reserved]="room.status === 'DIPESAN'" [class.occupied]="room.status === 'TERISI'">
-            {{ room.status }}
+            {{ room.status | titlecase }}
           </span>
 
         </div>
@@ -359,7 +359,7 @@
 
                 <span class="status-badge" [class.available]="room.status === 'TERSEDIA'"
                   [class.reserved]="room.status === 'DIPESAN'" [class.occupied]="room.status === 'TERISI'">
-                  {{ room.status }}
+                  {{ room.status | titlecase }}
                 </span>
 
               </td>
@@ -420,9 +420,10 @@
 
     @if (selectedRoom) {
 
-    <div class="modal-overlay" (click)="closeDetail()">
+    <ion-modal class="owner-page-modal" [isOpen]="selectedRoom !== null" (didDismiss)="closeDetail()">
+      <ng-template>
 
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal">
 
         <div class="modal-header">
 
@@ -434,7 +435,7 @@
 
           </div>
 
-          <button class="close-button" (click)="closeDetail()">
+          <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
             ×
           </button>
 
@@ -454,7 +455,7 @@
 
             <span class="status-badge" [class.available]="selectedRoom.status === 'TERSEDIA'"
               [class.reserved]="selectedRoom.status === 'DIPESAN'" [class.occupied]="selectedRoom.status === 'TERISI'">
-              {{ selectedRoom.status }}
+              {{ selectedRoom.status | titlecase }}
             </span>
 
             <span>
@@ -508,7 +509,7 @@
               <span>Status</span>
 
               <strong>
-                {{ selectedRoom.status }}
+                {{ selectedRoom.status | titlecase }}
               </strong>
             </div>
 
@@ -546,7 +547,6 @@
               }
 
             </div>
-
           </div>
 
           }
@@ -578,7 +578,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
     }
 
@@ -589,9 +590,10 @@
 
     @if (showAdd) {
 
-    <div class="modal-overlay" (click)="closeAdd()">
+    <ion-modal class="owner-page-modal" [isOpen]="showAdd" (didDismiss)="closeAdd()">
+      <ng-template>
 
-      <div class="modal add-modal" (click)="$event.stopPropagation()">
+      <div class="modal add-modal">
 
         <div class="modal-header">
 
@@ -608,7 +610,7 @@
           </div>
 
 
-          <button class="close-button" (click)="closeAdd()">
+          <button class="close-button" aria-label="Tutup" (click)="closeAdd()">
             ×
           </button>
 
@@ -717,8 +719,7 @@
 
             </div>
 
-            <div class="form-group">
-              <label>Fasilitas Kamar</label>
+            <div class="form-group full"> <label>Fasilitas Kamar</label>
 
               <div class="facility-list">
                 @for (facility of facilities; track facility.id) {
@@ -758,7 +759,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
     }
 
@@ -770,9 +772,10 @@
 
   @if (showDeleteModal) {
 
-  <div class="modal-overlay" (click)="closeDeleteModal()">
+  <ion-modal class="owner-page-modal" [isOpen]="showDeleteModal" (didDismiss)="closeDeleteModal()">
+    <ng-template>
 
-    <div class="modal delete-modal" (click)="$event.stopPropagation()">
+    <div class="modal delete-modal">
 
       <div class="modal-header">
 
@@ -784,7 +787,7 @@
           </p>
         </div>
 
-        <button class="close-button" (click)="closeDeleteModal()">
+        <button class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
           ×
         </button>
 
@@ -812,7 +815,8 @@
 
     </div>
 
-  </div>
+    </ng-template>
+  </ion-modal>
 
   }
 </div>

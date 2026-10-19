@@ -1,6 +1,8 @@
 <div class="ion-page">
   <div class="owner-layout">
 
+    <div class="sidebar-backdrop" [class.visible]="sidebarOpen" (click)="toggleSidebar()"></div>
+
     <!-- SIDEBAR -->
     <aside class="sidebar" [class.collapsed]="!sidebarOpen">
 
@@ -17,26 +19,11 @@
         </span>
         }
 
-      </div>
-
-      <!-- PROPERTY SELECTOR -->
-      @if (sidebarOpen) {
-      <div class="property-selector">
-
-        <p>Pilih Properti</p>
-
-        <select [(ngModel)]="selectedProperty" (change)="selectProperty()">
-
-          @for (property of properties; track property.id) {
-          <option [value]="property.id">
-            {{ property.name }}
-          </option>
-          }
-
-        </select>
+        <button type="button" class="mobile-sidebar-close" (click)="toggleSidebar()" aria-label="Tutup menu">
+          ×
+        </button>
 
       </div>
-      }
 
       <!-- NAVIGATION -->
       <div class="sidebar-navigation">
@@ -97,7 +84,7 @@
       <!-- TOPBAR -->
       <header class="topbar">
 
-        <button class="sidebar-toggle" (click)="toggleSidebar()">
+        <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Buka atau tutup menu">
 
           @if (sidebarOpen) {
           <ion-icon name="chevron-back-outline"></ion-icon>
@@ -110,7 +97,7 @@
         <div class="topbar-spacer"></div>
 
         <!-- NOTIFICATION -->
-        <button class="topbar-notification" [routerLink]="'/owner/notifications'">
+        <button type="button" class="topbar-notification" [routerLink]="'/owner/notifications'" aria-label="Notifikasi">
 
           <ion-icon name="notifications-outline"></ion-icon>
 
@@ -126,12 +113,10 @@
         <a class="topbar-user" routerLink="/owner/profile">
 
           <div class="top-avatar">
-            {{ user.name.charAt(0) }}
+            {{ (user.name || 'P').charAt(0).toUpperCase() }}
           </div>
 
-          <span>
-            {{ user.name }}
-          </span>
+          <span class="top-user-name">{{ user.name || 'Pemilik kos' }}</span>
 
         </a>
 

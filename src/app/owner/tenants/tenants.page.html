@@ -160,8 +160,8 @@
               <!-- STATUS -->
               <td>
                 <span class="status-badge" [class.status-active]="tenant.contractStatus === 'AKTIF'"
-                  [class.status-inactive]="tenant.contractStatus !== 'AKTIF'">
-                  {{ tenant.contractStatus || 'BELUM ADA KONTRAK' }}
+                  [class.status-inactive]="tenant.contractStatus !== 'AKTIF'" [class.status-waiting]="!!tenant.currentContractId && tenant.contractStatus === 'MENUNGGU_PEMBAYARAN'" [class.status-cancelled]="tenant.contractStatus === 'DIBATALKAN'">
+                  {{ !tenant.currentContractId ? 'Belum ada kontrak' : tenant.contractStatus === 'AKTIF' ? 'Aktif' : tenant.contractStatus === 'SELESAI' ? 'Selesai' : tenant.contractStatus === 'DIBATALKAN' ? 'Dibatalkan' : 'Menunggu pembayaran' }}
                 </span>
               </td>
 
@@ -208,9 +208,10 @@
 
 
   <!-- DETAIL MODAL -->
-  <div class="modal-backdrop" *ngIf="selectedTenant" (click)="closeDetail()">
+  <ion-modal class="owner-page-modal" *ngIf="selectedTenant" [isOpen]="true" (didDismiss)="closeDetail()">
+    <ng-template>
 
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal">
 
       <!-- MODAL HEADER -->
       <div class="modal-header">
@@ -220,7 +221,7 @@
           <p>Informasi lengkap penghuni</p>
         </div>
 
-        <button type="button" class="close-button" (click)="closeDetail()">
+        <button type="button" class="close-button" aria-label="Tutup" (click)="closeDetail()">
           ×
         </button>
 
@@ -250,7 +251,7 @@
 
             <span class="status-badge" [class.status-active]="selectedTenant.activeContractId"
               [class.status-inactive]="!selectedTenant.activeContractId">
-              {{ selectedTenant.activeContractId ? 'AKTIF' : 'SELESAI' }}
+              {{ !selectedTenant.currentContractId ? 'Belum ada kontrak' : selectedTenant.contractStatus === 'AKTIF' ? 'Aktif' : selectedTenant.contractStatus === 'SELESAI' ? 'Selesai' : selectedTenant.contractStatus === 'DIBATALKAN' ? 'Dibatalkan' : 'Menunggu pembayaran' }}
             </span>
 
           </div>
@@ -351,7 +352,7 @@
               <span class="info-value">
                 <span class="status-badge" [class.status-active]="contract.status === 'AKTIF'"
                   [class.status-inactive]="contract.status !== 'AKTIF'">
-                  {{ contract.status }}
+                  {{ contract.status === 'AKTIF' ? 'Aktif' : contract.status === 'SELESAI' ? 'Selesai' : contract.status === 'DIBATALKAN' ? 'Dibatalkan' : 'Menunggu pembayaran' }}
                 </span>
               </span>
             </div>
@@ -377,16 +378,16 @@
                   {{ contract.number }}
                 </div>
 
-                <div class="history-date">
-                  {{ formatDate(contract.startDate) }}
-                  –
-                  {{ formatDate(contract.endDate) }}
-                </div>
+              <div class="history-date">
+                {{ formatDate(contract.startDate) }}
+                –
+                {{ formatDate(contract.endDate) }}
+              </div>
               </div>
 
               <span class="status-badge" [class.status-active]="contract.status === 'AKTIF'"
                 [class.status-inactive]="contract.status !== 'AKTIF'">
-                {{ contract.status }}
+                {{ contract.status === 'AKTIF' ? 'Aktif' : contract.status === 'SELESAI' ? 'Selesai' : contract.status === 'DIBATALKAN' ? 'Dibatalkan' : 'Menunggu pembayaran' }}
               </span>
 
             </div>
@@ -399,5 +400,6 @@
 
     </div>
 
-  </div>
+  </ng-template>
+</ion-modal>
 </div>

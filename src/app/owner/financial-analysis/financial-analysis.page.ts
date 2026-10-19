@@ -1,42 +1,15 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnDestroy,
-  ViewChild
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
+import { ApiService } from '../../services/api';
 import {
-  Chart,
-  BarController,
-  BarElement,
-  LineController,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  ArcElement,
-  DoughnutController,
-  Filler
+  Chart, BarController, BarElement, LineController, LineElement, PointElement, CategoryScale, LinearScale,
+  Tooltip, Legend, ArcElement, DoughnutController, Filler
 } from 'chart.js';
 
-Chart.register(
-  BarController,
-  BarElement,
-  LineController,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  ArcElement,
-  DoughnutController,
-  Filler
-);
+Chart.register(BarController, BarElement, LineController, LineElement, PointElement, CategoryScale, LinearScale,
+  Tooltip, Legend, ArcElement, DoughnutController, Filler);
 
 interface Property {
   id: string;
@@ -50,7 +23,6 @@ interface PropertyAnalysis {
   expense: number;
   profit: number;
   investment: number;
-  occupancy: number;
   profitMargin: number;
   oer: number;
   roi: number;
@@ -73,7 +45,12 @@ interface Investment {
   styleUrls: ['./financial-analysis.page.scss']
 })
 export class FinancialAnalysisPage
-  implements AfterViewInit, OnDestroy {
+  implements OnInit, AfterViewInit, OnDestroy {
+
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
+
+  loading = false;
+  loadError = '';
 
   @ViewChild('financialChart')
   financialChart!: ElementRef<HTMLCanvasElement>;
@@ -84,272 +61,296 @@ export class FinancialAnalysisPage
   @ViewChild('expenseChart')
   expenseChart!: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('occupancyChart')
-  occupancyChart!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('incomeChart')
+  incomeChart!: ElementRef<HTMLCanvasElement>;
 
   @ViewChild('comparisonChart')
   comparisonChart!: ElementRef<HTMLCanvasElement>;
 
+  @ViewChild('incomeTrendChart')
+  incomeTrendChart!: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('expenseTrendChart')
+  expenseTrendChart!: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('marginChart')
+  marginChart!: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('oerChart')
+  oerChart!: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('roiChart')
+  roiChart!: ElementRef<HTMLCanvasElement>;
+
+
+  grafikBulanan: any[] = [];
+  rincianPendapatan: any[] = [];
+  rincianPengeluaran: any[] = [];
+
+  hunian = {
+    total_kamar: 0,
+    kamar_terisi: 0,
+    persentase: 0
+  };
+
   propertyFilter = 'all';
-  period = '2026';
 
-  properties: Property[] = [
-    {
-      id: 'p1',
-      name: 'Kost Griya 21'
-    },
-    {
-      id: 'p2',
-      name: 'Kost Melati'
-    },
-    {
-      id: 'p3',
-      name: 'Kost Mawar'
-    }
+  year = 2026;
+  month = 0;
+
+  availableYears = [2025, 2026];
+  selectedYear = 2026;
+  selectedMonth = 'all';
+
+  years = [2025, 2026, 2027];
+
+  months = [
+    { value: 'all', label: 'Semua Bulan' },
+    { value: '01', label: 'Januari' },
+    { value: '02', label: 'Februari' },
+    { value: '03', label: 'Maret' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'Mei' },
+    { value: '06', label: 'Juni' },
+    { value: '07', label: 'Juli' },
+    { value: '08', label: 'Agustus' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'Oktober' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'Desember' }
   ];
 
-  propertyAnalysis: PropertyAnalysis[] = [
-    {
-      id: 'p1',
-      name: 'Kost Griya 21',
-      income: 20000000,
-      expense: 8000000,
-      profit: 12000000,
-      investment: 160000000,
-      occupancy: 85,
-      profitMargin: 60,
-      oer: 40,
-      roi: 7.5
-    },
-    {
-      id: 'p2',
-      name: 'Kost Melati',
-      income: 32400000,
-      expense: 14580000,
-      profit: 17820000,
-      investment: 245000000,
-      occupancy: 90,
-      profitMargin: 55,
-      oer: 45,
-      roi: 6.8
-    },
-    {
-      id: 'p3',
-      name: 'Kost Mawar',
-      income: 18700000,
-      expense: 8415000,
-      profit: 10285000,
-      investment: 180000000,
-      occupancy: 80,
-      profitMargin: 55,
-      oer: 45,
-      roi: 5.7
-    }
-  ];
+  properties: Property[] = [];
 
-  /*
-   * Data sementara untuk tampilan chart.
-   * Nanti saat backend sudah terhubung,
-   * data ini diganti hasil query database.
-   */
-  monthlyFinancials = [
-    {
-      month: 'Jan',
-      income: 68000000,
-      expense: 27000000,
-      profit: 41000000
-    },
-    {
-      month: 'Feb',
-      income: 70000000,
-      expense: 28500000,
-      profit: 41500000
-    },
-    {
-      month: 'Mar',
-      income: 71500000,
-      expense: 29000000,
-      profit: 42500000
-    },
-    {
-      month: 'Apr',
-      income: 70500000,
-      expense: 28000000,
-      profit: 42500000
-    },
-    {
-      month: 'Mei',
-      income: 73000000,
-      expense: 30000000,
-      profit: 43000000
-    },
-    {
-      month: 'Jun',
-      income: 74500000,
-      expense: 31000000,
-      profit: 43500000
-    },
-    {
-      month: 'Jul',
-      income: 76000000,
-      expense: 31500000,
-      profit: 44500000
-    },
-    {
-      month: 'Agu',
-      income: 75500000,
-      expense: 30500000,
-      profit: 45000000
-    },
-    {
-      month: 'Sep',
-      income: 76500000,
-      expense: 32000000,
-      profit: 44500000
-    }
-  ];
+  propertyAnalysis: PropertyAnalysis[] = [];
 
-  expenseBreakdown = [
-    {
-      name: 'Operasional',
-      value: 12500000,
-      color: '#0D9488'
-    },
-    {
-      name: 'Pemeliharaan',
-      value: 8500000,
-      color: '#3B82F6'
-    },
-    {
-      name: 'Utilitas',
-      value: 6500000,
-      color: '#F59E0B'
-    },
-    {
-      name: 'Lainnya',
-      value: 3500000,
-      color: '#8B5CF6'
-    }
-  ];
+  monthlyFinancials: {
+    month: string;
+    income: number;
+    expense: number;
+    profit: number;
+  }[] = [];
 
-  occupancyTrend = [
-    {
-      month: 'Jan',
-      griya: 78,
-      melati: 85,
-      mawar: 72
-    },
-    {
-      month: 'Feb',
-      griya: 80,
-      melati: 87,
-      mawar: 74
-    },
-    {
-      month: 'Mar',
-      griya: 82,
-      melati: 88,
-      mawar: 76
-    },
-    {
-      month: 'Apr',
-      griya: 81,
-      melati: 89,
-      mawar: 75
-    },
-    {
-      month: 'Mei',
-      griya: 84,
-      melati: 90,
-      mawar: 78
-    },
-    {
-      month: 'Jun',
-      griya: 85,
-      melati: 91,
-      mawar: 79
-    },
-    {
-      month: 'Jul',
-      griya: 86,
-      melati: 92,
-      mawar: 80
-    },
-    {
-      month: 'Agu',
-      griya: 85,
-      melati: 91,
-      mawar: 81
-    },
-    {
-      month: 'Sep',
-      griya: 85,
-      melati: 90,
-      mawar: 80
-    }
-  ];
+  incomeBreakdown: { name: string; value: number; color: string }[] = [];
 
-  investments: Investment[] = [
-    {
-      id: 'inv1',
-      propertyId: 'p1',
-      date: '2022-03-15',
-      category: 'Konstruksi',
-      description: 'Pembangunan properti',
-      amount: 120000000
-    },
-    {
-      id: 'inv2',
-      propertyId: 'p1',
-      date: '2022-08-20',
-      category: 'Furnitur',
-      description: 'Pengadaan furnitur',
-      amount: 24000000
-    },
-    {
-      id: 'inv3',
-      propertyId: 'p1',
-      date: '2023-01-10',
-      category: 'Pemasangan AC',
-      description: 'Instalasi AC',
-      amount: 16000000
-    },
-    {
-      id: 'inv4',
-      propertyId: 'p2',
-      date: '2021-06-01',
-      category: 'Konstruksi',
-      description: 'Pembangunan properti',
-      amount: 200000000
-    },
-    {
-      id: 'inv5',
-      propertyId: 'p2',
-      date: '2021-10-15',
-      category: 'Furnitur',
-      description: 'Pengadaan furnitur',
-      amount: 45000000
-    },
-    {
-      id: 'inv6',
-      propertyId: 'p3',
-      date: '2023-05-01',
-      category: 'Konstruksi',
-      description: 'Pembangunan properti',
-      amount: 180000000
-    }
-  ];
+  expenseBreakdown: { name: string; value: number; color: string }[] = [];
+
+  investments: Investment[] = [];
 
   financialChartInstance?: Chart;
   profitChartInstance?: Chart;
   expenseChartInstance?: Chart;
-  occupancyChartInstance?: Chart;
+  incomeChartInstance?: Chart;
   comparisonChartInstance?: Chart;
+  incomeTrendChartInstance?: Chart;
+  expenseTrendChartInstance?: Chart;
+  marginChartInstance?: Chart;
+  oerChartInstance?: Chart;
+  roiChartInstance?: Chart;
+
+
+  ngOnInit(): void {
+    this.loadProperties();
+    this.loadInvestments();
+  }
+
+  private loadProperties(): void {
+    this.api.getKos().subscribe({
+      next: (data: any[]) => {
+        this.properties = data.map(kos => ({
+          id: String(kos.id_kos),
+          name: kos.nama_kos
+        }));
+
+        this.loadFinancialAnalysis();
+      },
+      error: error => {
+        console.error('Gagal mengambil daftar kos:', error);
+        this.loadError = 'Gagal mengambil daftar properti.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadInvestments(): void {
+    this.api.getInvestasi().subscribe({
+      next: (data: any[]) => {
+        this.investments = data.map(item => ({
+          id: String(item.id_investasi),
+          propertyId: String(item.tKos_id_kos),
+          date: String(item.tgl_masuk).substring(0, 10),
+          category: item.kategori,
+          description: item.deskripsi,
+          amount: Number(item.jumlah)
+        }));
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Gagal mengambil data investasi:', error);
+      }
+    });
+  }
+
+  private getPeriodDates(): { start: string; end: string } {
+    const year = this.year;
+
+    if (this.month === 0) {
+      return {
+        start: `${year}-01-01`,
+        end: `${year}-12-31`
+      };
+    }
+
+    const lastDay = new Date(year, this.month, 0).getDate();
+    const month = String(this.month).padStart(2, '0');
+
+    return {
+      start: `${year}-${month}-01`,
+      end: `${year}-${month}-${lastDay}`
+    };
+  }
+
+  private loadFinancialAnalysis(): void {
+    if (!this.properties.length) {
+      this.propertyAnalysis = [];
+      this.updateChartData();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.loading = true;
+    this.loadError = '';
+    const dates = this.getPeriodDates();
+
+    const selectedProperties = this.propertyFilter === 'all'
+      ? this.properties
+      : this.properties.filter(property => property.id === this.propertyFilter);
+
+    if (!selectedProperties.length) {
+      this.loading = false;
+      this.propertyAnalysis = [];
+      this.updateChartData();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    forkJoin(
+      selectedProperties.map(property =>
+        this.api.getAnalisisKeuangan(
+          Number(property.id),
+          dates.start,
+          dates.end
+        )
+      )
+    ).subscribe({
+      next: (results: any[]) => {
+        this.propertyAnalysis = results.map((result, index) => {
+          const property = selectedProperties[index];
+
+          return {
+            id: property.id,
+            name: property.name,
+            income: Number(result.total_pendapatan || 0),
+            expense: Number(result.total_pengeluaran || 0),
+            profit: Number(result.laba || 0),
+            investment: Number(result.total_investasi || 0),
+            profitMargin: Number(result.profit_margin || 0),
+            oer: Number(result.oer || 0),
+            roi: Number(result.roi || 0)
+          };
+        });
+
+        // Gabungkan rincian semua kos yang sedang dipilih agar grafik
+        // "Semua Kos" tidak hanya menampilkan data kos pertama.
+        const monthlyMap = new Map<number, any>();
+        results.forEach(result => {
+          (result.grafik_bulanan ?? []).forEach((item: any) => {
+            const monthNumber = Number(item.bulan);
+            const current = monthlyMap.get(monthNumber) ?? {
+              bulan: monthNumber,
+              label: item.label,
+              pendapatan: 0,
+              pengeluaran: 0,
+              laba: 0
+            };
+            current.pendapatan += Number(item.pendapatan || 0);
+            current.pengeluaran += Number(item.pengeluaran || 0);
+            current.laba = current.pendapatan - current.pengeluaran;
+            monthlyMap.set(monthNumber, current);
+          });
+        });
+        this.grafikBulanan = Array.from(monthlyMap.values())
+          .sort((a, b) => a.bulan - b.bulan);
+
+        const combineBreakdown = (key: 'rincian_pendapatan' | 'rincian_pengeluaran') => {
+          const totals = new Map<string, number>();
+          results.forEach(result => {
+            (result[key] ?? []).forEach((item: any) => {
+              const name = String(item.kategori || 'Tanpa catatan');
+              totals.set(name, (totals.get(name) || 0) + Number(item.total || 0));
+            });
+          });
+          return Array.from(totals.entries())
+            .map(([kategori, total]) => ({ kategori, total }))
+            .sort((a, b) => b.total - a.total);
+        };
+
+        this.rincianPendapatan = combineBreakdown('rincian_pendapatan');
+        this.rincianPengeluaran = combineBreakdown('rincian_pengeluaran');
+
+        this.hunian = results[0]?.hunian ?? {
+          total_kamar: 0,
+          kamar_terisi: 0,
+          persentase: 0
+        };
+
+        this.loading = false;
+        this.updateChartData();
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.createCharts();
+        }, 300);
+      },
+      error: error => {
+        console.error('Gagal mengambil analisis keuangan:', error);
+        this.loading = false;
+        this.loadError = error.error?.message || 'Gagal mengambil data analisis keuangan.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private updateChartData(): void {
+    this.monthlyFinancials = this.grafikBulanan.map(item => ({
+      month: item.label,
+      income: Number(item.pendapatan),
+      expense: Number(item.pengeluaran),
+      profit: Number(item.laba)
+    }));
+
+    const colors = [
+      '#0D9488', '#3B82F6', '#8B5CF6', '#F59E0B',
+      '#EF4444', '#64748B', '#14B8A6', '#EC4899'
+    ];
+
+    this.incomeBreakdown = this.rincianPendapatan.map((item, index) => ({
+      name: item.kategori,
+      value: Number(item.total),
+      color: colors[index % colors.length]
+    }));
+
+    this.expenseBreakdown = this.rincianPengeluaran.map((item, index) => ({
+      name: item.kategori,
+      value: Number(item.total),
+      color: colors[(index + 3) % colors.length]
+    }));
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.createCharts();
-    });
+    }, 300);
   }
 
   ngOnDestroy(): void {
@@ -426,11 +427,171 @@ export class FinancialAnalysisPage
     }
 
     return (
-      (this.profit * 12) /
-      this.totalInvestment *
-      100
-    ).toFixed(1);
+      (this.profit / this.totalInvestment) * 100
+    ).toFixed(2);
   }
+
+
+  get averageMonthlyProfit(): number {
+    if (!this.monthlyFinancials.length) return 0;
+    return this.monthlyFinancials.reduce((sum, item) => sum + item.profit, 0)
+      / this.monthlyFinancials.length;
+  }
+
+  get bestProfitMonth(): { month: string; profit: number } | null {
+    if (!this.monthlyFinancials.length) return null;
+    return this.monthlyFinancials.reduce((best, item) =>
+      item.profit > best.profit ? item : best
+    );
+  }
+
+  get positiveProfitMonths(): number {
+    return this.monthlyFinancials.filter(item => item.profit > 0).length;
+  }
+
+  get incomeBreakdownTotal(): number {
+    return this.incomeBreakdown.reduce((sum, item) => sum + item.value, 0);
+  }
+
+  get expenseBreakdownTotal(): number {
+    return this.expenseBreakdown.reduce((sum, item) => sum + item.value, 0);
+  }
+
+  get averageProfitMargin(): number {
+    const values = this.monthlyRatios.map(item => item.profitMargin);
+    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  }
+
+  get averageOer(): number {
+    const values = this.monthlyRatios.map(item => item.oer);
+    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  }
+
+  get averageRoi(): number {
+    const values = this.monthlyRatios.map(item => item.roi);
+    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  }
+
+  get monthlyRatios() {
+    return this.monthlyFinancials.map(item => {
+      const investment = this.totalInvestment;
+
+      return {
+        month: item.month,
+        profitMargin: item.income !== 0
+          ? (item.profit / item.income) * 100
+          : 0,
+        oer: item.income !== 0
+          ? (item.expense / item.income) * 100
+          : 0,
+        roi: investment !== 0
+          ? (item.profit / investment) * 100
+          : 0
+      };
+    });
+  }
+
+
+  private createTrendChart(
+    canvas: ElementRef<HTMLCanvasElement>,
+    label: string,
+    values: number[],
+    color: string,
+    percentage = false
+  ): Chart {
+    return new Chart(canvas.nativeElement, {
+      type: 'line',
+      data: {
+        labels: this.monthlyFinancials.map(item => item.month),
+        datasets: [{
+          label,
+          data: values,
+          borderColor: color,
+          backgroundColor: `${color}20`,
+          borderWidth: 2.5,
+          pointRadius: 3,
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        ...this.baseOptions(),
+        plugins: {
+          ...this.baseOptions().plugins,
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => percentage
+                ? `${label}: ${Number(context.raw).toFixed(2)}%`
+                : `${label}: ${this.formatRupiah(Number(context.raw))}`
+            }
+          }
+        },
+        scales: {
+          ...this.baseOptions().scales,
+          y: {
+            ...this.baseOptions().scales.y,
+            ticks: {
+              ...this.baseOptions().scales.y.ticks,
+              callback: (value: string | number) => percentage
+                ? `${value}%`
+                : `${Number(value) / 1000000}jt`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  private createTrendCharts(): void {
+    const ratios = this.monthlyRatios;
+
+    this.incomeTrendChartInstance = this.createTrendChart(
+      this.incomeTrendChart,
+      'Pendapatan',
+      this.monthlyFinancials.map(item => item.income),
+      '#0D9488'
+    );
+
+    this.expenseTrendChartInstance = this.createTrendChart(
+      this.expenseTrendChart,
+      'Pengeluaran',
+      this.monthlyFinancials.map(item => item.expense),
+      '#F59E0B'
+    );
+
+    this.profitChartInstance = this.createTrendChart(
+      this.profitChart,
+      'Laba Bersih',
+      this.monthlyFinancials.map(item => item.profit),
+      '#3B82F6'
+    );
+
+    this.marginChartInstance = this.createTrendChart(
+      this.marginChart,
+      'Profit Margin',
+      ratios.map(item => item.profitMargin),
+      '#8B5CF6',
+      true
+    );
+
+    this.oerChartInstance = this.createTrendChart(
+      this.oerChart,
+      'OER',
+      ratios.map(item => item.oer),
+      '#F59E0B',
+      true
+    );
+
+    this.roiChartInstance = this.createTrendChart(
+      this.roiChart,
+      'ROI',
+      ratios.map(item => item.roi),
+      '#0D9488',
+      true
+    );
+  }
+
 
   getPropertyInvestments(propertyId: string): Investment[] {
     return this.investments.filter(
@@ -485,11 +646,11 @@ export class FinancialAnalysisPage
   }
 
   changeProperty(): void {
-    this.createCharts();
+    this.loadFinancialAnalysis();
   }
 
   changePeriod(): void {
-    this.createCharts();
+    this.loadFinancialAnalysis();
   }
 
   printAnalysis(): void {
@@ -504,29 +665,39 @@ export class FinancialAnalysisPage
     this.financialChartInstance?.destroy();
     this.profitChartInstance?.destroy();
     this.expenseChartInstance?.destroy();
-    this.occupancyChartInstance?.destroy();
+    this.incomeChartInstance?.destroy();
     this.comparisonChartInstance?.destroy();
+    this.incomeTrendChartInstance?.destroy();
+    this.expenseTrendChartInstance?.destroy();
+    this.marginChartInstance?.destroy();
+    this.oerChartInstance?.destroy();
+    this.roiChartInstance?.destroy();
+
   }
+
 
   private createCharts(): void {
     if (
-      !this.financialChart ||
+      !this.incomeTrendChart ||
+      !this.expenseTrendChart ||
       !this.profitChart ||
-      !this.expenseChart ||
-      !this.occupancyChart ||
-      !this.comparisonChart
+      !this.marginChart ||
+      !this.oerChart ||
+      !this.roiChart ||
+      !this.comparisonChart ||
+      !this.incomeChart ||
+      !this.expenseChart
     ) {
       return;
     }
 
     this.destroyCharts();
-
-    this.createFinancialChart();
-    this.createProfitChart();
+    this.createTrendCharts();
+    this.createIncomeChart();
     this.createExpenseChart();
-    this.createOccupancyChart();
     this.createComparisonChart();
   }
+
 
   private baseOptions(): any {
     return {
@@ -675,6 +846,35 @@ export class FinancialAnalysisPage
     );
   }
 
+  private createIncomeChart(): void {
+    this.incomeChartInstance = new Chart(this.incomeChart.nativeElement, {
+      type: 'doughnut',
+      data: {
+        labels: this.incomeBreakdown.map(item => item.name),
+        datasets: [{
+          data: this.incomeBreakdown.map(item => item.value),
+          backgroundColor: this.incomeBreakdown.map(item => item.color),
+          borderWidth: 2,
+          borderColor: '#FFFFFF'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          ...this.baseOptions().plugins,
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => ` ${this.formatRupiah(Number(context.raw))}`
+            }
+          }
+        }
+      }
+    });
+  }
+
   private createExpenseChart(): void {
     this.expenseChartInstance = new Chart(
       this.expenseChart.nativeElement,
@@ -720,70 +920,6 @@ export class FinancialAnalysisPage
     );
   }
 
-  private createOccupancyChart(): void {
-    this.occupancyChartInstance = new Chart(
-      this.occupancyChart.nativeElement,
-      {
-        type: 'line',
-        data: {
-          labels: this.occupancyTrend.map(
-            item => item.month
-          ),
-          datasets: [
-            {
-              label: 'Kost Griya 21',
-              data: this.occupancyTrend.map(
-                item => item.griya
-              ),
-              borderColor: '#0D9488',
-              backgroundColor: 'rgba(13,148,136,0.08)',
-              borderWidth: 2,
-              fill: true,
-              tension: 0.35
-            },
-            {
-              label: 'Kost Melati',
-              data: this.occupancyTrend.map(
-                item => item.melati
-              ),
-              borderColor: '#3B82F6',
-              backgroundColor: 'rgba(59,130,246,0.08)',
-              borderWidth: 2,
-              fill: true,
-              tension: 0.35
-            },
-            {
-              label: 'Kost Mawar',
-              data: this.occupancyTrend.map(
-                item => item.mawar
-              ),
-              borderColor: '#F59E0B',
-              backgroundColor: 'rgba(245,158,11,0.08)',
-              borderWidth: 2,
-              fill: true,
-              tension: 0.35
-            }
-          ]
-        },
-        options: {
-          ...this.baseOptions(),
-          scales: {
-            ...this.baseOptions().scales,
-            y: {
-              ...this.baseOptions().scales.y,
-              min: 50,
-              max: 100,
-              ticks: {
-                ...this.baseOptions().scales.y.ticks,
-                callback: (value: string | number) =>
-                  `${value}%`
-              }
-            }
-          }
-        }
-      }
-    );
-  }
 
   private createComparisonChart(): void {
     this.comparisonChartInstance = new Chart(
@@ -791,31 +927,23 @@ export class FinancialAnalysisPage
       {
         type: 'bar',
         data: {
-          labels: this.propertyAnalysis.map(
-            item => item.name.replace('Kost ', '')
-          ),
+          labels: this.propertyAnalysis.map(item => item.name),
           datasets: [
             {
-              label: 'Profit Margin',
-              data: this.propertyAnalysis.map(
-                item => item.profitMargin
-              ),
+              label: 'Pendapatan',
+              data: this.propertyAnalysis.map(item => item.income),
               backgroundColor: '#0D9488',
               borderRadius: 4
             },
             {
-              label: 'OER',
-              data: this.propertyAnalysis.map(
-                item => item.oer
-              ),
+              label: 'Pengeluaran',
+              data: this.propertyAnalysis.map(item => item.expense),
               backgroundColor: '#F59E0B',
               borderRadius: 4
             },
             {
-              label: 'ROI',
-              data: this.propertyAnalysis.map(
-                item => item.roi
-              ),
+              label: 'Laba Bersih',
+              data: this.propertyAnalysis.map(item => item.profit),
               backgroundColor: '#3B82F6',
               borderRadius: 4
             }
@@ -827,11 +955,10 @@ export class FinancialAnalysisPage
             ...this.baseOptions().scales,
             y: {
               ...this.baseOptions().scales.y,
-              beginAtZero: true,
               ticks: {
                 ...this.baseOptions().scales.y.ticks,
                 callback: (value: string | number) =>
-                  `${value}%`
+                  `${Number(value) / 1000000}jt`
               }
             }
           }

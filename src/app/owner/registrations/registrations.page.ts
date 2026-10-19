@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonIcon } from '@ionic/angular';
+import { IonIcon, IonModal } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { searchOutline } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
@@ -66,7 +66,8 @@ interface Registration {
   imports: [
     CommonModule,
     FormsModule,
-    IonIcon
+    IonIcon,
+    IonModal
   ]
 })
 export class RegistrationsPage {

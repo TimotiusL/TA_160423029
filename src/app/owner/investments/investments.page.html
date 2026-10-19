@@ -42,26 +42,6 @@
         </p>
 
 
-        <!-- Investment items -->
-        <div class="investment-items">
-
-          <div class="investment-item" *ngFor="
-            let investment
-            of getPropertyInvestments(property.id)
-          ">
-
-            <span>
-              {{ investment.category }}
-            </span>
-
-            <strong>
-              {{ formatRupiah(investment.amount) }}
-            </strong>
-
-          </div>
-
-        </div>
-
       </div>
 
     </div>
@@ -177,13 +157,15 @@
 
 
               <td>
+                <div class="action-buttons">
+                  <button type="button" class="btn-ghost" (click)="editInvestment(investment)">
+                    Edit
+                  </button>
 
-                <button type="button" class="btn-ghost" (click)="
-                  editInvestment(investment)
-                ">
-                  Edit
-                </button>
-
+                  <button type="button" class="btn-ghost delete" (click)="deleteInvestment(investment)">
+                    Hapus
+                  </button>
+                </div>
               </td>
 
             </tr>
@@ -210,9 +192,10 @@
 
 
     <!-- ADD MODAL -->
-    <div class="modal-overlay" *ngIf="showAdd" (click)="closeAddModal()">
+    <ion-modal class="owner-page-modal" *ngIf="showAdd" [isOpen]="true" (didDismiss)="closeAddModal()">
+      <ng-template>
 
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal">
 
         <!-- MODAL HEADER -->
         <div class="modal-header">
@@ -220,7 +203,7 @@
           <div>
 
             <h2>
-              Tambah Data Investasi
+              {{ editingId !== null ? 'Edit Data Investasi' : 'Tambah Data Investasi' }}
             </h2>
 
             <p>
@@ -230,7 +213,7 @@
           </div>
 
 
-          <button type="button" class="close-button" (click)="closeAddModal()">
+          <button type="button" class="close-button" aria-label="Tutup" (click)="closeAddModal()">
             ×
           </button>
 
@@ -262,14 +245,13 @@
 
               </select>
 
-              <span class="select-arrow">
-                ▼
-              </span>
-
-            </div>
+            <span class="select-arrow">
+              ▼
+            </span>
 
           </div>
 
+          </div>
 
           <!-- CATEGORY + DATE -->
           <div class="form-grid">
@@ -360,7 +342,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
-  </div>
+</div>
 </div>

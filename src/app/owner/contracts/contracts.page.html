@@ -196,7 +196,7 @@
             <!-- EMPTY -->
             <tr *ngIf="filteredContracts.length === 0">
 
-              <td colspan="9">
+              <td colspan="10">
 
                 <div class="empty-state">
 
@@ -226,9 +226,10 @@
 
 
   <!-- DETAIL MODAL -->
-  <div class="modal-backdrop" *ngIf="selectedContract" (click)="closeDetail()">
+  <ion-modal class="owner-page-modal owner-page-modal--large" *ngIf="selectedContract" [isOpen]="true" (didDismiss)="closeDetail()">
+    <ng-template>
 
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal">
 
       <!-- MODAL HEADER -->
       <div class="modal-header">
@@ -238,7 +239,7 @@
           <p>Informasi lengkap kontrak sewa</p>
         </div>
 
-        <button type="button" class="close-button" (click)="closeDetail()">
+        <button type="button" class="close-button" aria-label="Tutup" (click)="closeDetail()">
           ×
         </button>
 
@@ -256,9 +257,8 @@
               {{ selectedContract.number }}
             </div>
 
-            <div class="contract-subtitle">
-              Kontrak Sewa Kamar
-            </div>
+          <div class="contract-subtitle">
+            Kontrak Sewa Kamar
           </div>
 
           <span class="status-badge" [class.status-waiting]="selectedContract.status === 'MENUNGGU_PEMBAYARAN'"
@@ -421,7 +421,7 @@
         <div class="modal-actions">
 
           <button type="button" class="outline-button" (click)="downloadContract()">
-            📄 Download Kontrak
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg> Download Kontrak
           </button>
 
           <button *ngIf="selectedContract.status === 'AKTIF'" type="button" class="danger-button"
@@ -436,4 +436,6 @@
     </div>
 
   </div>
+  </ng-template>
+  </ion-modal>
 </div>

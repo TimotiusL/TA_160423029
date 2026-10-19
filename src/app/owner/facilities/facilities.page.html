@@ -118,9 +118,10 @@
 
     @if (showForm) {
 
-    <div class="modal-overlay" (click)="closeForm()">
+    <ion-modal class="owner-page-modal" [isOpen]="showForm" (didDismiss)="closeForm()">
+      <ng-template>
 
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal">
 
         <div class="modal-header">
 
@@ -140,7 +141,7 @@
 
           </div>
 
-          <button class="close-button" (click)="closeForm()">
+          <button class="close-button" aria-label="Tutup" (click)="closeForm()">
             ×
           </button>
 
@@ -187,15 +188,17 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
     }
   </div>
 
   @if (showDeleteModal) {
-  <div class="modal-overlay" (click)="closeDeleteModal()">
+  <ion-modal class="owner-page-modal" [isOpen]="showDeleteModal" (didDismiss)="closeDeleteModal()">
+    <ng-template>
 
-    <div class="modal delete-modal" (click)="$event.stopPropagation()">
+    <div class="modal delete-modal">
 
       <div class="modal-header">
         <div>
@@ -203,7 +206,7 @@
           <p>Konfirmasi penghapusan data</p>
         </div>
 
-        <button class="close-button" (click)="closeDeleteModal()">
+        <button class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
           ×
         </button>
       </div>
@@ -227,6 +230,7 @@
 
     </div>
 
-  </div>
+    </ng-template>
+  </ion-modal>
   }
 </div>

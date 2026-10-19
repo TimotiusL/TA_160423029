@@ -99,11 +99,9 @@
 
         <div class="property-image">
 
-          <img [src]="property.photo" [alt]="property.name" />
+          @if (property.photo) {<img [src]="property.photo" [alt]="property.name" />} @else {<div class="image-placeholder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>}
 
-          <span class="status-badge">
-            {{ property.status }}
-          </span>
+          <span class="status-badge" [class.inactive]="property.status !== 'AKTIF'">{{ property.status | titlecase }}</span>
 
         </div>
 
@@ -117,7 +115,7 @@
           </h3>
 
           <p class="address">
-            📍 {{ property.address }}
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ property.address }}
           </p>
 
 
@@ -290,9 +288,9 @@
 
     @if (showAdd) {
 
-    <div class="modal-overlay" (click)="closeAddModal()">
-
-      <div class="modal" (click)="$event.stopPropagation()">
+    <ion-modal [isOpen]="showAdd" (didDismiss)="closeAddModal()" class="owner-page-modal property-modal">
+      <ng-template>
+        <div class="modal">
 
         <div class="modal-header">
 
@@ -306,7 +304,7 @@
             </p>
           </div>
 
-          <button class="close-button" (click)="closeAddModal()">
+          <button class="close-button" aria-label="Tutup" (click)="closeAddModal()">
             ×
           </button>
 
@@ -422,9 +420,7 @@
 
               <div class="upload-box" (click)="triggerPhotoUpload()">
 
-                <div class="upload-icon">
-                  📷
-                </div>
+                <div class="upload-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg></div>
 
                 <p>
                   Klik untuk upload foto
@@ -435,9 +431,7 @@
                 </span>
 
               </div>
-
             </div>
-
           </div>
 
         </div>
@@ -457,7 +451,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
     }
 
@@ -468,9 +463,10 @@
 
     @if (selectedProperty) {
 
-    <div class="modal-overlay" (click)="closeDetail()">
-
-      <div class="modal detail-modal" (click)="$event.stopPropagation()">
+    <ion-modal [isOpen]="selectedProperty !== null" (didDismiss)="closeDetail()"
+      class="owner-page-modal property-modal">
+      <ng-template>
+        <div class="modal detail-modal">
 
         <div class="modal-header">
 
@@ -480,7 +476,7 @@
             </h2>
           </div>
 
-          <button class="close-button" (click)="closeDetail()">
+          <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
             ×
           </button>
 
@@ -489,7 +485,7 @@
 
         <div class="modal-body">
 
-          <img class="detail-image" [src]="selectedProperty.photo" [alt]="selectedProperty.name" />
+          @if (selectedProperty.photo) {<img class="detail-image" [src]="selectedProperty.photo" [alt]="selectedProperty.name" />} @else {<div class="detail-image placeholder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>}
 
 
           <div class="detail-grid">
@@ -542,9 +538,7 @@
                 {{ selectedProperty.tenantCount }} orang
               </strong>
             </div>
-
           </div>
-
 
           <p class="detail-description">
             {{ selectedProperty.description }}
@@ -567,7 +561,8 @@
 
       </div>
 
-    </div>
+      </ng-template>
+    </ion-modal>
 
     }
 

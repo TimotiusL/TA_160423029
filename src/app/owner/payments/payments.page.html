@@ -142,7 +142,7 @@
     ">
 
       <p class="waiting-title">
-        ⚠️ Pembayaran menunggu verifikasi
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z"/><path d="M12 9v4M12 17h.01"/></svg> Pembayaran menunggu verifikasi
       </p>
 
 
@@ -156,7 +156,7 @@
 
             {{
             (
-            getTenant(payment)?.name ||
+            getTenant(payment).name ||
             'P'
             ).charAt(0)
             }}
@@ -167,7 +167,7 @@
           <div class="waiting-info">
 
             <p>
-              {{ getTenant(payment)?.name }}
+              {{ getTenant(payment).name }}
             </p>
 
             <span>
@@ -272,12 +272,12 @@
 
             <tr *ngFor="
               let payment of filteredPayments
-            " (click)="openDetail(payment)">
+            " (click)="openProof(payment)">
 
               <td>
 
                 <span class="tenant-name">
-                  {{ getTenant(payment)?.name }}
+                  {{ getTenant(payment).name }}
                 </span>
 
               </td>
@@ -286,7 +286,7 @@
               <td>
 
                 <span class="property-name">
-                  {{ getProperty(payment)?.name }}
+                  {{ getProperty(payment).name }}
                 </span>
 
               </td>
@@ -295,7 +295,7 @@
               <td>
 
                 <span class="bill-number">
-                  {{ getBill(payment)?.number }}
+                  {{ getBill(payment).number }}
                 </span>
 
               </td>
@@ -352,7 +352,7 @@
                   'status-rejected':
                     payment.status === 'DITOLAK'
                 }">
-                  {{ payment.status }}
+                  {{ payment.status | titlecase }}
                 </span>
 
               </td>
@@ -421,12 +421,13 @@
      BUKTI PEMBAYARAN MODAL
 ================================================== -->
 
-  <div class="modal-backdrop" *ngIf="
+  <ion-modal class="owner-page-modal" *ngIf="
     selectedPayment &&
     showProof
-  " (click)="closeProof()">
+  " [isOpen]="true" (didDismiss)="closeProof()">
+    <ng-template>
 
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal">
 
       <!-- HEADER -->
 
@@ -445,7 +446,7 @@
         </div>
 
 
-        <button type="button" class="close-button" (click)="closeProof()">
+        <button type="button" class="close-button" aria-label="Tutup" (click)="closeProof()">
           ×
         </button>
 
@@ -467,7 +468,7 @@
             </span>
 
             <strong>
-              {{ getTenant(selectedPayment)?.name }}
+              {{ getTenant(selectedPayment).name }}
             </strong>
 
           </div>
@@ -532,7 +533,7 @@
               'status-rejected':
                 selectedPayment.status === 'DITOLAK'
             }">
-              {{ selectedPayment.status }}
+              {{ selectedPayment.status | titlecase }}
             </span>
 
           </div>
@@ -544,7 +545,7 @@
 
         <div class="proof-image-wrapper">
 
-          <img [src]="selectedPayment.proofUrl" alt="Bukti Pembayaran" />
+          <img [src]="selectedPayment.proofUrl" alt="Bukti Pembayaran" (error)="$any($event.target).style.display = 'none'" />
 
         </div>
 
@@ -561,7 +562,7 @@
 
 
           <button type="button" class="modal-verify" (click)="verify(selectedPayment)">
-            ✅ Verifikasi
+            Verifikasi
           </button>
 
         </div>
@@ -570,5 +571,6 @@
 
     </div>
 
-  </div>
+    </ng-template>
+  </ion-modal>
 </div>

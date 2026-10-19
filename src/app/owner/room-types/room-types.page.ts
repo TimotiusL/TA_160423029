@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IonModal } from '@ionic/angular';
 import { ApiService } from '../../services/api';
 
 interface RoomType {
@@ -25,7 +26,8 @@ interface Kos {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    IonModal
   ]
 })
 export class RoomTypesPage implements OnInit {

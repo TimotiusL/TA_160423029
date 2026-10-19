@@ -42,8 +42,8 @@
             {{ user.email }}
           </p>
 
-          <span class="role-badge">
-            👑 Pemilik Kos
+          <span class="role-badge" *ngIf="user.role">
+            {{ user.role }}
           </span>
 
         </div>
@@ -83,17 +83,6 @@
           </label>
 
           <input type="text" [(ngModel)]="user.phone" />
-
-        </div>
-
-
-        <div class="form-field">
-
-          <label>
-            Kota
-          </label>
-
-          <input type="text" [(ngModel)]="user.city" />
 
         </div>
 

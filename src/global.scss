@@ -35,3 +35,22 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+ion-modal.owner-page-modal {
+  --width: min(700px, calc(100vw - 40px));
+  --height: auto;
+  --max-height: calc(100dvh - 40px);
+  --border-radius: 14px;
+  --background: transparent;
+  --box-shadow: none;
+  --ion-backdrop-color: #0f172a;
+  --backdrop-opacity: 0.45;
+}
+
+ion-modal.owner-page-modal--large {
+  --width: min(760px, calc(100vw - 40px));
+}
+
+ion-modal.owner-page-modal--small {
+  --width: min(400px, calc(100vw - 40px));
+}

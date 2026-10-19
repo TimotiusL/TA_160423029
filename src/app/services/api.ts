@@ -23,17 +23,6 @@ export class ApiService {
     );
   }
 
-  me(): Observable<any> {
-    const token = localStorage.getItem('token');
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
-    });
-
-    return this.http.get(`${this.baseUrl}/me`, { headers });
-  }
-
   logout(): Observable<any> {
     const token = localStorage.getItem('token');
 
@@ -527,6 +516,152 @@ export class ApiService {
       `${this.baseUrl}/pengeluaran/${id}`,
       { headers }
     );
+  }
+
+  getInvestasi(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}/investasi`,
+      { headers }
+    );
+  }
+
+  createInvestasi(data: any): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.post<any>(
+      `${this.baseUrl}/investasi`,
+      data,
+      { headers }
+    );
+  }
+
+  updateInvestasi(id: number, data: any): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.put<any>(
+      `${this.baseUrl}/investasi/${id}`,
+      data,
+      { headers }
+    );
+  }
+
+  deleteInvestasi(id: number): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.delete<any>(
+      `${this.baseUrl}/investasi/${id}`,
+      { headers }
+    );
+  }
+
+
+  getAnalisisKeuangan(
+    kosId: number,
+    tanggalMulai: string,
+    tanggalSelesai: string
+  ): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    const params = {
+      tKos_id_kos: kosId,
+      tanggal_mulai: tanggalMulai,
+      tanggal_selesai: tanggalSelesai
+    };
+
+    return this.http.get<any>(
+      `${this.baseUrl}/analisis-keuangan`,
+      { headers, params }
+    );
+  }
+
+
+  getKomplain(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}/komplain`,
+      { headers }
+    );
+  }
+
+  kirimTanggapan(id: number, tanggapan: string): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.post<any>(
+      `${this.baseUrl}/komplain/${id}/tanggapan`,
+      { tanggapan },
+      { headers }
+    );
+  }
+
+  updateStatusKomplain(
+    id: number,
+    status: 'menunggu' | 'terjawab'
+  ): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.put<any>(
+      `${this.baseUrl}/komplain/${id}/status`,
+      { status },
+      { headers }
+    );
+  }
+
+
+  me() {
+    const token = localStorage.getItem('token');
+
+    return this.http.get(`${this.baseUrl}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  updateProfile(data: any) {
+    const token = localStorage.getItem('token');
+
+    return this.http.put(`${this.baseUrl}/profile`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  changePassword(data: any) {
+    const token = localStorage.getItem('token');
+
+    return this.http.put(`${this.baseUrl}/change-password`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
   }
 
 }

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { IonModal } from '@ionic/angular';
+import { ApiService } from '../../services/api';
 
 interface Property {
   id: string;
@@ -8,7 +10,7 @@ interface Property {
 }
 
 interface Investment {
-  id: string;
+  id: number;
   propertyId: string;
   date: string;
   category: string;
@@ -19,14 +21,21 @@ interface Investment {
 @Component({
   selector: 'app-investments',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IonModal],
   templateUrl: './investments.page.html',
   styleUrls: ['./investments.page.scss']
 })
-export class InvestmentsPage {
+export class InvestmentsPage implements OnInit {
+
+  constructor(
+    private api: ApiService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   propFilter = '';
   showAdd = false;
+  editingId: number | null = null;
+  loading = false;
 
   form = {
     propertyId: '',
@@ -36,20 +45,7 @@ export class InvestmentsPage {
     description: ''
   };
 
-  properties: Property[] = [
-    {
-      id: 'p1',
-      name: 'Kost Griya 21'
-    },
-    {
-      id: 'p2',
-      name: 'Kost Melati Residence'
-    },
-    {
-      id: 'p3',
-      name: 'Kost Mawar Residence'
-    }
-  ];
+  properties: Property[] = [];
 
   categories = [
     'Konstruksi',
@@ -61,62 +57,55 @@ export class InvestmentsPage {
     'Lainnya'
   ];
 
-  investments: Investment[] = [
-    {
-      id: 'inv1',
-      propertyId: 'p1',
-      date: '2022-03-15',
-      category: 'Konstruksi',
-      amount: 120000000,
-      description:
-        'Biaya pembangunan gedung Kost Griya 21'
-    },
-    {
-      id: 'inv2',
-      propertyId: 'p1',
-      date: '2022-08-20',
-      category: 'Furnitur',
-      amount: 24000000,
-      description:
-        'Pengadaan furnitur kamar (kasur, lemari, meja)'
-    },
-    {
-      id: 'inv3',
-      propertyId: 'p1',
-      date: '2023-01-10',
-      category: 'Pemasangan AC',
-      amount: 16000000,
-      description:
-        'Pemasangan AC untuk 8 kamar Deluxe dan Premium'
-    },
-    {
-      id: 'inv4',
-      propertyId: 'p2',
-      date: '2021-06-01',
-      category: 'Konstruksi',
-      amount: 200000000,
-      description:
-        'Pembangunan gedung Kost Melati Residence'
-    },
-    {
-      id: 'inv5',
-      propertyId: 'p2',
-      date: '2021-10-15',
-      category: 'Furnitur',
-      amount: 45000000,
-      description:
-        'Pengadaan furnitur lengkap'
-    },
-    {
-      id: 'inv6',
-      propertyId: 'p3',
-      date: '2023-05-01',
-      category: 'Konstruksi',
-      amount: 180000000,
-      description:
-        'Pembangunan Kost Mawar Residence'
-    }
-  ];
+  investments: Investment[] = [];
+
+  ngOnInit(): void {
+    this.loadProperties();
+    this.loadInvestments();
+  }
+
+  loadProperties(): void {
+    this.api.getKos().subscribe({
+      next: (data: any[]) => {
+        this.properties = data.map(kos => ({
+          id: String(kos.id_kos),
+          name: kos.nama_kos
+        }));
+
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Gagal mengambil data kos:', error);
+        alert('Gagal mengambil daftar properti.');
+      }
+    });
+  }
+
+  loadInvestments(): void {
+    this.loading = true;
+
+    this.api.getInvestasi().subscribe({
+      next: (data: any[]) => {
+        this.investments = data.map(item => ({
+          id: Number(item.id_investasi),
+          propertyId: String(item.tKos_id_kos),
+          date: String(item.tgl_masuk).substring(0, 10),
+          category: item.kategori,
+          amount: Number(item.jumlah),
+          description: item.deskripsi
+        }));
+
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Gagal mengambil data investasi:', error);
+        this.loading = false;
+        alert('Gagal mengambil data investasi.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   get filteredInvestments(): Investment[] {
     if (!this.propFilter) {
@@ -124,43 +113,31 @@ export class InvestmentsPage {
     }
 
     return this.investments.filter(
-      investment =>
-        investment.propertyId === this.propFilter
+      investment => investment.propertyId === this.propFilter
     );
   }
 
   get totalInvestment(): number {
     return this.filteredInvestments.reduce(
-      (sum, investment) =>
-        sum + investment.amount,
+      (sum, investment) => sum + investment.amount,
       0
     );
   }
 
-  getPropertyInvestments(
-    propertyId: string
-  ): Investment[] {
+  getPropertyInvestments(propertyId: string): Investment[] {
     return this.investments.filter(
-      investment =>
-        investment.propertyId === propertyId
+      investment => investment.propertyId === propertyId
     );
   }
 
-  getPropertyTotal(
-    propertyId: string
-  ): number {
-    return this.getPropertyInvestments(
-      propertyId
-    ).reduce(
-      (sum, investment) =>
-        sum + investment.amount,
+  getPropertyTotal(propertyId: string): number {
+    return this.getPropertyInvestments(propertyId).reduce(
+      (sum, investment) => sum + investment.amount,
       0
     );
   }
 
-  getPropertyName(
-    propertyId: string
-  ): string {
+  getPropertyName(propertyId: string): string {
     const property = this.properties.find(
       item => item.id === propertyId
     );
@@ -168,10 +145,7 @@ export class InvestmentsPage {
     return property?.name || '-';
   }
 
-  getCategoryClass(
-    category: string
-  ): string {
-
+  getCategoryClass(category: string): string {
     const classes: Record<string, string> = {
       Konstruksi: 'category-slate',
       Renovasi: 'category-orange',
@@ -185,9 +159,7 @@ export class InvestmentsPage {
     return classes[category] || 'category-slate';
   }
 
-  formatRupiah(
-    value: number
-  ): string {
+  formatRupiah(value: number): string {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
@@ -195,17 +167,17 @@ export class InvestmentsPage {
     }).format(value);
   }
 
-  formatDate(
-    date: string
-  ): string {
+  formatDate(date: string): string {
     return new Intl.DateTimeFormat('id-ID', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
-    }).format(new Date(date));
+    }).format(new Date(date + 'T00:00:00'));
   }
 
   openAddModal(): void {
+    this.editingId = null;
+
     this.form = {
       propertyId: '',
       category: '',
@@ -219,46 +191,93 @@ export class InvestmentsPage {
 
   closeAddModal(): void {
     this.showAdd = false;
+    this.editingId = null;
+  }
+
+  editInvestment(investment: Investment): void {
+    this.editingId = investment.id;
+
+    this.form = {
+      propertyId: investment.propertyId,
+      category: investment.category,
+      date: investment.date,
+      amount: String(investment.amount),
+      description: investment.description
+    };
+
+    this.showAdd = true;
   }
 
   saveInvestment(): void {
-
     if (
       !this.form.propertyId ||
       !this.form.category ||
       !this.form.date ||
-      !this.form.amount
+      !this.form.amount ||
+      Number(this.form.amount) <= 0
     ) {
+      alert('Lengkapi data investasi terlebih dahulu.');
       return;
     }
 
-    const newInvestment: Investment = {
-      id: `inv${this.investments.length + 1}`,
-      propertyId: this.form.propertyId,
-      date: this.form.date,
-      category: this.form.category,
-      amount: Number(this.form.amount),
-      description:
-        this.form.description || '-'
+    if (!this.form.description.trim()) {
+      alert('Deskripsi investasi wajib diisi.');
+      return;
+    }
+
+    const data = {
+      tKos_id_kos: Number(this.form.propertyId),
+      tgl_masuk: this.form.date,
+      kategori: this.form.category,
+      deskripsi: this.form.description.trim(),
+      jumlah: Number(this.form.amount)
     };
 
-    this.investments = [
-      ...this.investments,
-      newInvestment
-    ];
+    const request = this.editingId !== null
+      ? this.api.updateInvestasi(this.editingId, data)
+      : this.api.createInvestasi(data);
 
-    this.showAdd = false;
+    request.subscribe({
+      next: () => {
+        alert(
+          this.editingId !== null
+            ? 'Investasi berhasil diperbarui.'
+            : 'Investasi berhasil ditambahkan.'
+        );
 
-    alert(
-      'Data investasi berhasil ditambahkan!'
-    );
+        this.closeAddModal();
+        this.loadInvestments();
+      },
+      error: error => {
+        console.error('Gagal menyimpan investasi:', error);
+        alert(
+          error.error?.message ||
+          'Gagal menyimpan investasi. Periksa kembali data dan API.'
+        );
+      }
+    });
   }
 
-  editInvestment(
-    investment: Investment
-  ): void {
-    alert(
-      `Edit investasi "${investment.description}"`
+  deleteInvestment(investment: Investment): void {
+    const confirmed = confirm(
+      `Hapus investasi "${investment.description}"?`
     );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.api.deleteInvestasi(investment.id).subscribe({
+      next: () => {
+        alert('Investasi berhasil dihapus.');
+        this.loadInvestments();
+      },
+      error: error => {
+        console.error('Gagal menghapus investasi:', error);
+        alert(
+          error.error?.message || 'Gagal menghapus investasi.'
+        );
+      }
+    });
   }
 }

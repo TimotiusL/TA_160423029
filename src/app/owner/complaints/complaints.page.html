@@ -1,512 +1,60 @@
 <div class="ion-page">
   <div class="complaints-page">
-
-    <!-- TOAST -->
     <div class="toast" *ngIf="showToast" [class.success]="toastType === 'success'" [class.info]="toastType === 'info'">
-      <span>
-        {{ toastType === 'success' ? '✓' : 'ℹ' }}
-      </span>
-
-      {{ toastMessage }}
+      <span>{{ toastType === 'success' ? '✓' : 'ℹ' }}</span> {{ toastMessage }}
     </div>
-
-
-    <!-- HEADER -->
-    <div class="page-header">
-
-      <div>
-        <h1>Manajemen Komplain</h1>
-
-        <p>
-          Kelola pengaduan dan respons penghuni
-        </p>
-      </div>
-
-    </div>
-
-
-    <!-- SUMMARY -->
+    <div class="page-header"><div><h1>Manajemen Komplain</h1><p>Kelola pengaduan dan respons penghuni</p></div></div>
     <div class="summary-grid">
-
-      <div class="summary-card">
-        <p class="summary-value total">
-          {{ totalCount }}
-        </p>
-
-        <p class="summary-label">
-          Total
-        </p>
-      </div>
-
-
-      <div class="summary-card">
-        <p class="summary-value baru">
-          {{ newCount }}
-        </p>
-
-        <p class="summary-label">
-          Baru
-        </p>
-      </div>
-
-
-      <div class="summary-card">
-        <p class="summary-value diproses">
-          {{ processedCount }}
-        </p>
-
-        <p class="summary-label">
-          Diproses
-        </p>
-      </div>
-
-
-      <div class="summary-card">
-        <p class="summary-value selesai">
-          {{ completedCount }}
-        </p>
-
-        <p class="summary-label">
-          Selesai
-        </p>
-      </div>
-
+      <div class="summary-card"><p class="summary-value total">{{ totalCount }}</p><p class="summary-label">Total Komplain</p></div>
+      <div class="summary-card"><p class="summary-value baru">{{ waitingCount }}</p><p class="summary-label">Menunggu</p></div>
+      <div class="summary-card"><p class="summary-value selesai">{{ answeredCount }}</p><p class="summary-label">Terjawab</p></div>
     </div>
-
-
-    <!-- TABS -->
     <div class="tabs">
-
-      <button type="button" [class.active]="tab === 'all'" (click)="tab = 'all'">
-        Semua
-
-        <span>
-          {{ totalCount }}
-        </span>
-      </button>
-
-
-      <button type="button" [class.active]="tab === 'BARU'" (click)="tab = 'BARU'">
-        Baru
-
-        <span>
-          {{ newCount }}
-        </span>
-      </button>
-
-
-      <button type="button" [class.active]="tab === 'DIPROSES'" (click)="tab = 'DIPROSES'">
-        Diproses
-
-        <span>
-          {{ processedCount }}
-        </span>
-      </button>
-
-
-      <button type="button" [class.active]="tab === 'SELESAI'" (click)="tab = 'SELESAI'">
-        Selesai
-
-        <span>
-          {{ completedCount }}
-        </span>
-      </button>
-
+      <button type="button" [class.active]="tab === 'all'" (click)="tab = 'all'">Semua <span>{{ totalCount }}</span></button>
+      <button type="button" [class.active]="tab === 'menunggu'" (click)="tab = 'menunggu'">Menunggu <span>{{ waitingCount }}</span></button>
+      <button type="button" [class.active]="tab === 'terjawab'" (click)="tab = 'terjawab'">Terjawab <span>{{ answeredCount }}</span></button>
     </div>
-
-
-    <!-- SEARCH -->
-    <div class="search-wrapper">
-
-      <span class="search-icon">
-        <ion-icon name="search-outline"></ion-icon>
-      </span>
-
-      <input type="text" [(ngModel)]="search" placeholder="Cari judul atau nama penghuni..." />
-
-    </div>
-
-
-    <!-- COMPLAINT LIST -->
-    <div class="complaint-list">
-
+    <div class="search-wrapper"><span class="search-icon"><ion-icon name="search-outline"></ion-icon></span><input type="text" [(ngModel)]="search" placeholder="Cari judul, penghuni, kos, atau kamar..." /></div>
+    <div class="loading-state" *ngIf="loading">Memuat data komplain...</div>
+    <div class="complaint-list" *ngIf="!loading">
       <div class="complaint-card" *ngFor="let complaint of filteredComplaints" (click)="selectComplaint(complaint)">
-
-        <!-- AVATAR -->
-        <div class="complaint-avatar">
-
-          {{
-          getInitial(
-          getTenantName(complaint.tenantId)
-          )
-          }}
-
-        </div>
-
-
-        <!-- CONTENT -->
+        <div class="complaint-avatar">{{ getInitial(complaint.tenantName) }}</div>
         <div class="complaint-content">
-
-          <div class="complaint-top">
-
-            <div class="complaint-main">
-
-              <h4>
-                {{ complaint.title }}
-              </h4>
-
-              <p class="complaint-meta">
-                {{ getTenantName(complaint.tenantId) }}
-
-                · Kamar
-                {{ getRoomNumber(complaint.roomId) }}
-
-                ·
-                {{ getPropertyName(complaint.propertyId) }}
-              </p>
-
-            </div>
-
-
-            <div class="complaint-badges">
-
-              <span class="priority-badge" [ngClass]="{
-                'priority-low':
-                  complaint.priority === 'RENDAH',
-
-                'priority-medium':
-                  complaint.priority === 'SEDANG',
-
-                'priority-high':
-                  complaint.priority === 'TINGGI'
-              }">
-                {{ complaint.priority }}
-              </span>
-
-
-              <span class="status-badge" [ngClass]="{
-                'status-new':
-                  complaint.status === 'BARU',
-
-                'status-processing':
-                  complaint.status === 'DIPROSES',
-
-                'status-completed':
-                  complaint.status === 'SELESAI'
-              }">
-                {{ complaint.status }}
-              </span>
-
-            </div>
-
+          <div class="complaint-top"><div class="complaint-main"><h4>{{ complaint.title }}</h4><p class="complaint-meta">{{ complaint.tenantName }} · {{ complaint.propertyName }} · Kamar {{ complaint.roomNumber ?? '-' }}</p></div>
+            <div class="complaint-badges"><span class="status-badge" [ngClass]="complaint.status === 'menunggu' ? 'status-new' : 'status-completed'">{{ complaint.status === 'menunggu' ? 'Menunggu' : 'Terjawab' }}</span></div>
           </div>
-
-
-          <p class="complaint-description">
-            {{ complaint.description }}
-          </p>
-
-
-          <div class="complaint-footer">
-
-            <span>
-              📅
-              {{ formatDate(complaint.date) }}
-            </span>
-
-            <span>
-              💬
-              {{ complaint.responses.length }}
-              respons
-            </span>
-
-            <span>
-              🏷️
-              {{ complaint.category }}
-            </span>
-
-          </div>
-
+          <p class="complaint-description">{{ complaint.description }}</p>
+          <div class="complaint-footer"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> {{ formatDate(complaint.date) }}</span><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> {{ complaint.responses.length }} respons</span></div>
         </div>
-
       </div>
-
-
-      <!-- EMPTY -->
-      <div class="empty-state" *ngIf="filteredComplaints.length === 0">
-
-        <div>
-          🎉
-        </div>
-
-        <p>
-          Tidak ada komplain
-        </p>
-
-      </div>
-
+      <div class="empty-state" *ngIf="filteredComplaints.length === 0"><div class="empty-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><p>Tidak ada komplain</p></div>
     </div>
-
   </div>
-
-
-  <!-- MODAL -->
-  <div class="modal-overlay" *ngIf="selected" (click)="closeModal()">
-
-    <div class="modal" (click)="$event.stopPropagation()">
-
-      <!-- MODAL HEADER -->
-      <div class="modal-header">
-
-        <h2>
-          Detail Komplain
-        </h2>
-
-        <button type="button" class="close-button" (click)="closeModal()">
-          ×
-        </button>
-
-      </div>
-
-
+  <ion-modal class="owner-page-modal" *ngIf="selected" [isOpen]="true" (didDismiss)="closeModal()">
+    <ng-template>
+    <div class="modal">
+      <div class="modal-header"><h2>Detail Komplain</h2><button type="button" class="close-button" aria-label="Tutup" (click)="closeModal()">×</button></div>
       <div class="modal-body" *ngIf="selected">
-
-        <!-- TITLE -->
-        <div class="detail-title">
-
-          <h3>
-            {{ selected.title }}
-          </h3>
-
-          <div class="detail-badges">
-
-            <span class="status-badge" [ngClass]="{
-              'status-new':
-                selected.status === 'BARU',
-
-              'status-processing':
-                selected.status === 'DIPROSES',
-
-              'status-completed':
-                selected.status === 'SELESAI'
-            }">
-              {{ selected.status }}
-            </span>
-
-
-            <span class="priority-badge" [ngClass]="{
-              'priority-low':
-                selected.priority === 'RENDAH',
-
-              'priority-medium':
-                selected.priority === 'SEDANG',
-
-              'priority-high':
-                selected.priority === 'TINGGI'
-            }">
-              {{ selected.priority }}
-            </span>
-
-
-            <span class="category-label">
-              🏷️
-              {{ selected.category }}
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- SUBMITTER INFO -->
+        <div class="detail-title"><h3>{{ selected.title }}</h3><div class="detail-badges"><span class="status-badge" [ngClass]="selected.status === 'menunggu' ? 'status-new' : 'status-completed'">{{ selected.status === 'menunggu' ? 'Menunggu' : 'Terjawab' }}</span></div></div>
         <div class="submitter-info">
-
-          <div>
-            <p>Penghuni</p>
-
-            <strong>
-              {{ getTenantName(selected.tenantId) }}
-            </strong>
-          </div>
-
-
-          <div>
-            <p>Kamar</p>
-
-            <strong>
-              Kamar
-              {{ getRoomNumber(selected.roomId) }}
-              ·
-              {{ getPropertyName(selected.propertyId) }}
-            </strong>
-          </div>
-
-
-          <div>
-            <p>Tanggal Lapor</p>
-
-            <strong>
-              {{ formatDate(selected.date) }}
-            </strong>
-          </div>
-
-
-          <div>
-            <p>Kategori</p>
-
-            <strong>
-              {{ selected.category }}
-            </strong>
-          </div>
-
+          <div><p>Nama Penghuni</p><strong>{{ selected.tenantName }}</strong></div>
+          <div><p>Nama Kos</p><strong>{{ selected.propertyName }}</strong></div>
+          <div><p>Nomor Kamar</p><strong>{{ selected.roomNumber ?? '-' }}</strong></div>
+          <div><p>Tanggal Lapor</p><strong>{{ formatDate(selected.date) }}</strong></div>
         </div>
-
-
-        <!-- DESCRIPTION -->
-        <div class="description-box">
-
-          <p>
-            Deskripsi Komplain
-          </p>
-
-          <span>
-            {{ selected.description }}
-          </span>
-
+        <div class="description-box"><p>Deskripsi Komplain</p><span>{{ selected.description }}</span></div>
+        <div class="timeline-section"><p class="timeline-title">Riwayat Respons</p>
+          <div class="message-row"><div class="message-avatar tenant-avatar">{{ getInitial(selected.tenantName) }}</div><div class="message-content"><div class="message-bubble tenant-bubble"><div class="message-header"><strong>{{ selected.tenantName }}</strong><span>{{ formatDate(selected.date) }}</span></div><p>{{ selected.description }}</p></div></div></div>
+          <div class="message-row" *ngFor="let resp of selected.responses" [class.owner-message]="resp.authorRole === 'admin'">
+            <div class="message-avatar" [class.owner-avatar]="resp.authorRole === 'admin'" [class.tenant-avatar]="resp.authorRole !== 'admin'">{{ getInitial(resp.authorName) }}</div>
+            <div class="message-content"><div class="message-bubble" [class.owner-bubble]="resp.authorRole === 'admin'" [class.tenant-bubble]="resp.authorRole !== 'admin'"><div class="message-header"><strong [class.owner-name]="resp.authorRole === 'admin'">{{ resp.authorName }} <span *ngIf="resp.authorRole === 'admin'">(Admin)</span></strong><span>{{ formatDate(resp.date) }}</span></div><p>{{ resp.content }}</p></div></div>
+            </div>
         </div>
-
-
-        <!-- TIMELINE -->
-        <div class="timeline-section">
-
-          <p class="timeline-title">
-            Riwayat Respons
-          </p>
-
-
-          <!-- ORIGINAL COMPLAINT -->
-          <div class="message-row">
-
-            <div class="message-avatar tenant-avatar">
-
-              {{
-              getInitial(
-              getTenantName(selected.tenantId)
-              )
-              }}
-
-            </div>
-
-
-            <div class="message-content">
-
-              <div class="message-bubble tenant-bubble">
-
-                <div class="message-header">
-
-                  <strong>
-                    {{ getTenantName(selected.tenantId) }}
-                  </strong>
-
-                  <span>
-                    {{ formatDate(selected.date) }}
-                  </span>
-
-                </div>
-
-                <p>
-                  {{ selected.description }}
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- RESPONSES -->
-          <div class="message-row" *ngFor="let resp of selected.responses"
-            [class.owner-message]="resp.authorRole === 'owner'">
-
-            <div class="message-avatar" [class.owner-avatar]="resp.authorRole === 'owner'"
-              [class.tenant-avatar]="resp.authorRole !== 'owner'">
-              {{ getInitial(resp.authorName) }}
-            </div>
-
-
-            <div class="message-content">
-
-              <div class="message-bubble" [class.owner-bubble]="resp.authorRole === 'owner'"
-                [class.tenant-bubble]="resp.authorRole !== 'owner'">
-
-                <div class="message-header">
-
-                  <strong [class.owner-name]="
-                    resp.authorRole === 'owner'
-                  ">
-                    {{ resp.authorName }}
-
-                    <span *ngIf="resp.authorRole === 'owner'">
-                      (Pemilik)
-                    </span>
-                  </strong>
-
-                  <span>
-                    {{ formatDate(resp.date) }}
-                  </span>
-
-                </div>
-
-                <p>
-                  {{ resp.content }}
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
+        <div class="response-section" *ngIf="selected.status === 'menunggu'"><label>Tulis Respons</label><textarea [(ngModel)]="response" rows="3" maxlength="100" placeholder="Tulis respons untuk penghuni..."></textarea>
+          <div class="response-actions"><button type="button" class="btn-outline" (click)="markAnswered()" [disabled]="savingStatus">{{ savingStatus ? 'Memperbarui...' : 'Tandai Terjawab' }}</button><div class="action-spacer"></div><button type="button" class="btn-primary" [disabled]="!response.trim() || savingResponse" (click)="sendResponse()">{{ savingResponse ? 'Mengirim...' : 'Kirim Respons' }}</button></div>
         </div>
-
-
-        <!-- RESPONSE FORM -->
-        <div class="response-section" *ngIf="selected.status !== 'SELESAI'">
-
-          <label>
-            Tulis Respons
-          </label>
-
-          <textarea [(ngModel)]="response" rows="3" placeholder="Tulis respons untuk penghuni..."></textarea>
-
-
-          <div class="response-actions">
-
-            <button type="button" class="btn-outline" (click)="markCompleted()">
-              ✅ Tandai Selesai
-            </button>
-
-
-            <button type="button" class="btn-secondary" *ngIf="selected.status === 'BARU'" (click)="markProcessed()">
-              ⚙️ Tandai Diproses
-            </button>
-
-
-            <div class="action-spacer"></div>
-
-
-            <button type="button" class="btn-primary" [disabled]="!response.trim()" (click)="sendResponse()">
-              Kirim Respons
-            </button>
-
-          </div>
-
-        </div>
-
       </div>
-
     </div>
-
-  </div>
+      </ng-template>
+    </ion-modal>
 </div>

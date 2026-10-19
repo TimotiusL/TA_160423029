@@ -11,7 +11,7 @@
       </div>
 
       <button type="button" class="btn-outline" (click)="exportReport()">
-        <span>📊</span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg>
         Export Laporan
       </button>
     </div>
@@ -20,11 +20,10 @@
     <!-- FILTER -->
     <div class="filter-bar">
 
+      <!-- Pilih Kos -->
       <div class="select-wrapper">
         <select [(ngModel)]="propertyFilter" (change)="changeProperty()">
-          <option value="all">
-            Semua Properti
-          </option>
+          <option value="all">Semua Kos</option>
 
           <option *ngFor="let property of properties" [value]="property.id">
             {{ property.name }}
@@ -33,27 +32,44 @@
         <span>▼</span>
       </div>
 
+      <!-- Filter Tahun -->
       <div class="select-wrapper">
-        <select [(ngModel)]="period" (change)="changePeriod()">
-          <option value="2026">
-            Tahun 2026
-          </option>
-
-          <option value="2025">
-            Tahun 2025
-          </option>
-
-          <option value="2026-q3">
-            Q3 2026 (Jul-Sep)
-          </option>
-
-          <option value="2026-q2">
-            Q2 2026 (Apr-Jun)
+        <select [(ngModel)]="year" (change)="changePeriod()">
+          <option *ngFor="let y of availableYears" [ngValue]="y">
+            Tahun {{ y }}
           </option>
         </select>
         <span>▼</span>
       </div>
 
+      <!-- Filter Bulan -->
+      <div class="select-wrapper">
+        <select [(ngModel)]="month" (change)="changePeriod()">
+          <option [ngValue]="0">Semua Bulan</option>
+          <option [ngValue]="1">Januari</option>
+          <option [ngValue]="2">Februari</option>
+          <option [ngValue]="3">Maret</option>
+          <option [ngValue]="4">April</option>
+          <option [ngValue]="5">Mei</option>
+          <option [ngValue]="6">Juni</option>
+          <option [ngValue]="7">Juli</option>
+          <option [ngValue]="8">Agustus</option>
+          <option [ngValue]="9">September</option>
+          <option [ngValue]="10">Oktober</option>
+          <option [ngValue]="11">November</option>
+          <option [ngValue]="12">Desember</option>
+        </select>
+        <span>▼</span>
+      </div>
+
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      Memuat analisis keuangan...
+    </div>
+
+    <div *ngIf="loadError" class="error-message">
+      {{ loadError }}
     </div>
 
 
@@ -61,7 +77,7 @@
     <div class="kpi-grid">
 
       <div class="kpi-card teal">
-        <div class="kpi-icon">💰</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
         <div class="kpi-value">
           {{ formatRupiah(totalIncome) }}
         </div>
@@ -71,7 +87,7 @@
       </div>
 
       <div class="kpi-card amber">
-        <div class="kpi-icon">📉</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 17-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/></svg></div>
         <div class="kpi-value">
           {{ formatRupiah(totalExpenses) }}
         </div>
@@ -81,7 +97,7 @@
       </div>
 
       <div class="kpi-card green">
-        <div class="kpi-icon">📈</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg></div>
         <div class="kpi-value">
           {{ formatRupiah(profit) }}
         </div>
@@ -91,7 +107,7 @@
       </div>
 
       <div class="kpi-card blue">
-        <div class="kpi-icon">📊</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
         <div class="kpi-value">
           {{ profitMargin }}%
         </div>
@@ -101,7 +117,7 @@
       </div>
 
       <div class="kpi-card purple">
-        <div class="kpi-icon">⚡</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
         <div class="kpi-value">
           {{ oer }}%
         </div>
@@ -111,7 +127,7 @@
       </div>
 
       <div class="kpi-card slate">
-        <div class="kpi-icon">🏗️</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></svg></div>
         <div class="kpi-value">
           {{ formatRupiah(totalInvestment) }}
         </div>
@@ -121,93 +137,275 @@
       </div>
 
       <div class="kpi-card teal-dark">
-        <div class="kpi-icon">🎯</div>
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
         <div class="kpi-value">
           {{ roi }}%
         </div>
         <div class="kpi-label">
-          ROI Tahunan
+          ROI Periode
         </div>
       </div>
 
     </div>
 
 
-    <!-- CHART ROW 1 -->
-    <div class="chart-grid two-columns">
-
-      <div class="chart-card">
-        <div class="section-title">
-          Pendapatan vs Pengeluaran
+    <!-- ROW 1: PENDAPATAN -->
+    <section class="analysis-section">
+      <div class="analysis-section-heading">
+        <div>
+          <span class="section-kicker">01 / PENDAPATAN</span>
+          <h2>Analisis Pendapatan</h2>
+          <p>Pergerakan pendapatan dan komposisi berdasarkan jenis biaya pada rincian tagihan.</p>
         </div>
-
-        <div class="chart-container">
-          <canvas #financialChart></canvas>
-        </div>
-      </div>
-
-
-      <div class="chart-card">
-        <div class="section-title">
-          Tren Laba Bersih
-        </div>
-
-        <div class="chart-container">
-          <canvas #profitChart></canvas>
+        <div class="section-total income-total">
+          <span>Total Pendapatan</span>
+          <strong>{{ formatRupiah(totalIncome) }}</strong>
         </div>
       </div>
 
-    </div>
-
-
-    <!-- CHART ROW 2 -->
-    <div class="chart-grid three-columns">
-
-      <div class="chart-card expense-card">
-
-        <div class="section-title">
-          Komposisi Pengeluaran
+      <div class="chart-grid two-columns">
+        <div class="chart-card">
+          <div class="section-title">Tren Pendapatan</div>
+          <p class="card-description">Perubahan pendapatan dari bulan ke bulan pada periode yang dipilih.</p>
+          <div class="chart-container"><canvas #incomeTrendChart></canvas></div>
         </div>
 
-        <div class="pie-container">
-          <canvas #expenseChart></canvas>
-        </div>
-
-        <div class="expense-list">
-
-          <div class="expense-item" *ngFor="let expense of expenseBreakdown">
-            <div class="expense-name">
-              <span class="expense-dot" [style.background]="expense.color"></span>
-
-              <span>
-                {{ expense.name }}
-              </span>
+        <div class="chart-card">
+          <div class="section-title">Rincian Pendapatan</div>
+          <p class="card-description">Nilai pemasukan dari tabel pendapatan dikelompokkan menurut jenis biaya pada rincian tagihan terkait.</p>
+          <div class="donut-layout">
+            <div class="donut-chart-container"><canvas #incomeChart></canvas></div>
+            <div class="donut-legend" *ngIf="incomeBreakdown.length; else noIncomeBreakdown">
+              <div class="donut-legend-item" *ngFor="let item of incomeBreakdown">
+                <span class="legend-label"><i class="legend-dot" [style.background]="item.color"></i>{{ item.name }}</span>
+                <strong>{{ formatRupiah(item.value) }}</strong>
+                <small>{{ incomeBreakdownTotal ? (item.value / incomeBreakdownTotal * 100).toFixed(1) : 0 }}%</small>
+              </div>
             </div>
-
-            <strong>
-              {{ formatRupiah(expense.value) }}
-            </strong>
+            <ng-template #noIncomeBreakdown><p class="empty-chart-message">Belum ada data pendapatan pada periode ini.</p></ng-template>
           </div>
-
         </div>
+      </div>
+    </section>
 
+    <!-- ROW 2: PENGELUARAN -->
+    <section class="analysis-section">
+      <div class="analysis-section-heading">
+        <div>
+          <span class="section-kicker">02 / PENGELUARAN</span>
+          <h2>Analisis Pengeluaran</h2>
+          <p>Pergerakan pengeluaran dan kategori biaya yang paling banyak menyerap dana.</p>
+        </div>
+        <div class="section-total expense-total">
+          <span>Total Pengeluaran</span>
+          <strong>{{ formatRupiah(totalExpenses) }}</strong>
+        </div>
       </div>
 
-
-      <div class="chart-card occupancy-card">
-
-        <div class="section-title">
-          Tren Tingkat Hunian (%)
+      <div class="chart-grid two-columns">
+        <div class="chart-card">
+          <div class="section-title">Tren Pengeluaran</div>
+          <p class="card-description">Perubahan pengeluaran dari bulan ke bulan pada periode yang dipilih.</p>
+          <div class="chart-container"><canvas #expenseTrendChart></canvas></div>
         </div>
 
-        <div class="chart-container">
-          <canvas #occupancyChart></canvas>
+        <div class="chart-card">
+          <div class="section-title">Rincian Pengeluaran</div>
+          <p class="card-description">Perbandingan total biaya berdasarkan nama pengeluaran.</p>
+          <div class="donut-layout">
+            <div class="donut-chart-container"><canvas #expenseChart></canvas></div>
+            <div class="donut-legend" *ngIf="expenseBreakdown.length; else noExpenseBreakdown">
+              <div class="donut-legend-item" *ngFor="let item of expenseBreakdown">
+                <span class="legend-label"><i class="legend-dot" [style.background]="item.color"></i>{{ item.name }}</span>
+                <strong>{{ formatRupiah(item.value) }}</strong>
+                <small>{{ expenseBreakdownTotal ? (item.value / expenseBreakdownTotal * 100).toFixed(1) : 0 }}%</small>
+              </div>
+            </div>
+            <ng-template #noExpenseBreakdown><p class="empty-chart-message">Belum ada data pengeluaran pada periode ini.</p></ng-template>
+          </div>
         </div>
+      </div>
+    </section>
 
+    <!-- ROW 3: FOKUS LABA BERSIH -->
+    <section class="analysis-section detail-section">
+      <div class="analysis-section-heading">
+        <div>
+          <span class="section-kicker">03 / PROFITABILITAS</span>
+          <h2>Analisis Laba Bersih</h2>
+          <p>Melihat hasil akhir pendapatan setelah dikurangi seluruh pengeluaran yang tercatat.</p>
+        </div>
+        <div class="section-total profit-total">
+          <span>Laba Bersih Periode</span>
+          <strong>{{ formatRupiah(profit) }}</strong>
+        </div>
       </div>
 
-    </div>
+      <div class="detail-metric-grid">
+        <div class="detail-metric-card">
+          <span>Total Pendapatan</span><strong>{{ formatRupiah(totalIncome) }}</strong>
+          <small>Seluruh pemasukan dalam periode terpilih</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Total Pengeluaran</span><strong>{{ formatRupiah(totalExpenses) }}</strong>
+          <small>Seluruh biaya dalam periode terpilih</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Rata-rata Laba Bulanan</span><strong>{{ formatRupiah(averageMonthlyProfit) }}</strong>
+          <small>Rata-rata dari bulan yang ditampilkan</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Bulan dengan Laba Tertinggi</span>
+          <strong>{{ bestProfitMonth ? formatRupiah(bestProfitMonth.profit) : formatRupiah(0) }}</strong>
+          <small>{{ bestProfitMonth?.month || 'Belum ada data' }}</small>
+        </div>
+      </div>
 
+      <div class="chart-card detail-chart-card">
+        <div class="section-title">Tren Laba Bersih Bulanan</div>
+        <p class="card-description">Laba dihitung dari pendapatan dikurangi pengeluaran pada setiap bulan.</p>
+        <div class="chart-container detail-chart-container"><canvas #profitChart></canvas></div>
+      </div>
+
+      <div class="analysis-note-grid">
+        <div class="analysis-note">
+          <span class="note-label">Rumus</span>
+          <strong>Laba Bersih = Pendapatan − Pengeluaran</strong>
+          <p>Nilai positif menunjukkan pendapatan lebih besar daripada pengeluaran. Nilai negatif menandakan biaya melebihi pemasukan.</p>
+        </div>
+        <div class="analysis-note">
+          <span class="note-label">Ringkasan Periode</span>
+          <strong>{{ positiveProfitMonths }} dari {{ monthlyFinancials.length }} bulan mencatat laba positif</strong>
+          <p>Gunakan tren bulanan untuk melihat perubahan hasil usaha, bukan hanya total pada akhir periode.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROW 4: PROFIT MARGIN -->
+    <section class="analysis-section detail-section">
+      <div class="analysis-section-heading">
+        <div>
+          <span class="section-kicker">04 / PROFITABILITAS</span>
+          <h2>Analisis Profit Margin</h2>
+          <p>Persentase pendapatan yang tersisa sebagai laba bersih.</p>
+        </div>
+        <div class="section-total margin-total">
+          <span>Profit Margin Periode</span>
+          <strong>{{ profitMargin }}%</strong>
+        </div>
+      </div>
+
+      <div class="detail-metric-grid three-metrics">
+        <div class="detail-metric-card">
+          <span>Profit Margin Periode</span><strong>{{ profitMargin }}%</strong>
+          <small>Laba bersih dibandingkan total pendapatan</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Rata-rata Margin Bulanan</span><strong>{{ averageProfitMargin.toFixed(2) }}%</strong>
+          <small>Rata-rata persentase tiap bulan</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Laba Bersih</span><strong>{{ formatRupiah(profit) }}</strong>
+          <small>Dasar perhitungan profit margin</small>
+        </div>
+      </div>
+
+      <div class="chart-card detail-chart-card">
+        <div class="section-title">Tren Profit Margin</div>
+        <p class="card-description">Memantau perubahan porsi laba bersih terhadap pendapatan setiap bulan.</p>
+        <div class="chart-container detail-chart-container"><canvas #marginChart></canvas></div>
+      </div>
+
+      <div class="analysis-note">
+        <span class="note-label">Rumus</span>
+        <strong>Profit Margin = (Laba Bersih ÷ Pendapatan) × 100%</strong>
+        <p>Margin yang lebih tinggi berarti bagian pendapatan yang menjadi laba lebih besar. Interpretasikan bersama tren pendapatan dan pengeluaran.</p>
+      </div>
+    </section>
+
+    <!-- ROW 5: OER -->
+    <section class="analysis-section detail-section">
+      <div class="analysis-section-heading">
+        <div>
+          <span class="section-kicker">05 / EFISIENSI BIAYA</span>
+          <h2>Analisis Operating Expense Ratio (OER)</h2>
+          <p>Perbandingan pengeluaran terhadap pendapatan pada periode terpilih.</p>
+        </div>
+        <div class="section-total oer-total">
+          <span>OER Periode</span>
+          <strong>{{ oer }}%</strong>
+        </div>
+      </div>
+
+      <div class="detail-metric-grid three-metrics">
+        <div class="detail-metric-card">
+          <span>OER Periode</span><strong>{{ oer }}%</strong>
+          <small>Rasio pengeluaran terhadap pendapatan</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Rata-rata OER Bulanan</span><strong>{{ averageOer.toFixed(2) }}%</strong>
+          <small>Rata-rata persentase tiap bulan</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Total Pengeluaran</span><strong>{{ formatRupiah(totalExpenses) }}</strong>
+          <small>Dasar perhitungan OER</small>
+        </div>
+      </div>
+
+      <div class="chart-card detail-chart-card">
+        <div class="section-title">Tren Operating Expense Ratio</div>
+        <p class="card-description">Perhatikan kenaikan rasio karena dapat menunjukkan biaya yang tumbuh lebih cepat daripada pendapatan.</p>
+        <div class="chart-container detail-chart-container"><canvas #oerChart></canvas></div>
+      </div>
+
+      <div class="analysis-note">
+        <span class="note-label">Rumus</span>
+        <strong>OER = (Total Pengeluaran ÷ Total Pendapatan) × 100%</strong>
+        <p>OER yang lebih rendah umumnya menunjukkan porsi biaya yang lebih kecil terhadap pendapatan. Nilai perlu dilihat sesuai kondisi dan kebutuhan operasional kos.</p>
+      </div>
+    </section>
+
+    <!-- ROW 6: ROI -->
+    <section class="analysis-section detail-section">
+      <div class="analysis-section-heading">
+        <div>
+          <span class="section-kicker">06 / PENGEMBALIAN INVESTASI</span>
+          <h2>Analisis Return on Investment (ROI)</h2>
+          <p>Melihat perbandingan laba terhadap total investasi yang tercatat.</p>
+        </div>
+        <div class="section-total roi-total">
+          <span>ROI Periode</span>
+          <strong>{{ roi }}%</strong>
+        </div>
+      </div>
+
+      <div class="detail-metric-grid three-metrics">
+        <div class="detail-metric-card">
+          <span>ROI Periode</span><strong>{{ roi }}%</strong>
+          <small>Laba bersih dibandingkan total investasi</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Total Investasi</span><strong>{{ formatRupiah(totalInvestment) }}</strong>
+          <small>Akumulasi investasi yang tercatat</small>
+        </div>
+        <div class="detail-metric-card">
+          <span>Laba Bersih</span><strong>{{ formatRupiah(profit) }}</strong>
+          <small>Dasar perhitungan ROI</small>
+        </div>
+      </div>
+
+      <div class="chart-card detail-chart-card">
+        <div class="section-title">Tren ROI Bulanan</div>
+        <p class="card-description">Perubahan laba bulanan dibandingkan total investasi pada properti yang dipilih.</p>
+        <div class="chart-container detail-chart-container"><canvas #roiChart></canvas></div>
+      </div>
+
+      <div class="analysis-note">
+        <span class="note-label">Rumus</span>
+        <strong>ROI = (Laba Bersih ÷ Total Investasi) × 100%</strong>
+        <p>ROI positif menunjukkan laba dibandingkan investasi bernilai positif pada periode tersebut. Angka ini bergantung pada kelengkapan data investasi dan laba.</p>
+      </div>
+    </section>
 
     <!-- PROPERTY COMPARISON -->
     <div class="chart-card comparison-card">
@@ -276,7 +474,7 @@
           <div class="property-stat">
             <span>Hunian</span>
             <strong class="indigo-text">
-              {{ property.occupancy }}%
+              {{ hunian.persentase }}%
             </strong>
           </div>
 
@@ -299,10 +497,6 @@
         <div class="section-title">
           Ringkasan Investasi
         </div>
-
-        <button type="button" class="small-outline-button" (click)="propertyFilter = 'all'">
-          Lihat Detail
-        </button>
 
       </div>
 

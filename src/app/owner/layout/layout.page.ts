@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -40,6 +40,13 @@ export class LayoutPage {
 
   sidebarOpen = true;
 
+  @HostListener('window:resize')
+  onResize() {
+    if (window.innerWidth <= 768) {
+      this.sidebarOpen = false;
+    }
+  }
+
   selectedProperty = 'all';
 
   notifCount = 3;
@@ -52,6 +59,9 @@ export class LayoutPage {
   constructor() { }
 
   ngOnInit() {
+    if (window.innerWidth <= 768) {
+      this.sidebarOpen = false;
+    }
     const savedUser = localStorage.getItem('user');
 
     if (savedUser) {
