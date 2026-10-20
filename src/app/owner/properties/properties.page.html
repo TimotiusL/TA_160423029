@@ -99,9 +99,16 @@
 
         <div class="property-image">
 
-          @if (property.photo) {<img [src]="property.photo" [alt]="property.name" />} @else {<div class="image-placeholder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>}
+          @if (property.photo) {<img [src]="property.photo" [alt]="property.name" (error)="onPhotoError($event)" />}
+          @else {<div class="image-placeholder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" />
+            </svg></div>}
 
-          <span class="status-badge" [class.inactive]="property.status !== 'AKTIF'">{{ property.status | titlecase }}</span>
+          <span class="status-badge" [class.inactive]="property.status !== 'AKTIF'">{{ property.status | titlecase
+            }}</span>
 
         </div>
 
@@ -115,7 +122,11 @@
           </h3>
 
           <p class="address">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ property.address }}
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg> {{ property.address }}
           </p>
 
 
@@ -241,7 +252,7 @@
               Hapus
             </button>
 
-            <button class="outline-button" (click)="navigate('rooms')">
+            <button class="outline-button" (click)="openRooms(property.id)">
               Kamar
             </button>
 
@@ -292,164 +303,169 @@
       <ng-template>
         <div class="modal">
 
-        <div class="modal-header">
+          <div class="modal-header">
 
-          <div>
-            <h2>
-              {{ editingProperty ? 'Edit Boarding House' : 'Tambah Boarding House' }}
-            </h2>
+            <div>
+              <h2>
+                {{ editingProperty ? 'Edit Boarding House' : 'Tambah Boarding House' }}
+              </h2>
 
-            <p>
-              {{ editingProperty ? 'Perbarui informasi properti' : 'Masukkan informasi properti baru' }}
-            </p>
+              <p>
+                {{ editingProperty ? 'Perbarui informasi properti' : 'Masukkan informasi properti baru' }}
+              </p>
+            </div>
+
+            <button class="close-button" aria-label="Tutup" (click)="closeAddModal()">
+              ×
+            </button>
+
           </div>
 
-          <button class="close-button" aria-label="Tutup" (click)="closeAddModal()">
-            ×
-          </button>
 
-        </div>
+          <div class="modal-body">
 
+            <div class="form-grid">
 
-        <div class="modal-body">
+              <!-- NAME -->
 
-          <div class="form-grid">
+              <div class="form-group">
 
-            <!-- NAME -->
+                <label>
+                  Nama Kos <span>*</span>
+                </label>
 
-            <div class="form-group">
-
-              <label>
-                Nama Kos <span>*</span>
-              </label>
-
-              <input type="text" [(ngModel)]="form.name" placeholder="Kost Griya 21" />
-
-            </div>
-
-
-            <!-- FLOORS -->
-
-            <div class="form-group">
-
-              <label>
-                Jumlah Lantai <span>*</span>
-              </label>
-
-              <input type="number" [(ngModel)]="form.floors" placeholder="3" />
-
-            </div>
-
-            <!-- DEPOSIT -->
-
-            <div class="form-group">
-
-              <label>
-                Deposit
-              </label>
-
-              <input type="number" [(ngModel)]="form.deposit" placeholder="Contoh: 500000" min="0" />
-
-              <small class="form-hint">
-                Isi 0 jika kos tidak memerlukan deposit.
-              </small>
-
-            </div>
-
-
-            <!-- PHONE -->
-
-            <div class="form-group">
-
-              <label>
-                Nomor Telepon
-              </label>
-
-              <input type="text" [(ngModel)]="form.phone" placeholder="021-xxxxxxx" />
-
-            </div>
-
-
-            <!-- EMAIL -->
-
-            <div class="form-group">
-
-              <label>
-                Email
-              </label>
-
-              <input type="email" [(ngModel)]="form.email" placeholder="kos@email.com" />
-
-            </div>
-
-
-            <!-- ADDRESS -->
-
-            <div class="form-group full">
-
-              <label>
-                Alamat <span>*</span>
-              </label>
-
-              <input type="text" [(ngModel)]="form.address" placeholder="Jl. Nama Jalan No. XX, Kota" />
-
-            </div>
-
-
-            <!-- DESCRIPTION -->
-
-            <div class="form-group full">
-
-              <label>
-                Deskripsi
-              </label>
-
-              <textarea [(ngModel)]="form.description" rows="3"
-                placeholder="Deskripsi singkat boarding house..."></textarea>
-
-            </div>
-
-
-            <!-- PHOTO -->
-
-            <div class="form-group full">
-
-              <label>
-                Foto Kos
-              </label>
-
-              <div class="upload-box" (click)="triggerPhotoUpload()">
-
-                <div class="upload-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg></div>
-
-                <p>
-                  Klik untuk upload foto
-                </p>
-
-                <span>
-                  Max 5MB, JPG/PNG
-                </span>
+                <input type="text" [(ngModel)]="form.name" placeholder="Kost Griya 21" />
 
               </div>
+
+
+              <!-- FLOORS -->
+
+              <div class="form-group">
+
+                <label>
+                  Jumlah Lantai <span>*</span>
+                </label>
+
+                <input type="number" [(ngModel)]="form.floors" placeholder="3" />
+
+              </div>
+
+              <!-- DEPOSIT -->
+
+              <div class="form-group">
+
+                <label>
+                  Deposit
+                </label>
+
+                <input type="number" [(ngModel)]="form.deposit" placeholder="Contoh: 500000" min="0" />
+
+                <small class="form-hint">
+                  Isi 0 jika kos tidak memerlukan deposit.
+                </small>
+
+              </div>
+
+
+              <!-- PHONE -->
+
+              <div class="form-group">
+
+                <label>
+                  Nomor Telepon
+                </label>
+
+                <input type="text" [(ngModel)]="form.phone" placeholder="021-xxxxxxx" />
+
+              </div>
+
+
+              <!-- EMAIL -->
+
+              <div class="form-group">
+
+                <label>
+                  Email
+                </label>
+
+                <input type="email" [(ngModel)]="form.email" placeholder="kos@email.com" />
+
+              </div>
+
+
+              <!-- ADDRESS -->
+
+              <div class="form-group full">
+
+                <label>
+                  Alamat <span>*</span>
+                </label>
+
+                <input type="text" [(ngModel)]="form.address" placeholder="Jl. Nama Jalan No. XX, Kota" />
+
+              </div>
+
+
+              <!-- DESCRIPTION -->
+
+              <div class="form-group full">
+
+                <label>
+                  Deskripsi
+                </label>
+
+                <textarea [(ngModel)]="form.description" rows="3"
+                  placeholder="Deskripsi singkat boarding house..."></textarea>
+
+              </div>
+
+
+              <!-- PHOTO -->
+
+              <div class="form-group full">
+
+                <label>
+                  Foto Kos
+                </label>
+
+                <input id="kos-photo-input" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden
+                  (change)="onPhotoSelected($event)" />
+                <div class="upload-box" (click)="triggerPhotoUpload()">
+
+                  <div class="upload-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <path d="m17 8-5-5-5 5M12 3v12" />
+                    </svg></div>
+
+                  @if (photoPreview) {
+                  <img class="photo-preview" [src]="photoPreview" alt="Preview foto kos" />
+                  } @else {
+                  <p>Klik untuk upload foto</p>
+                  <span>Max 5MB, JPG/PNG</span>
+                  }
+
+                </div>
+              </div>
             </div>
+
+          </div>
+
+
+          <div class="modal-footer">
+
+            <button class="outline-button large" (click)="closeAddModal()">
+              Batal
+            </button>
+
+            <button class="primary-button large" (click)="saveProperty()">
+              Simpan
+            </button>
+
           </div>
 
         </div>
-
-
-        <div class="modal-footer">
-
-          <button class="outline-button large" (click)="closeAddModal()">
-            Batal
-          </button>
-
-          <button class="primary-button large" (click)="saveProperty()">
-            Simpan
-          </button>
-
-        </div>
-
-      </div>
 
       </ng-template>
     </ion-modal>
@@ -468,98 +484,105 @@
       <ng-template>
         <div class="modal detail-modal">
 
-        <div class="modal-header">
+          <div class="modal-header">
 
-          <div>
-            <h2>
-              {{ selectedProperty.name }}
-            </h2>
+            <div>
+              <h2>
+                {{ selectedProperty.name }}
+              </h2>
+            </div>
+
+            <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
+              ×
+            </button>
+
           </div>
 
-          <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
-            ×
-          </button>
 
-        </div>
+          <div class="modal-body">
+
+            @if (selectedProperty.photo) {<img class="detail-image" [src]="selectedProperty.photo"
+              [alt]="selectedProperty.name" (error)="onPhotoError($event)" />} @else {<div
+              class="detail-image placeholder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" />
+              </svg></div>}
 
 
-        <div class="modal-body">
+            <div class="detail-grid">
 
-          @if (selectedProperty.photo) {<img class="detail-image" [src]="selectedProperty.photo" [alt]="selectedProperty.name" />} @else {<div class="detail-image placeholder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>}
+              <div>
+                <span>Alamat</span>
+                <strong>
+                  {{ selectedProperty.address }}
+                </strong>
+              </div>
 
+              <div>
+                <span>Telepon</span>
+                <strong>
+                  {{ selectedProperty.phone }}
+                </strong>
+              </div>
 
-          <div class="detail-grid">
+              <div>
+                <span>Email</span>
+                <strong>
+                  {{ selectedProperty.email }}
+                </strong>
+              </div>
 
-            <div>
-              <span>Alamat</span>
-              <strong>
-                {{ selectedProperty.address }}
-              </strong>
+              <div>
+                <span>Jumlah Lantai</span>
+                <strong>
+                  {{ selectedProperty.floors }} lantai
+                </strong>
+              </div>
+
+              <div>
+                <span>Deposit</span>
+                <strong>
+                  {{ formatRupiah(selectedProperty.deposit) }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Total Kamar</span>
+                <strong>
+                  {{ selectedProperty.totalRooms }} kamar
+                </strong>
+              </div>
+
+              <div>
+                <span>Penghuni</span>
+                <strong>
+                  {{ selectedProperty.tenantCount }} orang
+                </strong>
+              </div>
             </div>
 
-            <div>
-              <span>Telepon</span>
-              <strong>
-                {{ selectedProperty.phone }}
-              </strong>
-            </div>
+            <p class="detail-description">
+              {{ selectedProperty.description }}
+            </p>
 
-            <div>
-              <span>Email</span>
-              <strong>
-                {{ selectedProperty.email }}
-              </strong>
-            </div>
-
-            <div>
-              <span>Jumlah Lantai</span>
-              <strong>
-                {{ selectedProperty.floors }} lantai
-              </strong>
-            </div>
-
-            <div>
-              <span>Deposit</span>
-              <strong>
-                {{ formatRupiah(selectedProperty.deposit) }}
-              </strong>
-            </div>
-
-            <div>
-              <span>Total Kamar</span>
-              <strong>
-                {{ selectedProperty.totalRooms }} kamar
-              </strong>
-            </div>
-
-            <div>
-              <span>Penghuni</span>
-              <strong>
-                {{ selectedProperty.tenantCount }} orang
-              </strong>
-            </div>
           </div>
 
-          <p class="detail-description">
-            {{ selectedProperty.description }}
-          </p>
+
+          <div class="modal-footer">
+
+            <button class="outline-button large" (click)="closeDetail(); navigate('rooms')">
+              Kelola Kamar
+            </button>
+
+            <button class="primary-button large" (click)="closeDetail(); navigate('financial-analysis')">
+              Analisis Keuangan
+            </button>
+
+          </div>
 
         </div>
-
-
-        <div class="modal-footer">
-
-          <button class="outline-button large" (click)="closeDetail(); navigate('rooms')">
-            Kelola Kamar
-          </button>
-
-          <button class="primary-button large" (click)="closeDetail(); navigate('financial-analysis')">
-            Analisis Keuangan
-          </button>
-
-        </div>
-
-      </div>
 
       </ng-template>
     </ion-modal>

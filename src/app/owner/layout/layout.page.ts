@@ -49,8 +49,6 @@ export class LayoutPage {
 
   selectedProperty = 'all';
 
-  notifCount = 3;
-
   user = {
     name: '',
     email: ''

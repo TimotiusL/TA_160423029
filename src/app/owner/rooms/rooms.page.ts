@@ -5,6 +5,7 @@ import { IonIcon, IonModal } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { searchOutline } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
+import { ActivatedRoute } from '@angular/router';
 
 addIcons({
   searchOutline
@@ -66,9 +67,17 @@ interface Room {
 })
 export class RoomsPage implements OnInit {
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private api: ApiService,
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      this.propertyFilter = params.get('kosId') || '';
+    });
+
     this.loadData();
   }
 
@@ -163,22 +172,28 @@ export class RoomsPage implements OnInit {
   }
 
 
+  get roomsForSelectedProperty(): Room[] {
+    return this.propertyFilter
+      ? this.rooms.filter(room => room.propertyId === this.propertyFilter)
+      : this.rooms;
+  }
+
   get availableCount(): number {
-    return this.rooms.filter(
+    return this.roomsForSelectedProperty.filter(
       room => room.status === 'TERSEDIA'
     ).length;
   }
 
 
   get reservedCount(): number {
-    return this.rooms.filter(
+    return this.roomsForSelectedProperty.filter(
       room => room.status === 'DIPESAN'
     ).length;
   }
 
 
   get occupiedCount(): number {
-    return this.rooms.filter(
+    return this.roomsForSelectedProperty.filter(
       room => room.status === 'TERISI'
     ).length;
   }

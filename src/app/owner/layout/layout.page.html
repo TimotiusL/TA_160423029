@@ -52,17 +52,6 @@
               {{ item.label }}
             </span>
             }
-
-            @if (
-            sidebarOpen &&
-            item.id === 'notifications' &&
-            notifCount > 0
-            ) {
-            <span class="notification-badge">
-              {{ notifCount }}
-            </span>
-            }
-
           </a>
 
           }
@@ -100,12 +89,6 @@
         <button type="button" class="topbar-notification" [routerLink]="'/owner/notifications'" aria-label="Notifikasi">
 
           <ion-icon name="notifications-outline"></ion-icon>
-
-          @if (notifCount > 0) {
-          <span class="top-notification-badge">
-            {{ notifCount }}
-          </span>
-          }
 
         </button>
 

@@ -1114,3 +1114,14 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   .summary-card, .stat-card, .kpi-card { padding: 12px 14px; }
   .summary-value, .stat-card h2, .stat-card strong, .kpi-value { font-size: 18px; line-height: 26px; }
 }
+
+
+/* Preview foto yang dipilih pada form kos */
+.photo-preview {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 8px;
+}

@@ -71,23 +71,15 @@
 
       </div>
 
-
       <select [(ngModel)]="propertyFilter">
-
-        <option value="">
-          Semua Kos
-        </option>
+        <option value="">Semua Kos</option>
 
         @for (property of properties; track property.id) {
-
         <option [value]="property.id">
           {{ property.name }}
         </option>
-
         }
-
       </select>
-
 
       <select [(ngModel)]="typeFilter">
 
@@ -168,6 +160,7 @@
     <div class="visual-list">
 
       @for (property of properties; track property.id) {
+      @if (!propertyFilter || property.id === propertyFilter) {
 
       <div class="visual-card">
 
@@ -236,6 +229,7 @@
 
       </div>
 
+      }
       }
 
     </div>
@@ -423,160 +417,161 @@
     <ion-modal class="owner-page-modal" [isOpen]="selectedRoom !== null" (didDismiss)="closeDetail()">
       <ng-template>
 
-      <div class="modal">
+        <div class="modal">
 
-        <div class="modal-header">
+          <div class="modal-header">
 
-          <div>
+            <div>
 
-            <h2>
-              Kamar {{ selectedRoom.number }}
-            </h2>
+              <h2>
+                Kamar {{ selectedRoom.number }}
+              </h2>
 
-          </div>
+            </div>
 
-          <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
-            ×
-          </button>
-
-        </div>
-
-
-        <div class="modal-body">
-
-          @if (selectedRoom.photo) {
-
-          <img class="room-detail-image" [src]="selectedRoom.photo" alt="Kamar" />
-
-          }
-
-
-          <div class="detail-status">
-
-            <span class="status-badge" [class.available]="selectedRoom.status === 'TERSEDIA'"
-              [class.reserved]="selectedRoom.status === 'DIPESAN'" [class.occupied]="selectedRoom.status === 'TERISI'">
-              {{ selectedRoom.status | titlecase }}
-            </span>
-
-            <span>
-              Lantai {{ selectedRoom.floor }}
-              ·
-              {{ getType(selectedRoom)?.name }}
-            </span>
+            <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
+              ×
+            </button>
 
           </div>
 
 
-          <div class="detail-grid">
+          <div class="modal-body">
 
-            <div>
-              <span>Properti</span>
+            @if (selectedRoom.photo) {
 
-              <strong>
-                {{ getProperty(selectedRoom)?.name }}
-              </strong>
-            </div>
+            <img class="room-detail-image" [src]="selectedRoom.photo" alt="Kamar" />
+
+            }
 
 
-            <div>
-              <span>Tipe Kamar</span>
+            <div class="detail-status">
 
-              <strong>
-                {{ getType(selectedRoom)?.name }}
-              </strong>
-            </div>
-
-
-            <div>
-              <span>Lantai</span>
-
-              <strong>
-                Lantai {{ selectedRoom.floor }}
-              </strong>
-            </div>
-
-
-            <div>
-              <span>Harga/Bulan</span>
-
-              <strong>
-                {{ formatRupiah(selectedRoom.price) }}
-              </strong>
-            </div>
-
-
-            <div>
-              <span>Status</span>
-
-              <strong>
+              <span class="status-badge" [class.available]="selectedRoom.status === 'TERSEDIA'"
+                [class.reserved]="selectedRoom.status === 'DIPESAN'"
+                [class.occupied]="selectedRoom.status === 'TERISI'">
                 {{ selectedRoom.status | titlecase }}
-              </strong>
-            </div>
-
-
-            <div>
-              <span>Penghuni</span>
-
-              <strong>
-                {{ getTenant(selectedRoom)?.name || 'Tidak ada' }}
-              </strong>
-            </div>
-
-          </div>
-
-
-          @if (getType(selectedRoom)?.facilities?.length) {
-
-          <div class="facilities">
-
-            <p>
-              Fasilitas
-            </p>
-
-            <div>
-
-              @for (
-              facility of getType(selectedRoom)?.facilities;
-              track facility
-              ) {
-
-              <span>
-                {{ facility }}
               </span>
 
-              }
+              <span>
+                Lantai {{ selectedRoom.floor }}
+                ·
+                {{ getType(selectedRoom)?.name }}
+              </span>
 
             </div>
+
+
+            <div class="detail-grid">
+
+              <div>
+                <span>Properti</span>
+
+                <strong>
+                  {{ getProperty(selectedRoom)?.name }}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Tipe Kamar</span>
+
+                <strong>
+                  {{ getType(selectedRoom)?.name }}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Lantai</span>
+
+                <strong>
+                  Lantai {{ selectedRoom.floor }}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Harga/Bulan</span>
+
+                <strong>
+                  {{ formatRupiah(selectedRoom.price) }}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Status</span>
+
+                <strong>
+                  {{ selectedRoom.status | titlecase }}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Penghuni</span>
+
+                <strong>
+                  {{ getTenant(selectedRoom)?.name || 'Tidak ada' }}
+                </strong>
+              </div>
+
+            </div>
+
+
+            @if (getType(selectedRoom)?.facilities?.length) {
+
+            <div class="facilities">
+
+              <p>
+                Fasilitas
+              </p>
+
+              <div>
+
+                @for (
+                facility of getType(selectedRoom)?.facilities;
+                track facility
+                ) {
+
+                <span>
+                  {{ facility }}
+                </span>
+
+                }
+
+              </div>
+            </div>
+
+            }
+
+
+            <p class="description">
+              {{ selectedRoom.description }}
+            </p>
+
           </div>
 
-          }
+
+          <div class="modal-footer">
+
+            <button class="outline-button" (click)="editRoom(selectedRoom)">
+              Edit Kamar
+            </button>
 
 
-          <p class="description">
-            {{ selectedRoom.description }}
-          </p>
+            @if (selectedRoom.status === 'TERSEDIA') {
 
-        </div>
+            <button class="danger-button" (click)="deleteRoom(selectedRoom)">
+              Hapus
+            </button>
 
+            }
 
-        <div class="modal-footer">
-
-          <button class="outline-button" (click)="editRoom(selectedRoom)">
-            Edit Kamar
-          </button>
-
-
-          @if (selectedRoom.status === 'TERSEDIA') {
-
-          <button class="danger-button" (click)="deleteRoom(selectedRoom)">
-            Hapus
-          </button>
-
-          }
+          </div>
 
         </div>
-
-      </div>
 
       </ng-template>
     </ion-modal>
@@ -593,171 +588,171 @@
     <ion-modal class="owner-page-modal" [isOpen]="showAdd" (didDismiss)="closeAdd()">
       <ng-template>
 
-      <div class="modal add-modal">
+        <div class="modal add-modal">
 
-        <div class="modal-header">
+          <div class="modal-header">
 
-          <div>
+            <div>
 
-            <h2>
-              Tambah Kamar
-            </h2>
+              <h2>
+                Tambah Kamar
+              </h2>
 
-            <p>
-              Masukkan informasi kamar baru
-            </p>
+              <p>
+                Masukkan informasi kamar baru
+              </p>
+
+            </div>
+
+
+            <button class="close-button" aria-label="Tutup" (click)="closeAdd()">
+              ×
+            </button>
 
           </div>
 
 
-          <button class="close-button" aria-label="Tutup" (click)="closeAdd()">
-            ×
-          </button>
+          <div class="modal-body">
 
-        </div>
+            <div class="form-grid">
 
+              <div class="form-group">
 
-        <div class="modal-body">
+                <label>
+                  Nomor Kamar *
+                </label>
 
-          <div class="form-grid">
+                <input type="text" [(ngModel)]="newRoom.number" placeholder="101" />
 
-            <div class="form-group">
-
-              <label>
-                Nomor Kamar *
-              </label>
-
-              <input type="text" [(ngModel)]="newRoom.number" placeholder="101" />
-
-            </div>
+              </div>
 
 
-            <div class="form-group">
+              <div class="form-group">
 
-              <label>
-                Lantai *
-              </label>
+                <label>
+                  Lantai *
+                </label>
 
-              <input type="number" [(ngModel)]="newRoom.floor" placeholder="1" />
+                <input type="number" [(ngModel)]="newRoom.floor" placeholder="1" />
 
-            </div>
-
-
-            <div class="form-group full">
-
-              <label>
-                Kos *
-              </label>
-
-              <select [(ngModel)]="newRoom.propertyId" (ngModelChange)="onPropertyChange()">
-
-                <option value="">
-                  Pilih kos
-                </option>
-
-                @for (
-                property of properties;
-                track property.id
-                ) {
-
-                <option [value]="property.id">
-                  {{ property.name }}
-                </option>
-
-                }
-
-              </select>
-
-            </div>
+              </div>
 
 
-            <div class="form-group full">
+              <div class="form-group full">
 
-              <label>
-                Tipe Kamar *
-              </label>
+                <label>
+                  Kos *
+                </label>
 
-              <select [(ngModel)]="newRoom.roomTypeId" (ngModelChange)="onRoomTypeChange()">
+                <select [(ngModel)]="newRoom.propertyId" (ngModelChange)="onPropertyChange()">
 
-                <option value="">
-                  Pilih tipe
-                </option>
+                  <option value="">
+                    Pilih kos
+                  </option>
 
-                @for (
-                type of availableRoomTypes;
-                track type.id
-                ) {
-                <option [value]="type.id">
-                  {{ type.name }}
-                </option>
-                }
+                  @for (
+                  property of properties;
+                  track property.id
+                  ) {
 
-              </select>
+                  <option [value]="property.id">
+                    {{ property.name }}
+                  </option>
 
-            </div>
+                  }
 
+                </select>
 
-            <div class="form-group full">
-
-              <label>
-                Harga/Bulan *
-              </label>
-
-              <input type="text" [value]="newRoom.price ? formatRupiah(newRoom.price) : ''" readonly
-                placeholder="Harga otomatis" />
-
-            </div>
+              </div>
 
 
-            <div class="form-group full">
+              <div class="form-group full">
 
-              <label>
-                Deskripsi
-              </label>
+                <label>
+                  Tipe Kamar *
+                </label>
 
-              <textarea [(ngModel)]="newRoom.description" rows="3" placeholder="Deskripsi kamar..."></textarea>
+                <select [(ngModel)]="newRoom.roomTypeId" (ngModelChange)="onRoomTypeChange()">
 
-            </div>
+                  <option value="">
+                    Pilih tipe
+                  </option>
 
-            <div class="form-group full"> <label>Fasilitas Kamar</label>
+                  @for (
+                  type of availableRoomTypes;
+                  track type.id
+                  ) {
+                  <option [value]="type.id">
+                    {{ type.name }}
+                  </option>
+                  }
 
-              <div class="facility-list">
-                @for (facility of facilities; track facility.id) {
-                <div class="facility-item">
-                  <label class="facility-checkbox">
-                    <input type="checkbox" [checked]="isFacilitySelected(facility.id)"
-                      (change)="toggleFacility(facility.id, $event)" />
+                </select>
 
-                    <span>{{ facility.name }}</span>
-                  </label>
+              </div>
 
-                  @if (isFacilitySelected(facility.id)) {
-                  <input type="number" min="1" class="facility-quantity" [value]="getFacilityQuantity(facility.id)"
-                    (input)="updateFacilityQuantity(facility.id, $event)" />
+
+              <div class="form-group full">
+
+                <label>
+                  Harga/Bulan *
+                </label>
+
+                <input type="text" [value]="newRoom.price ? formatRupiah(newRoom.price) : ''" readonly
+                  placeholder="Harga otomatis" />
+
+              </div>
+
+
+              <div class="form-group full">
+
+                <label>
+                  Deskripsi
+                </label>
+
+                <textarea [(ngModel)]="newRoom.description" rows="3" placeholder="Deskripsi kamar..."></textarea>
+
+              </div>
+
+              <div class="form-group full"> <label>Fasilitas Kamar</label>
+
+                <div class="facility-list">
+                  @for (facility of facilities; track facility.id) {
+                  <div class="facility-item">
+                    <label class="facility-checkbox">
+                      <input type="checkbox" [checked]="isFacilitySelected(facility.id)"
+                        (change)="toggleFacility(facility.id, $event)" />
+
+                      <span>{{ facility.name }}</span>
+                    </label>
+
+                    @if (isFacilitySelected(facility.id)) {
+                    <input type="number" min="1" class="facility-quantity" [value]="getFacilityQuantity(facility.id)"
+                      (input)="updateFacilityQuantity(facility.id, $event)" />
+                    }
+                  </div>
                   }
                 </div>
-                }
               </div>
+
             </div>
 
           </div>
 
+
+          <div class="modal-footer">
+
+            <button class="outline-button" (click)="closeAdd()">
+              Batal
+            </button>
+
+            <button class="primary-button" (click)="saveRoom()">
+              Simpan
+            </button>
+
+          </div>
+
         </div>
-
-
-        <div class="modal-footer">
-
-          <button class="outline-button" (click)="closeAdd()">
-            Batal
-          </button>
-
-          <button class="primary-button" (click)="saveRoom()">
-            Simpan
-          </button>
-
-        </div>
-
-      </div>
 
       </ng-template>
     </ion-modal>
@@ -775,45 +770,45 @@
   <ion-modal class="owner-page-modal" [isOpen]="showDeleteModal" (didDismiss)="closeDeleteModal()">
     <ng-template>
 
-    <div class="modal delete-modal">
+      <div class="modal delete-modal">
 
-      <div class="modal-header">
+        <div class="modal-header">
 
-        <div>
-          <h2>Hapus Kamar?</h2>
-          <p>
-            Apakah Anda yakin ingin menghapus kamar
-            {{ roomToDelete?.number }}?
-          </p>
+          <div>
+            <h2>Hapus Kamar?</h2>
+            <p>
+              Apakah Anda yakin ingin menghapus kamar
+              {{ roomToDelete?.number }}?
+            </p>
+          </div>
+
+          <button class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
+            ×
+          </button>
+
         </div>
 
-        <button class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
-          ×
-        </button>
+        <div class="modal-body">
+
+          <p class="delete-warning">
+            Data kamar yang sudah dihapus tidak dapat dikembalikan.
+          </p>
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button class="outline-button" (click)="closeDeleteModal()">
+            Batal
+          </button>
+
+          <button class="danger-button" (click)="confirmDeleteRoom()">
+            Hapus
+          </button>
+
+        </div>
 
       </div>
-
-      <div class="modal-body">
-
-        <p class="delete-warning">
-          Data kamar yang sudah dihapus tidak dapat dikembalikan.
-        </p>
-
-      </div>
-
-      <div class="modal-footer">
-
-        <button class="outline-button" (click)="closeDeleteModal()">
-          Batal
-        </button>
-
-        <button class="danger-button" (click)="confirmDeleteRoom()">
-          Hapus
-        </button>
-
-      </div>
-
-    </div>
 
     </ng-template>
   </ion-modal>

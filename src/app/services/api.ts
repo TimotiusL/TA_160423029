@@ -104,7 +104,7 @@ export class ApiService {
     );
   }
 
-  createKos(data: any): Observable<any> {
+  createKos(data: FormData): Observable<any> {
     const token = localStorage.getItem('token');
 
     const headers = new HttpHeaders({
@@ -119,7 +119,7 @@ export class ApiService {
     );
   }
 
-  updateKos(id: string, data: any): Observable<any> {
+  updateKos(id: string, data: FormData): Observable<any> {
     const token = localStorage.getItem('token');
 
     const headers = new HttpHeaders({
@@ -127,7 +127,10 @@ export class ApiService {
       Accept: 'application/json'
     });
 
-    return this.http.put<any>(
+    // Laravel lebih konsisten membaca upload file melalui POST + method spoofing.
+    data.append('_method', 'PUT');
+
+    return this.http.post<any>(
       `${this.baseUrl}/kos/${id}`,
       data,
       { headers }
@@ -664,4 +667,42 @@ export class ApiService {
     });
   }
 
+
+  getNotifikasi() {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any>(
+      `${this.baseUrl}/notifikasi`,
+      { headers }
+    );
+  }
+
+  markNotifikasiAsRead(id: number) {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.put<any>(
+      `${this.baseUrl}/notifikasi/${id}/baca`,
+      {},
+      { headers }
+    );
+  }
+
+  markAllNotifikasiAsRead() {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.put<any>(
+      `${this.baseUrl}/notifikasi/baca-semua`,
+      {},
+      { headers }
+    );
+  }
 }
