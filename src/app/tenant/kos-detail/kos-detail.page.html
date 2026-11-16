@@ -1,0 +1,389 @@
+<ion-content class="kos-detail-content">
+  <main class="detail-page">
+
+    <!-- Loading State -->
+    <section *ngIf="loading && !errorMessage" class="panel detail-status-panel" aria-live="polite">
+      <div class="state-spinner"></div>
+      <h2>Memuat detail kos...</h2>
+      <p>Data kos sedang diambil dari server.</p>
+    </section>
+
+    <!-- Error State -->
+    <section *ngIf="!loading && errorMessage" class="panel detail-status-panel error" role="alert">
+      <div class="error-icon-box">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <h2>Detail kos tidak tersedia</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="button button-primary" (click)="kembali()" type="button">Kembali ke Daftar Kos</button>
+    </section>
+
+    <!-- Main Detail Content -->
+    <ng-container *ngIf="!loading && !errorMessage">
+
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <button class="breadcrumb-link" (click)="kembali()" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>Cari Kos</span>
+        </button>
+        <svg class="breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="breadcrumb-current">Detail Kos</span>
+      </nav>
+
+      <!-- Property Title Row -->
+      <section class="title-row">
+        <div class="title-copy">
+          <span class="eyebrow">INFORMASI PROPERTI</span>
+          <h1 class="property-heading">{{ detail.nama }}</h1>
+          <p class="address">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>{{ detail.alamat }}</span>
+          </p>
+          <a class="map-link" *ngIf="mapsUrl" [href]="mapsUrl" target="_blank" rel="noopener noreferrer">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+            <span>Buka Google Maps</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        </div>
+
+        <span class="available-label" [class.unavailable-label]="detail.tersedia === 0">
+          <span class="status-dot"></span>
+          {{ detail.tersedia > 0 ? detail.tersedia + ' kamar tersedia' : 'Kamar penuh' }}
+        </span>
+      </section>
+
+      <!-- Photo Gallery -->
+      <section class="gallery">
+        <div class="hero-photo-wrap">
+          <img [src]="fotoKos[fotoAktif]" [alt]="'Foto ' + detail.nama" />
+          <span class="photo-counter" *ngIf="fotoKos.length > 1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            {{ fotoAktif + 1 }} / {{ fotoKos.length }}
+          </span>
+          <button class="gallery-arrow prev" *ngIf="fotoAktif > 0" (click)="pilihFoto(fotoAktif - 1)" aria-label="Foto sebelumnya" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="gallery-arrow next" *ngIf="fotoAktif < fotoKos.length - 1" (click)="pilihFoto(fotoAktif + 1)" aria-label="Foto berikutnya" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div class="thumbnail-list" *ngIf="fotoKos.length > 1">
+          <button *ngFor="let foto of fotoKos; let i = index" [class.selected]="fotoAktif === i" (click)="pilihFoto(i)" [attr.aria-label]="'Pilih foto ' + (i + 1)" type="button">
+            <img [src]="foto" [alt]="'Foto kos ' + (i + 1)" />
+          </button>
+        </div>
+      </section>
+
+      <!-- Main Layout: Details + Sticky Side Card -->
+      <div class="detail-layout">
+
+        <!-- Main Column -->
+        <div class="main-column">
+
+          <!-- About Section -->
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">TENTANG PROPERTI</span>
+                <h2>Hunian Nyaman untuk Keseharianmu</h2>
+              </div>
+              <span class="verified-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                ID #{{ detail.id }}
+              </span>
+            </div>
+
+            <p class="description">{{ detail.deskripsi }}</p>
+
+            <div class="info-strip">
+              <div class="info-item">
+                <div class="info-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                </div>
+                <div class="info-text">
+                  <small>Total Kamar</small>
+                  <strong>{{ detail.total }} unit</strong>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <div class="info-icon teal-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="info-text">
+                  <small>Kamar Tersedia</small>
+                  <strong class="highlight-teal">{{ detail.tersedia }} unit</strong>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <div class="info-icon blue-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+                </div>
+                <div class="info-text">
+                  <small>Jumlah Lantai</small>
+                  <strong>{{ detail.floors }} lantai</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- House Rules Section -->
+          <section class="panel rules-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">KETENTUAN PENGHUNIAN</span>
+                <h2>Peraturan Kos</h2>
+                <p class="panel-subtitle">Mohon baca dan pahami peraturan yang ditetapkan pemilik kos sebelum mengajukan sewa.</p>
+              </div>
+              <span class="rules-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+              </span>
+            </div>
+            <div class="rules-content" *ngIf="detail.peraturan; else rulesNotProvided">{{ detail.peraturan }}</div>
+            <ng-template #rulesNotProvided>
+              <p class="rules-empty">Pemilik kos belum menambahkan informasi peraturan untuk properti ini.</p>
+            </ng-template>
+          </section>
+
+          <!-- Facilities Section -->
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">FASILITAS PROPERTI</span>
+                <h2>Fasilitas yang Disediakan</h2>
+              </div>
+            </div>
+            <div class="facility-grid">
+              <div class="facility-item" *ngFor="let item of fasilitas">
+                <span class="facility-icon-badge">{{ item.icon }}</span>
+                <span class="facility-name">{{ item.nama }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Available Bundle Packages -->
+          <section class="panel bundle-panel" *ngIf="detail.bundleAktif && bundles.length > 0">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">PROMO KHUSUS</span>
+                <h2>Paket Bundle Tersedia</h2>
+                <p class="panel-subtitle">Nikmati masa sewa lebih panjang dengan harga khusus dari pemilik kos.</p>
+              </div>
+            </div>
+
+            <div class="bundle-grid">
+              <article class="bundle-card" *ngFor="let bundle of bundles">
+                <div class="bundle-card-heading">
+                  <div>
+                    <span class="bundle-type">{{ bundle.jenisKamar }}</span>
+                    <h3>{{ bundle.nama }}</h3>
+                  </div>
+                  <span class="bundle-saving-badge">Hemat {{ formatRupiah(bundle.potongan) }}</span>
+                </div>
+
+                <div class="bundle-duration">
+                  <strong>{{ bundle.durasiBulan }} bulan</strong>
+                  <span>Total masa sewa</span>
+                </div>
+
+                <div class="bundle-price-list">
+                  <div class="bundle-price-row">
+                    <span>Harga normal</span>
+                    <del>{{ formatRupiah(bundle.hargaNormal) }}</del>
+                  </div>
+                  <div class="bundle-price-row bundle-discount-row">
+                    <span>Potongan harga</span>
+                    <strong>-{{ formatRupiah(bundle.potongan) }}</strong>
+                  </div>
+                  <div class="bundle-final-price">
+                    <span>Harga bundle</span>
+                    <strong>{{ formatRupiah(bundle.hargaBundle) }}</strong>
+                  </div>
+                </div>
+
+                <p class="bundle-footnote">Paket berlaku untuk tipe kamar {{ bundle.jenisKamar }}. Pilih kamar dengan tipe tersebut saat mendaftar. Pembayaran bundle wajib lunas dan tidak dapat dicicil.</p>
+              </article>
+            </div>
+          </section>
+
+          <!-- Room Options Section -->
+          <section class="panel room-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">PILIHAN KAMAR</span>
+                <h2>Tipe Kamar dan Tarif Sewa</h2>
+                <p class="panel-subtitle">Pilih kamar yang sesuai dengan preferensi Anda untuk memulai pendaftaran.</p>
+              </div>
+            </div>
+
+            <!-- Eligibility States -->
+            <div class="eligibility-note" *ngIf="eligibilityLoading" aria-live="polite">
+              <div class="state-spinner mini-spinner"></div>
+              <span>Memeriksa kelayakan pendaftaran...</span>
+            </div>
+
+            <div class="eligibility-note warning" *ngIf="!eligibilityLoading && !eligibilityErrorMessage && !canRegister" role="status">
+              <div class="note-icon-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="note-body">
+                <p>{{ eligibilityMessage }}</p>
+                <div class="note-actions">
+                  <button
+                    *ngIf="eligibilityReason === 'pendaftaran_menunggu' || eligibilityReason === 'pendaftaran_disetujui'"
+                    type="button"
+                    class="note-action-btn"
+                    (click)="lihatStatusPendaftaran()">Lihat Status Pendaftaran</button>
+                  <button
+                    *ngIf="eligibilityReason === 'kontrak_aktif' || eligibilityReason === 'kontrak_menunggu_pembayaran'"
+                    type="button"
+                    class="note-action-btn"
+                    (click)="lihatKontrak()">Lihat Kontrak</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="eligibility-note error" *ngIf="eligibilityErrorMessage" role="alert">
+              <div class="note-icon-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="note-body">
+                <p>{{ eligibilityErrorMessage }}</p>
+                <button type="button" class="note-action-btn" (click)="checkRegistrationEligibility()">Coba Periksa Lagi</button>
+              </div>
+            </div>
+
+            <!-- Rooms List -->
+            <ng-container *ngIf="tipeKamar.length; else noAvailableRooms">
+              <article class="room-option" *ngFor="let kamar of tipeKamar">
+                <div class="room-symbol-wrap">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                </div>
+                <div class="room-info">
+                  <h3>{{ kamar.nama }}</h3>
+                  <p class="room-specs">Ukuran {{ kamar.ukuran }} · {{ kamar.fasilitas }}</p>
+                  <span class="room-available">
+                    <span class="status-dot"></span>
+                    {{ kamar.tersedia }} unit kamar tersedia
+                  </span>
+                  <label class="room-select-label">
+                    <span>Pilih nomor kamar</span>
+                    <div class="select-wrapper">
+                      <select [name]="'room-' + kamar.typeId" [(ngModel)]="kamar.selectedRoomId">
+                        <option *ngFor="let room of kamar.rooms" [ngValue]="room.id">Kamar {{ room.label }}</option>
+                      </select>
+                      <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                  </label>
+                </div>
+                <div class="room-price">
+                  <span class="price-kicker">Tarif Sewa</span>
+                  <strong>{{ formatRupiah(kamar.harga) }}</strong>
+                  <small>/ bulan</small>
+                  <button type="button" class="select-room-btn" (click)="pilihKamar(kamar)" [disabled]="eligibilityLoading || !canRegister || !!eligibilityErrorMessage">
+                    <span>Mau Daftar</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                </div>
+              </article>
+            </ng-container>
+
+            <ng-template #noAvailableRooms>
+              <div class="empty-rooms">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+                <strong>Belum ada kamar tersedia</strong>
+                <p>Silakan periksa kembali di lain waktu atau hubungi pengelola untuk informasi ketersediaan terbaru.</p>
+              </div>
+            </ng-template>
+          </section>
+        </div>
+
+        <!-- Sticky Side Column -->
+        <aside class="side-column">
+
+          <!-- Booking Summary Card -->
+          <section class="booking-card">
+            <span class="eyebrow">HARGA MULAI DARI</span>
+            <div class="starting-price">
+              <strong>{{ formatRupiah(tipeKamar.length ? tipeKamar[0].harga : 0) }}</strong>
+              <small>/bln</small>
+            </div>
+            <p class="booking-note">{{ detail.tersedia }} dari {{ detail.total }} kamar tersedia. Harga menyesuaikan tipe pilihan.</p>
+
+            <button class="primary-button full-width" (click)="pilihKamar(tipeKamar[0])" [disabled]="!tipeKamar.length || eligibilityLoading || !canRegister || !!eligibilityErrorMessage" type="button">
+              <ng-container *ngIf="eligibilityLoading">
+                <span>Memeriksa status...</span>
+              </ng-container>
+              <ng-container *ngIf="!eligibilityLoading && canRegister">
+                <span>Ajukan Sewa Sekarang</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </ng-container>
+              <ng-container *ngIf="!eligibilityLoading && !canRegister">
+                <span>Pendaftaran Belum Tersedia</span>
+              </ng-container>
+            </button>
+
+            <div class="booking-divider"></div>
+
+            <div class="booking-features">
+              <div class="booking-feature">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Bebas pilih tipe kamar</span>
+              </div>
+              <div class="booking-feature">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Fasilitas transparan</span>
+              </div>
+              <div class="booking-feature">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Proses pendaftaran online</span>
+              </div>
+            </div>
+
+            <!-- Manager Contact Options -->
+            <div class="owner-contact" *ngIf="phoneLink || whatsappLink || (detail.email && detail.email !== '-')">
+              <span class="contact-heading">Hubungi Pengelola</span>
+              <div class="contact-links">
+                <a *ngIf="whatsappLink" [href]="whatsappLink" target="_blank" rel="noopener noreferrer" class="contact-btn wa-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                  <span>WhatsApp</span>
+                </a>
+                <a *ngIf="phoneLink" [href]="phoneLink" class="contact-btn phone-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span>Telepon</span>
+                </a>
+                <a *ngIf="detail.email && detail.email !== '-'" [href]="'mailto:' + detail.email" class="contact-btn email-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  <span>Email</span>
+                </a>
+              </div>
+            </div>
+
+            <p class="booking-footnote">Kontak: {{ detail.phone }} · {{ detail.email }}</p>
+          </section>
+
+          <!-- Help Card -->
+          <section class="help-card">
+            <div class="help-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="help-content">
+              <h3>Butuh bantuan informasi?</h3>
+              <p>Periksa detail fasilitas dan tipe kamar sebelum mengajukan pendaftaran kamar.</p>
+              <button type="button" class="help-btn" (click)="bukaBantuan()">
+                <span>Pusat Bantuan</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+          </section>
+
+        </aside>
+
+      </div>
+    </ng-container>
+
+  </main>
+</ion-content>

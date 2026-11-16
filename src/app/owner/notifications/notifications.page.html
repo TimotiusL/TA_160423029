@@ -24,7 +24,7 @@
     <div class="notification-list">
 
       <div *ngFor="let notification of filteredNotifications" [hidden]="loading || !!errorMessage"
-        class="notification-card" [class.unread]="!notification.read" (click)="markAsRead(notification.id)">
+        class="notification-card" [class.unread]="!notification.read" (click)="openNotification(notification)">
 
         <!-- ICON -->
         <span class="notification-icon" [attr.data-type]="notification.type">@switch (notification.type) {@case

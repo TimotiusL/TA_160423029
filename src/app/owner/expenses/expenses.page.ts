@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonIcon, IonModal } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -33,6 +33,9 @@ interface Expense {
   styleUrls: ['./expenses.page.scss']
 })
 export class ExpensesPage implements OnInit {
+  @ViewChild('expenseFormModal') private expenseFormModal?: IonModal;
+  @ViewChild('expenseSuccessModal') private expenseSuccessModal?: IonModal;
+
   constructor(
     private api: ApiService,
     private cdr: ChangeDetectorRef
@@ -46,6 +49,8 @@ export class ExpensesPage implements OnInit {
   editingId: number | null = null;
   selectedFile: File | null = null;
   loading = false;
+  saving = false;
+  saveSuccessMessage = 'Data pengeluaran berhasil disimpan.';
 
   form = {
     propertyId: '',
@@ -212,7 +217,7 @@ export class ExpensesPage implements OnInit {
     return classes[category] || 'category-slate';
   }
 
-  openAddModal(): void {
+  async openAddModal(): Promise<void> {
     this.editingId = null;
     this.currentProof = null;
     this.selectedFile = null;
@@ -226,12 +231,41 @@ export class ExpensesPage implements OnInit {
     };
 
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.expenseFormModal?.present();
   }
 
-  closeAddModal(): void {
+  async closeAddModal(): Promise<void> {
+    const dismissed = await this.expenseFormModal?.dismiss(null, 'cancel');
+    if (!dismissed) this.onFormDidDismiss();
+  }
+
+  onFormDidDismiss(): void {
     this.showAdd = false;
     this.editingId = null;
     this.selectedFile = null;
+    this.currentProof = null;
+    this.saving = false;
+    this.cdr.detectChanges();
+  }
+
+  private async completeSave(): Promise<void> {
+    this.saveSuccessMessage = this.editingId !== null
+      ? 'Data pengeluaran berhasil diperbarui.'
+      : 'Data pengeluaran berhasil ditambahkan.';
+
+    const dismissed = await this.expenseFormModal?.dismiss({ saved: true }, 'saved');
+    if (!dismissed) this.onFormDidDismiss();
+
+    this.showAdd = false;
+    this.saving = false;
+    this.loadExpenses();
+    this.cdr.detectChanges();
+    await this.expenseSuccessModal?.present();
+  }
+
+  async dismissSaveSuccess(): Promise<void> {
+    await this.expenseSuccessModal?.dismiss(null, 'backdrop');
   }
 
   onFileSelected(event: Event): void {
@@ -239,7 +273,7 @@ export class ExpensesPage implements OnInit {
     this.selectedFile = input.files?.[0] || null;
   }
 
-  editExpense(expense: Expense): void {
+  async editExpense(expense: Expense): Promise<void> {
     this.editingId = expense.id;
     this.selectedFile = null;
     this.currentProof = expense.proof || null;
@@ -255,6 +289,8 @@ export class ExpensesPage implements OnInit {
     };
 
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.expenseFormModal?.present();
   }
 
   saveExpense(): void {
@@ -274,6 +310,9 @@ export class ExpensesPage implements OnInit {
       return;
     }
 
+    if (this.saving) return;
+    this.saving = true;
+
     const data = new FormData();
 
     data.append('tKos_id_kos', this.form.propertyId);
@@ -291,17 +330,11 @@ export class ExpensesPage implements OnInit {
       : this.api.createPengeluaran(data);
 
     request.subscribe({
-      next: () => {
-        alert(
-          this.editingId !== null
-            ? 'Pengeluaran berhasil diperbarui.'
-            : 'Pengeluaran berhasil dicatat.'
-        );
-
-        this.closeAddModal();
-        this.loadExpenses();
+      next: async () => {
+        await this.completeSave();
       },
       error: error => {
+        this.saving = false;
         console.error('Gagal menyimpan pengeluaran:', error);
 
         const message = error.error?.message ||

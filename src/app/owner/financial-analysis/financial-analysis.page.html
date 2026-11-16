@@ -9,11 +9,6 @@
           Laporan keuangan & rasio investasi properti
         </p>
       </div>
-
-      <button type="button" class="btn-outline" (click)="exportReport()">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg>
-        Export Laporan
-      </button>
     </div>
 
 
@@ -35,6 +30,7 @@
       <!-- Filter Tahun -->
       <div class="select-wrapper">
         <select [(ngModel)]="year" (change)="changePeriod()">
+          <option [ngValue]="'all'">Semua Periode</option>
           <option *ngFor="let y of availableYears" [ngValue]="y">
             Tahun {{ y }}
           </option>
@@ -44,7 +40,7 @@
 
       <!-- Filter Bulan -->
       <div class="select-wrapper">
-        <select [(ngModel)]="month" (change)="changePeriod()">
+        <select [(ngModel)]="month" (change)="changePeriod()" [disabled]="year === 'all'">
           <option [ngValue]="0">Semua Bulan</option>
           <option [ngValue]="1">Januari</option>
           <option [ngValue]="2">Februari</option>
@@ -72,7 +68,7 @@
       {{ loadError }}
     </div>
 
-
+    <ng-container *ngIf="hasAnalysisData; else noFinancialAnalysis">
     <!-- KPI -->
     <div class="kpi-grid">
 
@@ -553,6 +549,24 @@
       </div>
 
     </div>
+    </ng-container>
+
+    <ng-template #noFinancialAnalysis>
+      <section class="financial-empty-state" *ngIf="propertiesLoaded && !loading && !loadError">
+        <div class="financial-empty-icon" aria-hidden="true">Rp</div>
+        <h2>{{ properties.length ? 'Belum ada data keuangan' : 'Belum ada kos yang terdaftar' }}</h2>
+        <p *ngIf="properties.length">
+          Belum ada pemasukan, pengeluaran, atau investasi untuk kos dan periode yang dipilih.
+          Hasil FRA akan dibuat dan diperbarui otomatis ketika data pemasukan, pengeluaran, atau investasi berubah. Tidak perlu menyimpan secara manual.
+        </p>
+        <p *ngIf="!properties.length">
+          Tambahkan data kos terlebih dahulu agar analisis keuangan dapat dibuat.
+        </p>
+        <span *ngIf="properties.length" class="financial-empty-period">
+          Periode: {{ year === 'all' ? 'Semua Periode' : year + (month ? '-' + (month < 10 ? '0' + month : month) : '') }}
+        </span>
+      </section>
+    </ng-template>
 
   </div>
 </div>

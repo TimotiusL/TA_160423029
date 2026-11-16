@@ -8,14 +8,13 @@
         <p>Kelola tipe kamar yang tersedia</p>
       </div>
 
-      <button class="primary-button" (click)="openAdd()">
+      <button type="button" class="primary-button" (click)="openAdd()">
         Tambah Tipe
       </button>
     </div>
 
 
-    <!-- MAIN CONTENT -->
-    <div class="content-card">
+
 
       <div class="toolbar">
 
@@ -79,11 +78,11 @@
           <!-- ACTION -->
           <div class="card-actions">
 
-            <button class="edit-button" (click)="openEdit(roomType)">
+            <button type="button" class="edit-button" (click)="openEdit(roomType)">
               Edit
             </button>
 
-            <button class="delete-button" (click)="deleteRoomType(roomType)">
+            <button type="button" class="delete-button" (click)="deleteRoomType(roomType)">
               Hapus
             </button>
 
@@ -117,9 +116,7 @@
 
 
     <!-- ADD / EDIT MODAL -->
-    @if (showAdd) {
-
-    <ion-modal class="owner-page-modal" [isOpen]="showAdd" (didDismiss)="closeAdd()">
+    <ion-modal #roomTypeFormModal class="owner-page-modal" (didDismiss)="onFormDidDismiss()">
       <ng-template>
 
       <div class="modal">
@@ -141,7 +138,7 @@
             </p>
           </div>
 
-          <button class="close-button" aria-label="Tutup" (click)="closeAdd()">
+          <button type="button" class="close-button" aria-label="Tutup" (click)="closeAdd()">
             ×
           </button>
 
@@ -212,11 +209,11 @@
         <!-- MODAL FOOTER -->
         <div class="modal-footer">
 
-          <button class="outline-button" (click)="closeAdd()">
+          <button type="button" class="outline-button" (click)="closeAdd()">
             Batal
           </button>
 
-          <button class="primary-button" (click)="saveRoomType()">
+          <button type="button" class="primary-button" (click)="saveRoomType()">
             Simpan
           </button>
 
@@ -227,7 +224,17 @@
       </ng-template>
     </ion-modal>
 
-    }
+    <ion-modal #roomTypeSuccessModal class="owner-page-modal room-type-success-modal"
+      (didDismiss)="onSaveSuccessDidDismiss()" [backdropDismiss]="true">
+      <ng-template>
+        <div class="save-success-screen" role="button" tabindex="0" aria-label="Tutup pesan berhasil disimpan"
+          (click)="dismissSaveSuccess()" (keydown.enter)="dismissSaveSuccess()" (keydown.space)="dismissSaveSuccess()">
+          <div class="save-success-card" role="status" (click)="$event.stopPropagation()">
+            <div class="save-success-icon">✓</div>
+            <h3>Berhasil disimpan</h3>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
 
-  </div>
 </div>

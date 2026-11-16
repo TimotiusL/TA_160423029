@@ -1,10 +1,12 @@
+@use '../theme' as km;
+
 /* =====================================================================
    KostManager Owner UI - design system bersama
    Blok ini identik di setiap halaman agar tampilan konsisten dan
    tidak bergantung pada stylesheet global.
 ===================================================================== */
 
-$font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
 $ink: #0f172a;
@@ -511,6 +513,7 @@ input[type='password'],
 input[type='number'],
 input[type='date'],
 input[type='tel'],
+input[type='url'],
 select,
 textarea {
   width: 100%;
@@ -1124,4 +1127,316 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   object-fit: cover;
   border-radius: 10px;
   margin-top: 8px;
+}
+
+
+/* Bundle manager */
+.bundle-manager-modal { max-width: 900px; }
+.bundle-disabled-notice { padding: 14px 16px; margin-bottom: 18px; border: 1px solid #fcd34d; border-radius: 10px; background: #fffbeb; color: #92400e; }
+.bundle-disabled-notice strong { display: block; font-size: 13px; }
+.bundle-disabled-notice p { margin: 5px 0 0; font-size: 12px; line-height: 1.5; }
+.bundle-editor-card { padding: 18px; border: 1px solid $line; border-radius: 12px; background: $bg-soft; }
+.bundle-editor-heading h3, .bundle-list-heading h3 { margin: 0; color: $ink; font-size: 16px; font-weight: 750; }
+.bundle-editor-heading p { margin: 5px 0 14px; color: $muted; font-size: 12px; }
+.bundle-price-preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.bundle-price-preview > div { padding: 12px; border: 1px solid $line; border-radius: 9px; background: #fff; display: grid; gap: 4px; }
+.bundle-price-preview span { color: $muted; font-size: 11px; }
+.bundle-price-preview strong { color: $ink; font-size: 14px; }
+.bundle-price-preview .bundle-discount { color: $success; }
+.bundle-price-preview .bundle-final-price { border-color: #99f6e4; background: #f0fdfa; }
+.bundle-price-preview .bundle-final-price strong { color: $brand-dark; font-size: 17px; }
+.bundle-editor-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.bundle-list-section { margin-top: 24px; }
+.bundle-list-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.bundle-list-heading span { padding: 4px 8px; border-radius: 999px; background: $bg-page; color: $muted; font-size: 11px; font-weight: 700; }
+.bundle-empty-state { padding: 22px; border: 1px dashed $line-strong; border-radius: 10px; color: $muted; text-align: center; font-size: 13px; }
+.bundle-list { display: grid; gap: 10px; }
+.bundle-list-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 15px; border: 1px solid $line; border-radius: 11px; background: #fff; }
+.bundle-list-main { min-width: 0; flex: 1; }
+.bundle-list-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bundle-list-title-row h4 { margin: 0; color: $ink; font-size: 14px; font-weight: 750; }
+.bundle-status { padding: 3px 8px; border-radius: 999px; background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.bundle-status.inactive { background: #f1f5f9; color: #64748b; }
+.bundle-list-main > p { margin: 6px 0 10px; color: $muted; font-size: 12px; }
+.bundle-list-prices { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; color: $muted; font-size: 11px; }
+.bundle-list-prices strong { color: $brand-dark; font-size: 14px; }
+.bundle-list-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.bundle-list-actions .outline-button { min-height: 34px; padding: 0 10px; font-size: 11px; }
+@media (max-width: 700px) {
+  .bundle-price-preview { grid-template-columns: 1fr; }
+  .bundle-list-card { flex-direction: column; }
+  .bundle-list-actions { justify-content: flex-start; }
+}
+
+
+/* ---------- owner property rules editor ---------- */
+.rules-editor {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid #b7e4d2;
+  border-radius: 14px;
+  background: #f4fbf7;
+}
+
+.rules-editor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.rules-editor-heading label {
+  display: block;
+  margin: 0;
+  color: #164e3b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.rules-editor-heading label span {
+  color: #dc2626;
+}
+
+.rules-editor-heading p {
+  margin: 4px 0 0;
+  color: #557366;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.rules-required {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #dff3e8;
+  color: #176344;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rules-editor textarea.rules-textarea {
+  display: block;
+  width: 100%;
+  min-height: 156px;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #9bcbb5;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #18392d;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.65;
+  resize: vertical;
+  white-space: pre-wrap;
+}
+
+.rules-editor textarea.rules-textarea:focus {
+  outline: none;
+  border-color: #26966d;
+  box-shadow: 0 0 0 3px rgba(38, 150, 109, 0.14);
+}
+
+.rules-editor textarea.rules-textarea::placeholder {
+  color: #8a9f94;
+  opacity: 1;
+}
+
+.rules-editor-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.rules-editor-footer small {
+  color: #557366;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.rules-editor-footer span {
+  flex: 0 0 auto;
+  color: #557366;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .rules-editor { padding: 13px; }
+  .rules-editor-heading { flex-direction: column; }
+  .rules-editor textarea.rules-textarea { min-height: 140px; }
+}
+
+
+// Shared design system / visual styles only.
+@include km.page();
+
+/* ---------- revised add/edit property form ---------- */
+ion-modal.property-form-modal { --width: min(820px, calc(100vw - 32px)); }
+
+.property-form-body { padding-top: 18px; }
+
+.property-form-section {
+  padding: 0 0 22px;
+  margin: 0 0 22px;
+  border-bottom: 1px solid $line;
+
+  &:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+}
+
+.property-form-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: $brand-soft;
+    color: $brand-dark;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  h3 { margin: 0; color: $ink; font-size: 14px; line-height: 20px; font-weight: 700; }
+  p { margin: 3px 0 0; color: $muted; font-size: 12px; line-height: 18px; }
+}
+
+.property-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  column-gap: 18px;
+  row-gap: 18px;
+
+  > .full { grid-column: 1 / -1; }
+  > .form-group { min-width: 0; margin: 0; }
+  > .form-group > label {
+    display: flex;
+    align-items: flex-end;
+    min-height: 38px;
+    line-height: 18px;
+  }
+  > .form-group > label > small { margin-left: 5px; color: $muted; font-size: 11px; font-weight: 500; }
+}
+
+.property-form-grid input:not([type='file']),
+.property-form-grid select,
+.property-form-grid textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.field-error {
+  display: block;
+  margin-top: 1px;
+  color: #b91c1c;
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 500;
+}
+
+.invalid-field,
+.property-form-grid .invalid-field {
+  border-color: #ef4444 !important;
+  background-color: #fffafa !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.08);
+}
+
+.form-error-banner {
+  margin: 0 0 18px;
+  padding: 11px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.property-form-grid .rules-editor {
+  width: 100%;
+  margin: 0;
+}
+
+.property-form-grid .rules-editor-heading label { min-height: 0; }
+.property-form-grid .rules-editor textarea.rules-textarea { width: 100%; }
+.property-form-grid .upload-box { min-height: 132px; }
+.property-form-grid .photo-preview { display: block; max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; }
+
+ion-modal.property-save-success-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-width: 100%;
+  --max-height: 100%;
+  --border-radius: 0;
+  --box-shadow: none;
+  --backdrop-opacity: 0.48;
+}
+
+ion-modal.property-save-success-modal::part(content) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.save-success-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.42);
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+}
+
+.save-success-card {
+  width: min(360px, 100%);
+  padding: 26px 24px 22px;
+  border: 1px solid #bbf7d0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.22);
+  text-align: center;
+  cursor: default;
+
+  h3 { margin: 12px 0 4px; color: #166534; font-size: 18px; font-weight: 750; }
+  p { margin: 0; color: $text; font-size: 14px; }
+  small { display: block; margin-top: 13px; color: $muted; font-size: 11px; }
+}
+
+.save-success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+@media (max-width: 700px) {
+  ion-modal.property-form-modal { --width: calc(100vw - 20px); --max-height: calc(100dvh - 24px); }
+  .property-form-grid { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
+  .property-form-grid > .full { grid-column: 1; }
+  .property-form-grid > .form-group > label { min-height: 0; }
+  .property-form-section { padding-bottom: 18px; margin-bottom: 18px; }
+  .property-form-section-heading { margin-bottom: 13px; }
 }

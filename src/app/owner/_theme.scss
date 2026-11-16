@@ -1,0 +1,247 @@
+/*
+ * KostManager / pemilik — shared visual refinements.
+ * This mixin is applied at the end of every owner page's local SCSS.
+ * It does NOT change services, data processing or user interactions.
+ */
+@mixin page {
+  :host {
+    --km-bg: #f6f7f5;
+    --km-surface: #fff;
+    --km-ink: #1b2930;
+    --km-secondary: #52636a;
+    --km-border: #e0e6e3;
+    --km-primary: #166c5f;
+    --km-primary-hover: #105348;
+    --km-primary-wash: #e8f3ee;
+    --km-danger: #ae4242;
+    --km-radius: 13px;
+    --km-shadow: 0 3px 14px rgba(27,41,48,.035);
+    --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--ion-font-family);
+    color: var(--km-ink);
+    background: var(--km-bg);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-width: 0;
+  }
+  :host *, :host *::before, :host *::after { box-sizing: border-box; }
+  :host .ion-page { background: var(--km-bg); color: var(--km-ink); }
+  :host :is(.dashboard-page, .billing-page, .complaints-page, .contracts-page,
+    .expenses-page, .facilities-page, .financial-analysis-page, .income-page,
+    .investments-page, .notifications-page, .payments-page, .profile-page,
+    .properties-page, .registrations-page, .room-types-page, .rooms-page,
+    .tenants-page) { color: var(--km-ink); min-width: 0; }
+  :host :is(.page-header, .dashboard-header) {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px 24px;
+    margin-bottom: 26px;
+    min-width: 0;
+  }
+  :host :is(.page-header, .dashboard-header) h1 {
+    font-size: clamp(24px, 2.6vw, 30px);
+    line-height: 1.3;
+    letter-spacing: -.035em;
+    font-weight: 730;
+    color: var(--km-ink);
+    margin: 0 0 6px;
+  }
+  :host :is(.page-header, .dashboard-header) p {
+    max-width: 650px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--km-secondary);
+    margin: 0;
+  }
+  :host :is(.section-header, .card-title, .card-header) h2,
+  :host :is(.section-header, .card-title, .card-header) h3 {
+    color: var(--km-ink);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  :host :is(.summary-label, .kpi-label, .stat-title, .stat-sub, .muted, .empty-state p) {
+    color: var(--km-secondary);
+  }
+  :host :is(.stat-card, .summary-card, .kpi-card, .dashboard-card, .chart-card,
+    .detail-chart-card, .detail-metric-card, .analysis-note-card, .comparison-card,
+    .table-card, .content-card, .filter-card, .property-card, .room-card,
+    .facility-card, .room-type-card, .complaint-card, .notification-card,
+    .profile-card, .investment-card, .property-mini-card, .empty-state,
+    .waiting-box, .cicilan-review-panel) {
+    background: var(--km-surface);
+    border: 1px solid var(--km-border);
+    border-radius: var(--km-radius);
+    box-shadow: var(--km-shadow);
+    min-width: 0;
+  }
+  :host :is(.stat-card, .summary-card, .kpi-card) {
+    background-image: none;
+    box-shadow: var(--km-shadow);
+  }
+  :host :is(.stat-card, .summary-card, .kpi-card) strong,
+  :host :is(.summary-value, .kpi-value, .stat-value, .financial-value) {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.035em;
+  }
+  :host :is(.stats-grid, .summary-grid, .kpi-grid, .charts-grid,
+    .chart-grid, .property-grid, .room-grid, .facility-grid, .investment-grid,
+    .property-summary-grid, .detail-metric-grid) { gap: 16px; }
+  :host :is(.property-card, .room-card, .facility-card, .room-type-card,
+    .notification-card, .investment-card) {
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+  :host :is(.property-card, .room-card, .facility-card, .room-type-card):hover {
+    border-color: #b8cec2;
+    box-shadow: 0 5px 20px rgba(27,41,48,.075);
+    transform: none;
+  }
+  :host :is(.stat-card, .kpi-card) :is(.stat-icon, .kpi-icon) { box-shadow: none; }
+  :host :is(.dashboard-card, .chart-card, .detail-chart-card) canvas { max-width: 100%; }
+
+  /* Enterprise-useful density and alignment in data tables */
+  :host .table-wrapper { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  :host table { width: 100%; border-collapse: collapse; }
+  :host table th {
+    padding: 13px 15px;
+    background: #f7f9f7;
+    color: var(--km-secondary);
+    border-bottom: 1px solid var(--km-border);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .035em;
+    vertical-align: middle;
+  }
+  :host table td {
+    padding: 15px;
+    border-bottom: 1px solid #edf0ee;
+    color: var(--km-ink);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  :host table tbody tr:last-child td { border-bottom: 0; }
+  :host table tbody tr:hover { background: #fafcfa; }
+  :host :is(.status-badge, .status-pill, .exit-request-status) {
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1.4;
+    font-weight: 690;
+  }
+  :host :is(.table-card, .content-card) { overflow: hidden; }
+  :host :is(.property-filter-controls, .filter-bar, .filters) { gap: 12px; }
+
+  /* Form alignment and a single focused control style */
+  :host :is(button, input, select, textarea) { font-family: inherit; }
+  :host :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--km-primary);
+    outline-offset: 3px;
+  }
+  :host button:not(:disabled) { cursor: pointer; }
+  :host button:disabled { opacity: .58; cursor: not-allowed; }
+  :host :is(input:not([type='checkbox']):not([type='radio']):not([type='file']),
+    select, textarea) {
+    min-height: 43px;
+    min-width: 0;
+    max-width: 100%;
+    border: 1px solid #cbd6d0;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--km-ink);
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: none;
+  }
+  :host :is(input, textarea)::placeholder { color: #74857e; opacity: 1; }
+  :host :is(input:not([type='checkbox']):not([type='radio']), select, textarea):focus {
+    border-color: var(--km-primary);
+  }
+  :host :is(.search-box, .search-wrapper, .search-container):focus-within {
+    border-color: var(--km-primary);
+  }
+  :host :is(.form-group, .form-field) label { font-size: 13px; font-weight: 640; color: var(--km-ink); }
+  :host textarea { min-height: 108px; resize: vertical; }
+  :host input[type='file'] { max-width: 100%; }
+
+  :host :is(.primary-button, .outline-button, .detail-button, .verify-button,
+    .reject-button, .delete-button, .edit-button, .reset-button,
+    .action-button, .modal-action, .modal-close, .close-button) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 660;
+    line-height: 1.45;
+    text-decoration: none;
+    transform: none;
+    box-shadow: none;
+    transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+  }
+  :host :is(.primary-button, .verify-button) {
+    background: var(--km-primary);
+    border: 1px solid var(--km-primary);
+    color: white;
+  }
+  :host :is(.primary-button, .verify-button):hover:not(:disabled) {
+    background: var(--km-primary-hover);
+    border-color: var(--km-primary-hover);
+    color: white;
+    transform: none;
+  }
+  :host :is(.outline-button, .detail-button) {
+    background: #fff;
+    border: 1px solid #cbd8d0;
+    color: var(--km-primary);
+  }
+  :host :is(.outline-button, .detail-button):hover:not(:disabled) {
+    background: #f1f7f2;
+    border-color: #a5bfb1;
+    color: var(--km-primary-hover);
+    transform: none;
+  }
+  :host :is(.delete-button, .reject-button) { color: #a63838; }
+  :host :is(.modal-close, .close-button) { min-width: 40px; min-height: 40px; }
+
+  /* Keep existing modal sizes and action bindings; improve readability and scroll. */
+  :host :is(.owner-page-modal, .modal-backdrop) { background-color: rgba(20,36,32,.50); }
+  :host .modal {
+    border-radius: 15px;
+    border: 1px solid var(--km-border);
+    background: white;
+    box-shadow: 0 18px 55px rgba(20,36,32,.20);
+    max-height: calc(100dvh - 42px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  :host .modal-header { border-bottom-color: var(--km-border); }
+  :host .modal-header h2 { font-size: 19px; color: var(--km-ink); letter-spacing: -.02em; }
+  :host :is(.empty-state, .loading-state) { color: var(--km-secondary); }
+  :host .financial-analysis-page :is(.kpi-card, .detail-metric-card) { border-color: var(--km-border); }
+  :host .financial-analysis-page .analysis-section-heading h2 { color: var(--km-ink); }
+
+  @media (max-width: 850px) {
+    :host :is(.page-header, .dashboard-header) { flex-wrap: wrap; }
+    :host .modal { max-height: calc(100dvh - 24px); }
+    :host :is(.stats-grid, .summary-grid, .kpi-grid) { gap: 12px; }
+  }
+  @media (max-width: 600px) {
+    :host :is(.page-header, .dashboard-header) h1 { font-size: 25px; }
+    :host :is(.page-header, .dashboard-header) { margin-bottom: 20px; }
+    :host :is(.stat-card, .summary-card, .kpi-card) { min-width: 0; }
+    :host :is(input:not([type='checkbox']):not([type='radio']):not([type='file']),
+      select, textarea) { font-size: 16px; }
+    :host :is(.form-grid, .detail-grid) { grid-template-columns: minmax(0, 1fr); }
+    :host :is(.modal-actions, .modal-footer, .header-actions) { flex-wrap: wrap; gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host *, :host *::before, :host *::after {
+      transition-duration: .01ms !important;
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}

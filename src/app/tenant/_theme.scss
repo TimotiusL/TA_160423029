@@ -1,0 +1,427 @@
+/*
+ * KostManager / penghuni — design system
+ * Visual only: no template bindings, API calls or business logic.
+ * Each page calls @include tenant-theme.page() AFTER its local SCSS,
+ * allowing one set of consistently applied UI rules.
+ */
+@mixin page {
+  :host {
+    --km-bg: #f6f7f5;
+    --km-surface: #ffffff;
+    --km-ink: #1b2930;
+    --km-secondary: #52636a;
+    --km-subtle: #69787e;
+    --km-border: #e0e6e3;
+    --km-primary: #166c5f;
+    --km-primary-hover: #105348;
+    --km-primary-wash: #e8f3ee;
+    --km-warning: #a56820;
+    --km-danger: #ae4242;
+    --km-radius: 14px;
+    --km-shadow: 0 3px 14px rgba(27,41,48,.035);
+    --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --ion-background-color: var(--km-bg);
+    --ion-text-color: var(--km-ink);
+    --ion-color-primary: var(--km-primary);
+    --slate-50: var(--km-bg);
+    --slate-800: var(--km-ink);
+    font-family: var(--ion-font-family);
+    color: var(--km-ink);
+    background: var(--km-bg);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-width: 0;
+  }
+
+  :host *, :host *::before, :host *::after { box-sizing: border-box; }
+  :host ion-content {
+    --background: var(--km-bg);
+    --color: var(--km-ink);
+    --padding-bottom: 32px;
+    color-scheme: light;
+  }
+  :host :is(button, input, select, textarea) { font-family: inherit; }
+  :host :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--km-primary);
+    outline-offset: 3px;
+  }
+  :host :is(button, a) { -webkit-tap-highlight-color: transparent; }
+  :host button:not(:disabled) { cursor: pointer; }
+  :host button:disabled { cursor: not-allowed; opacity: .56; }
+  :host [hidden] { display: none !important; }
+
+  /* Width and rhythm: 1 content measure across the entire tenant journey */
+  :host :is(.dashboard, .browse-page, .detail-page, .registration-page,
+    .status-page, .billing-page, .bill-page, .history-page, .complaints-page,
+    .notifications-page, .profile-page, .page-shell) {
+    width: min(100%, 1120px);
+    max-width: 1120px;
+    min-width: 0;
+    margin-inline: auto;
+    padding: 36px 32px 64px;
+  }
+  :host :is(.status-page, .notifications-page) { max-width: 900px; }
+  :host :is(.page-heading, .page-header, .property-heading) {
+    margin-bottom: 28px;
+    gap: 16px 24px;
+    min-width: 0;
+  }
+  :host :is(.page-heading, .page-header, .property-heading) h1,
+  :host .page-title {
+    font-size: clamp(25px, 2.6vw, 31px);
+    line-height: 1.25;
+    font-weight: 720;
+    letter-spacing: -.035em;
+    margin-block: 0 8px;
+    color: var(--km-ink);
+    overflow-wrap: anywhere;
+  }
+  :host :is(.eyebrow, .section-label, .search-kicker, .section-kicker) {
+    display: block;
+    color: var(--km-primary);
+    font-weight: 720;
+    font-size: 11px;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  :host :is(.subtitle, .page-subtitle, .intro-description, .property-description) {
+    color: var(--km-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 640px;
+    margin: 0;
+  }
+  :host :is(.panel-heading, .section-heading, .table-heading, .card-heading, .list-heading) h2,
+  :host :is(.panel-heading, .section-heading, .table-heading, .card-heading, .list-heading) h3 {
+    color: var(--km-ink);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.4;
+  }
+  :host :is(.muted, .helper, .helper-text, .muted-summary, .panel-subtitle,
+    .summary-label, .stat-label, .overview-label, .field-hint) {
+    color: var(--km-secondary);
+  }
+  :host :is(.breadcrumb, .breadcrumb button, .breadcrumb a) {
+    color: var(--km-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  :host .breadcrumb { flex-wrap: wrap; row-gap: 6px; }
+
+  /* Restraint: flat paper surfaces, consistent 1px separators, quiet elevation */
+  :host :is(.panel, .search-panel, .search-card, .table-card, .history-card,
+    .profile-card, .profile-hero-card, .form-card, .info-card, .summary-card,
+    .overview-card, .stat-card, .payment-card, .upload-card, .invoice-card,
+    .contract-hero, .complaint-card, .notification-card, .application-card,
+    .property-card, .room-card, .bundle-card, .booking-card, .installment-card,
+    .help-card, .support-card, .state-card, .empty-card, .empty-state,
+    .no-bill-panel, .success-card, .alert-card, .contact-card, .password-card) {
+    background-color: var(--km-surface);
+    border: 1px solid var(--km-border);
+    border-radius: var(--km-radius);
+    box-shadow: var(--km-shadow);
+  }
+  :host :is(.panel, .form-card, .profile-card, .payment-card, .upload-card,
+    .info-card, .search-panel) { padding: 24px; }
+  :host :is(.stats-grid, .summary-grid, .overview-grid, .complaint-summary,
+    .property-grid, .room-grid, .bundle-grid) { gap: 16px; }
+  :host :is(.summary-value, .stat-value, .summary-amount, .amount-panel strong,
+    .summary-total, .payment-amount, .price, .invoice-amount) {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.035em;
+  }
+  :host :is(.panel-heading, .section-heading) { gap: 12px; }
+  :host :is(.panel-heading, .table-heading, .card-heading, .list-heading) { min-width: 0; }
+  :host :is(.payment-info, .complaint-info, .property-copy, .profile-identity,
+    .tenant-profile, .notification-body) { min-width: 0; overflow-wrap: anywhere; }
+
+  /* Buttons: single action hierarchy, 44px touch targets */
+  :host :is(.primary-button, .secondary-button, .danger-button, .button,
+    .outline-button, .detail-button, .view-button, .view-action,
+    .history-primary, .history-secondary, .bill-primary, .bill-secondary,
+    .submit-button, .pay-action, .search-submit-btn, .refresh-button,
+    .installment-toggle, .bill-confirm, .bill-cancel, .copy-button,
+    .reset-button, .hero-btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 660;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: none;
+    transform: none;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+  }
+  :host :is(.primary-button, .button-primary, .detail-button, .pay-action,
+    .history-primary, .bill-primary, .submit-button, .bill-confirm, .search-submit-btn) {
+    background: var(--km-primary);
+    color: #fff;
+    border: 1px solid var(--km-primary);
+  }
+  :host :is(.primary-button, .button-primary, .detail-button, .pay-action,
+    .history-primary, .bill-primary, .submit-button, .bill-confirm, .search-submit-btn):hover:not(:disabled) {
+    background: var(--km-primary-hover);
+    border-color: var(--km-primary-hover);
+    color: #fff;
+    transform: none;
+  }
+  :host :is(.secondary-button, .button-outline, .outline-button,
+    .view-button, .view-action, .history-secondary, .bill-secondary,
+    .bill-cancel, .installment-toggle, .copy-button, .reset-button) {
+    background: #fff;
+    color: var(--km-ink);
+    border: 1px solid #cad7d1;
+  }
+  :host :is(.secondary-button, .button-outline, .outline-button, .view-button,
+    .view-action, .history-secondary, .bill-secondary, .bill-cancel,
+    .installment-toggle, .copy-button, .reset-button):hover:not(:disabled) {
+    background: #f1f6f3;
+    border-color: #a8bfb4;
+    color: var(--km-primary-hover);
+    transform: none;
+  }
+  :host :is(.danger-button, .button-danger) { color: #9b3939; }
+  :host :is(.close-button, .preview-close, .history-close, .bill-close,
+    .back-button, .clear-search, .gallery-arrow) {
+    min-width: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
+  }
+
+  /* Form system and accessible input focus */
+  :host :is(input:not([type='checkbox']):not([type='radio']):not([type='file']),
+    select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    border-radius: 9px;
+    border-color: #cbd6d0;
+    background: #fff;
+    color: var(--km-ink);
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: none;
+  }
+  :host :is(input, textarea)::placeholder { color: #77868c; opacity: 1; }
+  :host :is(input, textarea, select):disabled { background: #f0f3f1; color: #65736e; }
+  :host :is(input[readonly], textarea[readonly]) { background: #f7f8f6; }
+  :host :is(input:not([type='checkbox']):not([type='radio']), select, textarea):focus {
+    border-color: var(--km-primary);
+  }
+  :host :is(.form-field, .field, .filter-field, .form-group) label,
+  :host :is(.field, .form-field, .filter-field) > span {
+    font-size: 13px;
+    font-weight: 640;
+    color: var(--km-ink);
+  }
+  :host textarea { min-height: 108px; resize: vertical; }
+  :host input[type='file'] { max-width: 100%; font-size: 13px; }
+  :host input[type='file']::file-selector-button {
+    padding: 9px 12px;
+    margin-right: 12px;
+    border: 1px solid #cbd6d0;
+    border-radius: 8px;
+    color: var(--km-primary);
+    background: #fff;
+    font: inherit;
+    cursor: pointer;
+  }
+  :host :is(.search-box, .filter-box, .search-input-row):focus-within {
+    border-color: var(--km-primary);
+    box-shadow: 0 0 0 3px rgba(22,108,95,.10);
+  }
+
+  /* Tables and list collections */
+  :host :is(.desktop-table, .table-wrapper) { max-width: 100%; overflow-x: auto; }
+  :host table { border-collapse: collapse; width: 100%; }
+  :host table th {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--km-border);
+    background: #f7f9f7;
+    color: var(--km-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .035em;
+  }
+  :host table td {
+    padding: 16px;
+    border-bottom: 1px solid #edf0ee;
+    font-size: 13px;
+    color: var(--km-ink);
+    vertical-align: middle;
+  }
+  :host table tbody tr:last-child td { border-bottom: 0; }
+  :host table tbody tr:hover { background: #fafcfa; }
+  :host :is(.table-heading, .card-heading, .list-heading) { padding: 20px 24px; }
+  :host :is(.filters, .filter-row) { gap: 14px; background: #fafbf9; }
+  :host :is(.empty-state, .empty-results, .empty-list-state, .state-card) p {
+    font-size: 13px;
+    color: var(--km-secondary);
+    line-height: 1.65;
+  }
+  :host :is(.status-pill, .status, .badge, .contract-status,
+    .room-status-badge, .role-badge) {
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.4;
+  }
+  :host :is(.status-pill, .status, .badge, .contract-status, .room-status-badge) .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+  :host :is(.error-panel, .notice-error, .form-error) { color: var(--km-danger); }
+
+  /* Focused overlays; no oversized dialogs on small phones */
+  :host :is(.modal-backdrop, .preview-backdrop, .history-modal-backdrop,
+    .bill-modal-backdrop) {
+    z-index: 1000;
+    padding: 24px;
+    background: rgba(18,35,33,.55);
+  }
+  :host :is(.modal-card, .preview-modal, .history-modal,
+    .bill-modal, .bill-confirm-modal) {
+    max-width: min(100%, 680px);
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 60px rgba(18,35,33,.20);
+  }
+  :host .toast-message {
+    position: fixed;
+    inset: auto 20px 20px auto;
+    z-index: 1100;
+    width: max-content;
+    max-width: min(440px, calc(100vw - 40px));
+    padding: 13px 17px;
+    background: var(--km-ink);
+    color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 35px rgba(27,41,48,.17);
+    font-size: 13px;
+  }
+
+  /* Module-specific finishing: adapt the pre-existing content, not its behavior */
+  :host .welcome-banner {
+    padding: 32px;
+    color: var(--km-ink);
+    background: #e9f1ed;
+    border: 1px solid #d5e3db;
+    border-left: 4px solid var(--km-primary);
+    border-radius: var(--km-radius);
+    box-shadow: none;
+  }
+  :host .welcome-deco { display: none; }
+  :host .welcome-label { color: var(--km-primary); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+  :host .welcome-title { color: var(--km-ink); font-size: clamp(27px, 3vw, 35px); font-weight: 730; letter-spacing: -.035em; }
+  :host .welcome-subtitle { color: #48615a; font-size: 14px; line-height: 1.65; }
+  :host .hero-btn.hero-btn-primary { color: #fff; background: var(--km-primary); border: 1px solid var(--km-primary); }
+  :host .hero-btn.hero-btn-primary:hover { background: var(--km-primary-hover); color: #fff; }
+  :host .hero-btn.hero-btn-secondary { color: var(--km-primary-hover); background: #fff; border: 1px solid #c7dacf; backdrop-filter: none; }
+  :host .hero-btn.hero-btn-secondary:hover { background: #f4faf6; }
+  :host .dashboard { gap: 20px; }
+  :host .dashboard .panel { padding: 24px; }
+  :host .dashboard .panel-heading h2 { font-size: 17px; }
+  :host .dashboard .mini-detail,
+  :host .dashboard .bill-amounts { background: #f7f9f7; border-color: #e6ebe7; border-radius: 10px; }
+  :host .dashboard .mini-detail.rental { background: var(--km-primary-wash); border-color: #d1e6da; }
+  :host .dashboard .bill-panel { border-left: 3px solid var(--km-primary); }
+  :host .dashboard .bill-panel.overdue { border-left-color: var(--km-danger); }
+  :host .dashboard .amount-col strong { color: var(--km-ink); font-size: 22px; }
+  :host .dashboard .amount-col.remaining strong { color: var(--km-danger); }
+  :host .dashboard .stat-card { transition: border-color .15s ease, background-color .15s ease; }
+  :host .dashboard .stat-card:hover { border-color: #b6cac0; background: #fcfefd; transform: none; }
+  :host .dashboard :is(.payment-row, .complaint-row) { gap: 12px; }
+
+  :host :is(.property-card, .room-card, .bundle-card, .booking-card, .notification-card) {
+    overflow: hidden;
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+  :host :is(.property-card, .room-card, .bundle-card, .booking-card):hover {
+    transform: none;
+    border-color: #b8cec2;
+    box-shadow: 0 5px 20px rgba(27,41,48,.07);
+  }
+  :host :is(.property-card, .room-card, .bundle-card) img { max-width: 100%; object-fit: cover; }
+  :host :is(.property-card, .room-card, .bundle-card) h3 { color: var(--km-ink); font-weight: 700; }
+  :host :is(.summary-grid, .overview-grid, .complaint-summary) .summary-card,
+  :host .overview-card { min-width: 0; }
+  :host :is(.history-scope-switch, .view-switch) {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  :host :is(.history-scope-switch, .view-switch) button { min-height: 42px; }
+  :host .notification-card { min-height: 82px; }
+  :host .notification-card.unread {
+    background: #edf6f0;
+    border-color: #c1ddca;
+  }
+  :host .notification-card:hover { transform: none; border-color: #b8cec2; box-shadow: var(--km-shadow); }
+  :host .state-card.state-error { background: #fffafa; border-color: #eed2d2; }
+  :host .search-box input { padding-right: 54px; }
+  :host .detail-page .hero-photo-wrap { border-radius: 12px; overflow: hidden; }
+  :host .profile-hero-card { box-shadow: none; }
+  :host :is(.alert-box, .summary-warning-box) { line-height: 1.6; }
+
+  @media (max-width: 1100px) {
+    :host :is(.dashboard, .browse-page, .detail-page, .registration-page,
+      .status-page, .billing-page, .bill-page, .history-page,
+      .complaints-page, .notifications-page, .profile-page, .page-shell) {
+      padding: 28px 24px 48px;
+    }
+    :host ion-content { --padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+    :host .toast-message { bottom: calc(94px + env(safe-area-inset-bottom, 0px)); }
+  }
+  @media (max-width: 620px) {
+    :host :is(.dashboard, .browse-page, .detail-page, .registration-page,
+      .status-page, .billing-page, .bill-page, .history-page,
+      .complaints-page, .notifications-page, .profile-page, .page-shell) {
+      padding: 22px 16px 36px;
+    }
+    :host :is(.page-heading, .page-header, .property-heading) { margin-bottom: 22px; }
+    :host :is(.page-heading, .page-header, .property-heading) h1,
+    :host .page-title { font-size: 25px; }
+    :host :is(.subtitle, .page-subtitle) { font-size: 13px; }
+    :host :is(.panel, .form-card, .profile-card, .payment-card, .upload-card, .info-card,
+      .search-panel, .dashboard .panel) { padding: 18px; }
+    :host .welcome-banner { padding: 24px 20px; }
+    :host .welcome-title { font-size: 28px; }
+    :host .welcome-actions { gap: 10px; }
+    :host :is(.summary-grid, .overview-grid, .complaint-summary) { gap: 12px; }
+    :host :is(.table-heading, .card-heading, .list-heading) { padding: 18px; }
+    :host :is(.field-grid, .form-grid) { grid-template-columns: minmax(0, 1fr); }
+    :host :is(input:not([type='checkbox']):not([type='radio']):not([type='file']),
+      select, textarea) { font-size: 16px; }
+    :host :is(.modal-backdrop, .preview-backdrop, .history-modal-backdrop,
+      .bill-modal-backdrop) { padding: 12px; }
+    :host :is(.modal-card, .preview-modal, .history-modal, .bill-modal, .bill-confirm-modal) {
+      max-height: calc(100dvh - 24px);
+      border-radius: 12px;
+    }
+    :host :is(.form-actions, .form-footer, .modal-actions) { flex-wrap: wrap; gap: 10px; }
+    :host .toast-message { right: 16px; max-width: calc(100vw - 32px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host *, :host *::before, :host *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: .01ms !important;
+    }
+  }
+}

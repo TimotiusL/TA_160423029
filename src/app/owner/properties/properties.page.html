@@ -6,14 +6,14 @@
     <div class="page-header">
 
       <div>
-        <h1>Boarding House</h1>
+        <h1>Kos</h1>
 
         <p>
           Kelola semua properti kos Anda
         </p>
       </div>
 
-      <button class="primary-button" (click)="openAddModal()">
+      <button type="button" class="primary-button" (click)="openAddModal()">
         Tambah Kos
       </button>
 
@@ -51,9 +51,6 @@
             {{ totalOccupied }}/{{ totalRooms }}
           </strong>
 
-          <small>
-            {{ occupancyPercentage }}% okupansi
-          </small>
         </div>
       </div>
 
@@ -106,9 +103,6 @@
               <circle cx="9" cy="9" r="2" />
               <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" />
             </svg></div>}
-
-          <span class="status-badge" [class.inactive]="property.status !== 'AKTIF'">{{ property.status | titlecase
-            }}</span>
 
         </div>
 
@@ -240,25 +234,26 @@
           <!-- ACTIONS -->
 
           <div class="property-actions">
-            <button class="outline-button" (click)="openDetail(property)">
+            <button type="button" class="outline-button" (click)="openDetail(property)">
               Detail
             </button>
 
-            <button class="outline-button" (click)="editProperty(property)">
+            <button type="button" class="outline-button" (click)="editProperty(property)">
               Edit
             </button>
 
-            <button class="outline-button delete-button" (click)="deleteProperty(property)">
+            <button type="button" class="outline-button" (click)="openBundleManager(property)">
+              Bundle
+            </button>
+
+            <button type="button" class="outline-button delete-button" (click)="deleteProperty(property)">
               Hapus
             </button>
 
-            <button class="outline-button" (click)="openRooms(property.id)">
+            <button type="button" class="outline-button" (click)="openRooms(property.id)">
               Kamar
             </button>
 
-            <button class="primary-small-button" (click)="navigate('financial-analysis')">
-              Analisis
-            </button>
           </div>
 
         </div>
@@ -297,9 +292,7 @@
        ADD PROPERTY MODAL
   ====================================================== -->
 
-    @if (showAdd) {
-
-    <ion-modal [isOpen]="showAdd" (didDismiss)="closeAddModal()" class="owner-page-modal property-modal">
+    <ion-modal #propertyFormModal (didDismiss)="onAddModalDidDismiss()" class="owner-page-modal property-modal property-form-modal">
       <ng-template>
         <div class="modal">
 
@@ -307,7 +300,7 @@
 
             <div>
               <h2>
-                {{ editingProperty ? 'Edit Boarding House' : 'Tambah Boarding House' }}
+                {{ editingProperty ? 'Edit Kos' : 'Tambah Kos' }}
               </h2>
 
               <p>
@@ -315,152 +308,246 @@
               </p>
             </div>
 
-            <button class="close-button" aria-label="Tutup" (click)="closeAddModal()">
+            <button type="button" class="close-button" aria-label="Tutup" (click)="closeAddModal()">
               ×
             </button>
 
           </div>
 
 
-          <div class="modal-body">
+          <div class="modal-body property-form-body">
 
-            <div class="form-grid">
+            @if (formError) {
+            <div class="form-error-banner" role="alert">{{ formError }}</div>
+            }
 
-              <!-- NAME -->
-
-              <div class="form-group">
-
-                <label>
-                  Nama Kos <span>*</span>
-                </label>
-
-                <input type="text" [(ngModel)]="form.name" placeholder="Kost Griya 21" />
-
-              </div>
-
-
-              <!-- FLOORS -->
-
-              <div class="form-group">
-
-                <label>
-                  Jumlah Lantai <span>*</span>
-                </label>
-
-                <input type="number" [(ngModel)]="form.floors" placeholder="3" />
-
-              </div>
-
-              <!-- DEPOSIT -->
-
-              <div class="form-group">
-
-                <label>
-                  Deposit
-                </label>
-
-                <input type="number" [(ngModel)]="form.deposit" placeholder="Contoh: 500000" min="0" />
-
-                <small class="form-hint">
-                  Isi 0 jika kos tidak memerlukan deposit.
-                </small>
-
-              </div>
-
-
-              <!-- PHONE -->
-
-              <div class="form-group">
-
-                <label>
-                  Nomor Telepon
-                </label>
-
-                <input type="text" [(ngModel)]="form.phone" placeholder="021-xxxxxxx" />
-
-              </div>
-
-
-              <!-- EMAIL -->
-
-              <div class="form-group">
-
-                <label>
-                  Email
-                </label>
-
-                <input type="email" [(ngModel)]="form.email" placeholder="kos@email.com" />
-
-              </div>
-
-
-              <!-- ADDRESS -->
-
-              <div class="form-group full">
-
-                <label>
-                  Alamat <span>*</span>
-                </label>
-
-                <input type="text" [(ngModel)]="form.address" placeholder="Jl. Nama Jalan No. XX, Kota" />
-
-              </div>
-
-
-              <!-- DESCRIPTION -->
-
-              <div class="form-group full">
-
-                <label>
-                  Deskripsi
-                </label>
-
-                <textarea [(ngModel)]="form.description" rows="3"
-                  placeholder="Deskripsi singkat boarding house..."></textarea>
-
-              </div>
-
-
-              <!-- PHOTO -->
-
-              <div class="form-group full">
-
-                <label>
-                  Foto Kos
-                </label>
-
-                <input id="kos-photo-input" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden
-                  (change)="onPhotoSelected($event)" />
-                <div class="upload-box" (click)="triggerPhotoUpload()">
-
-                  <div class="upload-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <path d="m17 8-5-5-5 5M12 3v12" />
-                    </svg></div>
-
-                  @if (photoPreview) {
-                  <img class="photo-preview" [src]="photoPreview" alt="Preview foto kos" />
-                  } @else {
-                  <p>Klik untuk upload foto</p>
-                  <span>Max 5MB, JPG/PNG</span>
-                  }
-
+            <section class="property-form-section">
+              <div class="property-form-section-heading">
+                <span>01</span>
+                <div>
+                  <h3>Informasi Properti</h3>
+                  <p>Informasi dasar dan lokasi kos.</p>
                 </div>
               </div>
-            </div>
+
+              <div class="property-form-grid">
+                <div class="form-group full">
+                  <label for="property-name">Nama Kos <span>*</span></label>
+                  <input id="property-name" type="text" [(ngModel)]="form.name" (ngModelChange)="clearFieldError('name')"
+                    [class.invalid-field]="formErrors['name']" [attr.aria-invalid]="!!formErrors['name']"
+                    placeholder="Contoh: Kost Griya 21" maxlength="150" />
+                  @if (formErrors['name']) { <small class="field-error">{{ formErrors['name'] }}</small> }
+                </div>
+
+                <div class="form-group full">
+                  <label for="property-address">Alamat <span>*</span></label>
+                  <input id="property-address" type="text" [(ngModel)]="form.address" (ngModelChange)="clearFieldError('address')"
+                    [class.invalid-field]="formErrors['address']" [attr.aria-invalid]="!!formErrors['address']"
+                    placeholder="Jl. Nama Jalan No. XX, Kota" maxlength="255" />
+                  @if (formErrors['address']) { <small class="field-error">{{ formErrors['address'] }}</small> }
+                </div>
+
+                <div class="form-group">
+                  <label for="property-floors">Jumlah Lantai <span>*</span></label>
+                  <input id="property-floors" type="number" [(ngModel)]="form.floors" (ngModelChange)="clearFieldError('floors')"
+                    [class.invalid-field]="formErrors['floors']" [attr.aria-invalid]="!!formErrors['floors']"
+                    min="1" max="100" step="1" placeholder="Contoh: 3" />
+                  @if (formErrors['floors']) { <small class="field-error">{{ formErrors['floors'] }}</small> }
+                </div>
+
+                <div class="form-group">
+                  <label for="property-deposit">Deposit</label>
+                  <input id="property-deposit" type="number" [(ngModel)]="form.deposit" (ngModelChange)="clearFieldError('deposit')"
+                    [class.invalid-field]="formErrors['deposit']" [attr.aria-invalid]="!!formErrors['deposit']"
+                    min="0" step="1000" placeholder="Contoh: 500000" />
+                  @if (formErrors['deposit']) { <small class="field-error">{{ formErrors['deposit'] }}</small> }
+                  @else { <small class="form-hint">Isi 0 jika kos tidak memerlukan deposit.</small> }
+                </div>
+
+                <div class="form-group">
+                  <label for="property-phone">Nomor Telepon</label>
+                  <input id="property-phone" type="tel" [(ngModel)]="form.phone" placeholder="Contoh: 081234567890" />
+                </div>
+
+                <div class="form-group">
+                  <label for="property-email">Email</label>
+                  <input id="property-email" type="email" [(ngModel)]="form.email" (ngModelChange)="clearFieldError('email')"
+                    [class.invalid-field]="formErrors['email']" [attr.aria-invalid]="!!formErrors['email']"
+                    placeholder="kos@email.com" />
+                  @if (formErrors['email']) { <small class="field-error">{{ formErrors['email'] }}</small> }
+                </div>
+
+                <div class="form-group full">
+                  <label for="property-google-maps">Link Google Maps <small>(Opsional)</small></label>
+                  <input id="property-google-maps" type="url" [(ngModel)]="form.googleMapsLink"
+                    (ngModelChange)="clearFieldError('googleMapsLink')" [class.invalid-field]="formErrors['googleMapsLink']"
+                    [attr.aria-invalid]="!!formErrors['googleMapsLink']" placeholder="https://maps.app.goo.gl/..." maxlength="2048" />
+                  @if (formErrors['googleMapsLink']) { <small class="field-error">{{ formErrors['googleMapsLink'] }}</small> }
+                  @else { <small class="form-hint">Salin link melalui menu Bagikan di Google Maps. Jika dikosongkan, lokasi dapat dicari melalui alamat kos.</small> }
+                </div>
+              </div>
+            </section>
+
+            <section class="property-form-section">
+              <div class="property-form-section-heading">
+                <span>02</span>
+                <div>
+                  <h3>Rekening Pembayaran</h3>
+                  <p>Informasi rekening yang akan digunakan penghuni untuk pembayaran transfer.</p>
+                </div>
+              </div>
+
+              <div class="property-form-grid">
+                <div class="form-group">
+                  <label for="property-bank-name">Nama Bank <span>*</span></label>
+                  <input id="property-bank-name" type="text" [(ngModel)]="form.bankName" (ngModelChange)="clearFieldError('bankName')"
+                    [class.invalid-field]="formErrors['bankName']" [attr.aria-invalid]="!!formErrors['bankName']"
+                    placeholder="Contoh: BCA, BRI, Mandiri" maxlength="50" />
+                  @if (formErrors['bankName']) { <small class="field-error">{{ formErrors['bankName'] }}</small> }
+                </div>
+
+                <div class="form-group">
+                  <label for="property-account-number">Nomor Rekening <span>*</span></label>
+                  <input id="property-account-number" type="text" [(ngModel)]="form.accountNumber"
+                    (ngModelChange)="clearFieldError('accountNumber')" [class.invalid-field]="formErrors['accountNumber']"
+                    [attr.aria-invalid]="!!formErrors['accountNumber']" placeholder="Masukkan nomor rekening"
+                    inputmode="numeric" maxlength="34" autocomplete="off" />
+                  @if (formErrors['accountNumber']) { <small class="field-error">{{ formErrors['accountNumber'] }}</small> }
+                  @else { <small class="form-hint">Spasi atau tanda hubung diperbolehkan.</small> }
+                </div>
+
+                <div class="form-group full">
+                  <label for="property-account-holder">Nama Pemilik Rekening <span>*</span></label>
+                  <input id="property-account-holder" type="text" [(ngModel)]="form.accountHolder"
+                    (ngModelChange)="clearFieldError('accountHolder')" [class.invalid-field]="formErrors['accountHolder']"
+                    [attr.aria-invalid]="!!formErrors['accountHolder']" placeholder="Nama sesuai buku rekening"
+                    maxlength="100" autocomplete="name" />
+                  @if (formErrors['accountHolder']) { <small class="field-error">{{ formErrors['accountHolder'] }}</small> }
+                  @else { <small class="form-hint">Nama ini ditampilkan kepada penghuni saat memilih metode transfer bank.</small> }
+                </div>
+              </div>
+            </section>
+
+            <section class="property-form-section">
+              <div class="property-form-section-heading">
+                <span>03</span>
+                <div>
+                  <h3>Pengaturan Sewa dan Denda</h3>
+                  <p>Atur opsi pembayaran dan ketentuan denda keterlambatan.</p>
+                </div>
+              </div>
+
+              <div class="property-form-grid">
+                <div class="form-group">
+                  <label for="property-installment">Pembayaran Cicilan <span>*</span></label>
+                  <select id="property-installment" [(ngModel)]="form.bisaDicicil">
+                    <option [ngValue]="true">Ya, boleh mengajukan cicilan</option>
+                    <option [ngValue]="false">Tidak, pembayaran normal</option>
+                  </select>
+                  <small class="form-hint">Jika tidak, penghuni tidak dapat mengajukan cicilan.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="property-bundle">Paket Bundle <span>*</span></label>
+                  <select id="property-bundle" [(ngModel)]="form.bundleEnabled">
+                    <option [ngValue]="true">Ya, sediakan paket bundle</option>
+                    <option [ngValue]="false">Tidak, hanya sewa normal</option>
+                  </select>
+                  <small class="form-hint">Pengaturan durasi dan potongan tersedia melalui tombol Bundle.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="property-penalty-interval">Interval Denda (Hari) <span>*</span></label>
+                  <input id="property-penalty-interval" type="number" [(ngModel)]="form.intervalDendaHari"
+                    (ngModelChange)="clearFieldError('intervalDendaHari')" [class.invalid-field]="formErrors['intervalDendaHari']"
+                    [attr.aria-invalid]="!!formErrors['intervalDendaHari']" min="1" max="365" step="1" placeholder="7" />
+                  @if (formErrors['intervalDendaHari']) { <small class="field-error">{{ formErrors['intervalDendaHari'] }}</small> }
+                  @else { <small class="form-hint">Denda bertambah setiap sejumlah hari keterlambatan ini.</small> }
+                </div>
+
+                <div class="form-group">
+                  <label for="property-penalty-amount">Nominal Denda per Interval <span>*</span></label>
+                  <input id="property-penalty-amount" type="number" [(ngModel)]="form.nominalDenda"
+                    (ngModelChange)="clearFieldError('nominalDenda')" [class.invalid-field]="formErrors['nominalDenda']"
+                    [attr.aria-invalid]="!!formErrors['nominalDenda']" min="0" step="1000" placeholder="Contoh: 25000" />
+                  @if (formErrors['nominalDenda']) { <small class="field-error">{{ formErrors['nominalDenda'] }}</small> }
+                  @else { <small class="form-hint">Isi 0 jika tidak ingin mengenakan denda.</small> }
+                </div>
+              </div>
+            </section>
+
+            <section class="property-form-section">
+              <div class="property-form-section-heading">
+                <span>04</span>
+                <div>
+                  <h3>Peraturan dan Deskripsi</h3>
+                  <p>Informasi yang dapat dibaca penghuni sebelum mengajukan pendaftaran.</p>
+                </div>
+              </div>
+
+              <div class="property-form-grid">
+                <div class="form-group full">
+                  <div class="rules-editor">
+                    <div class="rules-editor-heading">
+                      <div>
+                        <label for="property-rules">Peraturan Kos <span>*</span></label>
+                        <p>Aturan ini akan dibaca penghuni pada halaman Detail Kos sebelum mendaftar.</p>
+                      </div>
+                      <span class="rules-required">Wajib diisi</span>
+                    </div>
+                    <textarea id="property-rules" class="rules-textarea" [(ngModel)]="form.rules"
+                      (ngModelChange)="clearFieldError('rules')" [class.invalid-field]="formErrors['rules']"
+                      [attr.aria-invalid]="!!formErrors['rules']" rows="6" maxlength="10000"
+                      placeholder="Contoh:\n1. Jam malam maksimal pukul 22.00.\n2. Dilarang membawa tamu menginap.\n3. Dilarang merokok di dalam kamar.\n4. Wajib menjaga kebersihan lingkungan kos."></textarea>
+                    @if (formErrors['rules']) { <small class="field-error">{{ formErrors['rules'] }}</small> }
+                    <div class="rules-editor-footer">
+                      <small>Pisahkan setiap peraturan dengan baris baru. Peraturan dapat diubah kembali melalui menu Edit Kos.</small>
+                      <span>{{ form.rules.length || 0 }}/10.000</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group full">
+                  <label for="property-description">Deskripsi <small>(Opsional)</small></label>
+                  <textarea id="property-description" [(ngModel)]="form.description" rows="4"
+                    placeholder="Tuliskan fasilitas, keunggulan, atau informasi tambahan mengenai kos..."></textarea>
+                </div>
+
+                <div class="form-group full">
+                  <label for="kos-photo-input">Foto Kos <small>(Opsional)</small></label>
+                  <input id="kos-photo-input" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden
+                    (change)="onPhotoSelected($event)" />
+                  <div class="upload-box" role="button" tabindex="0" (click)="triggerPhotoUpload()"
+                    (keydown.enter)="triggerPhotoUpload()" (keydown.space)="triggerPhotoUpload()">
+                    @if (photoPreview) {
+                    <img class="photo-preview" [src]="photoPreview" alt="Preview foto kos" />
+                    <p>Klik untuk mengganti foto</p>
+                    <span>Format JPG/PNG, maksimal 5 MB</span>
+                    } @else {
+                    <div class="upload-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="m17 8-5-5-5 5M12 3v12" />
+                      </svg></div>
+                    <p>Klik untuk upload foto</p>
+                    <span>Format JPG/PNG, maksimal 5 MB</span>
+                    }
+                  </div>
+                  @if (photoError) { <small class="field-error">{{ photoError }}</small> }
+                </div>
+              </div>
+            </section>
 
           </div>
 
-
           <div class="modal-footer">
 
-            <button class="outline-button large" (click)="closeAddModal()">
+            <button type="button" class="outline-button large" (click)="closeAddModal()">
               Batal
             </button>
 
-            <button class="primary-button large" (click)="saveProperty()">
-              Simpan
+            <button type="button" class="primary-button large" (click)="saveProperty()" [disabled]="savingProperty">
+              {{ savingProperty ? 'Menyimpan...' : 'Simpan Kos' }}
             </button>
 
           </div>
@@ -470,8 +557,163 @@
       </ng-template>
     </ion-modal>
 
-    }
+    <ion-modal #propertySaveSuccessModal (didDismiss)="onSaveSuccessModalDidDismiss()"
+      class="owner-page-modal property-save-success-modal" [backdropDismiss]="true">
+      <ng-template>
+        <div class="save-success-screen" role="button" tabindex="0" aria-label="Tutup pesan berhasil disimpan"
+          (click)="dismissSaveSuccess()" (keydown.enter)="dismissSaveSuccess()" (keydown.space)="dismissSaveSuccess()">
+          <div class="save-success-card" role="status" (click)="$event.stopPropagation()">
+            <div class="save-success-icon">✓</div>
+            <h3>Berhasil disimpan</h3>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
 
+
+    <!-- =====================================================
+       BUNDLE MANAGER MODAL
+  ====================================================== -->
+    @if (showBundleModal && bundleProperty) {
+    <ion-modal [isOpen]="showBundleModal" (didDismiss)="closeBundleManager()" class="owner-page-modal property-modal">
+      <ng-template>
+        <div class="modal bundle-manager-modal">
+          <div class="modal-header">
+            <div>
+              <h2>Kelola Bundle</h2>
+              <p>{{ bundleProperty.name }} · Paket khusus per jenis kamar</p>
+            </div>
+            <button type="button" class="close-button" aria-label="Tutup" (click)="closeBundleManager()">×</button>
+          </div>
+
+          <div class="modal-body">
+            @if (!bundleProperty.bundleEnabled) {
+            <div class="bundle-disabled-notice">
+              <strong>Fitur bundle belum diaktifkan untuk kos ini.</strong>
+              <p>Menambahkan atau mengaktifkan paket berstatus Aktif akan otomatis mengaktifkan bundle pada kos ini.
+                Untuk menonaktifkan seluruh promo, ubah pengaturan pada Edit Kos atau nonaktifkan semua paket.</p>
+            </div>
+            }
+
+            <section class="bundle-editor-card">
+              <div class="bundle-editor-heading">
+                <div>
+                  <h3>{{ editingBundleId ? 'Edit Paket Bundle' : 'Tambah Paket Bundle' }}</h3>
+                  <p>Durasi adalah total masa tinggal termasuk bulan bonus. Harga normal dihitung dari tarif jenis kamar
+                    × durasi.</p>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nama Paket <span>*</span></label>
+                  <input type="text" [(ngModel)]="bundleForm.name" maxlength="80"
+                    placeholder="Contoh: Paket Hemat 12+1" />
+                </div>
+
+                <div class="form-group">
+                  <label>Jenis Kamar <span>*</span></label>
+                  <select [(ngModel)]="bundleForm.roomTypeId">
+                    <option [ngValue]="null">Pilih jenis kamar</option>
+                    @for (type of bundleRoomTypes; track type.id_jenisKamar) {
+                    <option [ngValue]="type.id_jenisKamar">{{ type.nama_jenis }} · {{ formatRupiah(type.harga_sewa)
+                      }}/bulan</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Total Masa Tinggal (Bulan) <span>*</span></label>
+                  <input type="number" [(ngModel)]="bundleForm.durationMonths" min="2" max="36" step="1" />
+                  <small class="form-hint">Contoh 13 bulan untuk paket 12 bulan + 1 bulan bonus.</small>
+                </div>
+
+                <div class="form-group">
+                  <label>Potongan Harga (Rp) <span>*</span></label>
+                  <input type="number" [(ngModel)]="bundleForm.discount" min="1" [max]="bundleNormalPrice"
+                    placeholder="Contoh: 1000000" />
+                  <small class="form-hint">Potongan tidak boleh sama dengan atau melebihi harga normal.</small>
+                </div>
+
+                @if (editingBundleId) {
+                <div class="form-group">
+                  <label>Status Paket</label>
+                  <select [(ngModel)]="bundleForm.status">
+                    <option value="aktif">Aktif</option>
+                    <option value="nonaktif">Nonaktif</option>
+                  </select>
+                </div>
+                }
+              </div>
+
+              <div class="bundle-price-preview">
+                <div><span>Harga Normal</span><strong>{{ formatRupiah(bundleNormalPrice) }}</strong></div>
+                <div><span>Potongan</span><strong class="bundle-discount">−{{ formatRupiah(bundleForm.discount || 0)
+                    }}</strong></div>
+                <div class="bundle-final-price"><span>Harga Bundle</span><strong>{{ formatRupiah(bundleFinalPrice)
+                    }}</strong></div>
+              </div>
+
+              <div class="bundle-editor-actions">
+                @if (editingBundleId) {
+                <button type="button" class="outline-button" (click)="cancelBundleEdit()">Batal Edit</button>
+                }
+                <button type="button" class="primary-button" (click)="saveBundle()"
+                  [disabled]="bundleSaving || bundleRoomTypes.length === 0">
+                  {{ bundleSaving ? 'Menyimpan...' : (editingBundleId ? 'Simpan Perubahan' : 'Tambah Bundle') }}
+                </button>
+              </div>
+            </section>
+
+            <section class="bundle-list-section">
+              <div class="bundle-list-heading">
+                <h3>Daftar Paket</h3>
+                <span>{{ bundles.length }} paket</span>
+              </div>
+
+              @if (bundleLoading) {
+              <div class="bundle-empty-state">Memuat daftar bundle...</div>
+              } @else if (bundles.length === 0) {
+              <div class="bundle-empty-state">Belum ada paket bundle untuk kos ini.</div>
+              } @else {
+              <div class="bundle-list">
+                @for (bundle of bundles; track bundle.id_bundle) {
+                <article class="bundle-list-card">
+                  <div class="bundle-list-main">
+                    <div class="bundle-list-title-row">
+                      <h4>{{ bundle.nama_bundle }}</h4>
+                      <span class="bundle-status" [class.inactive]="bundle.status !== 'aktif'">{{ bundle.status ===
+                        'aktif' ? 'Aktif' : 'Nonaktif' }}</span>
+                    </div>
+                    <p>{{ bundle.jenis_kamar?.nama_jenis || 'Jenis kamar' }} · {{ bundle.durasi_sewa_bulan }} bulan masa
+                      tinggal</p>
+                    <div class="bundle-list-prices">
+                      <span>Normal {{ formatRupiah(bundle.harga_normal) }}</span>
+                      <span>Potongan {{ formatRupiah(bundle.potongan) }}</span>
+                      <strong>{{ formatRupiah(bundle.harga_bundle) }}</strong>
+                    </div>
+                  </div>
+                  <div class="bundle-list-actions">
+                    <button type="button" class="outline-button" (click)="editBundle(bundle)">Edit</button>
+                    <button type="button" class="outline-button" (click)="toggleBundleStatus(bundle)">{{ bundle.status
+                      === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                    <button type="button" class="outline-button delete-button"
+                      (click)="deleteBundle(bundle)">Hapus</button>
+                  </div>
+                </article>
+                }
+              </div>
+              }
+            </section>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="outline-button large" (click)="closeBundleManager()">Tutup</button>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
+    }
 
     <!-- =====================================================
        DETAIL MODAL
@@ -492,7 +734,7 @@
               </h2>
             </div>
 
-            <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
+            <button type="button" class="close-button" aria-label="Tutup" (click)="closeDetail()">
               ×
             </button>
 
@@ -520,6 +762,12 @@
                 </strong>
               </div>
 
+              <div *ngIf="selectedProperty.googleMapsLink">
+                <span>Link Google Maps</span>
+                <strong><a [href]="selectedProperty.googleMapsLink" target="_blank" rel="noopener noreferrer">Buka
+                    lokasi di Google Maps</a></strong>
+              </div>
+
               <div>
                 <span>Telepon</span>
                 <strong>
@@ -535,6 +783,21 @@
               </div>
 
               <div>
+                <span>Nama Bank</span>
+                <strong>{{ selectedProperty.bankName || 'Belum diisi' }}</strong>
+              </div>
+
+              <div>
+                <span>Nomor Rekening</span>
+                <strong>{{ selectedProperty.accountNumber || 'Belum diisi' }}</strong>
+              </div>
+
+              <div>
+                <span>Nama Pemilik Rekening</span>
+                <strong>{{ selectedProperty.accountHolder || 'Belum diisi' }}</strong>
+              </div>
+
+              <div>
                 <span>Jumlah Lantai</span>
                 <strong>
                   {{ selectedProperty.floors }} lantai
@@ -546,6 +809,27 @@
                 <strong>
                   {{ formatRupiah(selectedProperty.deposit) }}
                 </strong>
+              </div>
+
+              <div>
+                <span>Interval Denda</span>
+                <strong>Setiap {{ selectedProperty.intervalDendaHari }} hari</strong>
+              </div>
+
+              <div>
+                <span>Nominal Denda</span>
+                <strong>{{ selectedProperty.nominalDenda > 0 ? formatRupiah(selectedProperty.nominalDenda) : 'Tidak
+                  dikenakan denda' }}</strong>
+              </div>
+
+              <div>
+                <span>Pembayaran Cicilan</span>
+                <strong>{{ selectedProperty.bisaDicicil ? 'Diperbolehkan' : 'Tidak diperbolehkan' }}</strong>
+              </div>
+
+              <div>
+                <span>Paket Bundle</span>
+                <strong>{{ selectedProperty.bundleEnabled ? 'Aktif' : 'Tidak aktif' }}</strong>
               </div>
 
               <div>
@@ -572,11 +856,7 @@
 
           <div class="modal-footer">
 
-            <button class="outline-button large" (click)="closeDetail(); navigate('rooms')">
-              Kelola Kamar
-            </button>
-
-            <button class="primary-button large" (click)="closeDetail(); navigate('financial-analysis')">
+            <button type="button" class="primary-button large" (click)="openFinancialAnalysis(selectedProperty)">
               Analisis Keuangan
             </button>
 

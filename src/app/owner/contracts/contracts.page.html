@@ -14,7 +14,7 @@
     <div class="summary-grid">
 
       <div class="summary-card">
-        <div class="summary-value active">
+        <div class="summary-value">
           {{ activeCount }}
         </div>
         <div class="summary-label">
@@ -23,7 +23,7 @@
       </div>
 
       <div class="summary-card">
-        <div class="summary-value completed">
+        <div class="summary-value">
           {{ completedCount }}
         </div>
         <div class="summary-label">
@@ -32,7 +32,7 @@
       </div>
 
       <div class="summary-card">
-        <div class="summary-value cancelled">
+        <div class="summary-value">
           {{ cancelledCount }}
         </div>
         <div class="summary-label">
@@ -41,7 +41,7 @@
       </div>
 
       <div class="summary-card">
-        <div class="summary-value waiting">
+        <div class="summary-value">
           {{ waitingPaymentCount }}
         </div>
         <div class="summary-label">
@@ -51,6 +51,46 @@
 
     </div>
 
+
+    <!-- REQUESTS FOR EARLY MOVE-OUT -->
+    <section class="exit-requests-section">
+      <div class="exit-requests-heading">
+        <div>
+          <h2>Permintaan Keluar Penghuni</h2>
+          <p>Penghuni dapat mengajukan keluar lebih awal atau meminta konfirmasi keluar saat masa kontrak mencapai tanggal akhir.</p>
+        </div>
+        <span class="exit-request-count">{{ pendingExitRequestCount }} menunggu</span>
+      </div>
+
+      <div class="exit-requests-empty" *ngIf="exitRequests.length === 0">
+        Tidak ada permintaan keluar yang menunggu verifikasi.
+      </div>
+
+      <div class="exit-request-list" *ngIf="exitRequests.length > 0">
+        <article class="exit-request-item" *ngFor="let request of exitRequests">
+          <div class="exit-request-main">
+            <div class="exit-request-title">
+              <strong>{{ request.tenantName }}</strong>
+              <span class="exit-request-status" [class.waiting]="request.status === 'menunggu'"
+                [class.approved]="request.status === 'disetujui'" [class.rejected]="request.status === 'ditolak'">
+                {{ getExitRequestStatusLabel(request.status) }}
+              </span>
+            </div>
+            <p>{{ request.contractNumber }} · {{ request.propertyName }} · Kamar {{ request.roomNumber }}</p>
+            <p>Rencana keluar: <strong>{{ request.plannedDate | date:'dd MMM yyyy' }}</strong></p>
+            <p class="exit-request-reason">Alasan: {{ request.reason }}</p>
+            <p class="exit-request-note" *ngIf="request.ownerNote">Catatan owner: {{ request.ownerNote }}</p>
+          </div>
+          <div class="exit-request-actions">
+            <button type="button" class="outline-button" (click)="openContractFromRequest(request)">Detail Kontrak</button>
+            <button type="button" class="verify-button" *ngIf="request.status === 'menunggu'"
+              (click)="decideExitRequest(request, 'disetujui')">Setujui</button>
+            <button type="button" class="reject-button" *ngIf="request.status === 'menunggu'"
+              (click)="decideExitRequest(request, 'ditolak')">Tolak</button>
+          </div>
+        </article>
+      </div>
+    </section>
 
     <!-- TABS -->
     <div class="tabs">
@@ -80,24 +120,22 @@
 
 
     <!-- SEARCH -->
-    <div class="search-wrapper">
-
-      <div class="search-box">
-
-        <span class="search-icon">
-          <ion-icon name="search-outline"></ion-icon>
-        </span>
-
-        <input type="text" [(ngModel)]="search" placeholder="Cari nomor kontrak atau penghuni..." />
-
-        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
-          ×
-        </button>
-
+        <div class="property-filter-controls">
+      <div class="search-wrapper">
+        <div class="search-box">
+          <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+          <input type="text" [(ngModel)]="search" placeholder="Cari nomor kontrak atau penghuni..." />
+          <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">×</button>
+        </div>
       </div>
-
+      <div class="property-filter">
+        <label for="contracts-property-filter">Filter kos</label>
+        <select id="contracts-property-filter" class="property-filter-select" [(ngModel)]="selectedPropertyId">
+          <option value="all">Semua Kos</option>
+          <option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</option>
+        </select>
+      </div>
     </div>
-
 
     <!-- TABLE -->
     <div class="table-card">
@@ -110,7 +148,7 @@
             <tr>
               <th>No. Kontrak</th>
               <th>Penghuni</th>
-              <th>Properti</th>
+              <th>Kos</th>
               <th>Kamar</th>
               <th>Mulai</th>
               <th>Berakhir</th>
@@ -169,7 +207,7 @@
 
               <td>
                 <span class="date-text">
-                  {{ contract.duration }} bulan
+                  {{ contract.bundleName ? (contract.bundleName + ' · ' + contract.duration + ' bulan') : (contract.duration + ' bulan') }}
                 </span>
               </td>
 
@@ -225,11 +263,12 @@
   </div>
 
 
-  <!-- DETAIL MODAL -->
-  <ion-modal class="owner-page-modal owner-page-modal--large" *ngIf="selectedContract" [isOpen]="true" (didDismiss)="closeDetail()">
+  <!-- DETAIL DAN KONFIRMASI BERBAGI MODAL YANG SAMA AGAR BACKDROP KONSISTEN -->
+  <ion-modal #contractDetailModal class="owner-page-modal owner-page-modal--large"
+    [isOpen]="!!selectedContract" [backdropDismiss]="!endingContract" (didDismiss)="closeDetail()">
     <ng-template>
 
-    <div class="modal">
+    <div class="modal" *ngIf="!showEndConfirmationModal">
 
       <!-- MODAL HEADER -->
       <div class="modal-header">
@@ -337,7 +376,7 @@
           <div class="detail-box">
 
             <div class="section-title">
-              Properti & Kamar
+              Kos & Kamar
             </div>
 
             <div class="box-title">
@@ -402,40 +441,214 @@
 
           </div>
 
+          <ng-container *ngIf="selectedContract.bundleName">
+            <div class="info-row">
+              <span class="info-label">Paket Bundle</span>
+              <span class="info-value">{{ selectedContract.bundleName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Harga Normal Paket</span>
+              <span class="info-value">{{ formatRupiah(selectedContract.bundleNormalPrice) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Potongan Bundle</span>
+              <span class="info-value">−{{ formatRupiah(selectedContract.bundleDiscount) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Harga Bundle (Lunas)</span>
+              <span class="info-value rental-highlight">{{ formatRupiah(selectedContract.bundlePrice) }}</span>
+            </div>
+          </ng-container>
+
           <div class="info-row">
+            <span class="info-label">Deposit</span>
+            <span class="info-value">{{ formatRupiah(selectedContract.deposit) }}</span>
+          </div>
 
-            <span class="info-label">
-              Deposit
-            </span>
+          <div class="info-row" *ngIf="selectedContract.checkoutDate">
+            <span class="info-label">Tanggal Keluar Aktual</span>
+            <span class="info-value">{{ formatDate(selectedContract.checkoutDate) }}</span>
+          </div>
 
-            <span class="info-value">
-              {{ formatRupiah(selectedContract.deposit) }}
-            </span>
+          <div class="info-row" *ngIf="selectedContract.terminationReason">
+            <span class="info-label">Alasan Pengakhiran</span>
+            <span class="info-value">{{ getTerminationLabel(selectedContract.terminationReason) }}</span>
+          </div>
 
+          <div class="info-row" *ngIf="selectedContract.terminationNote">
+            <span class="info-label">Catatan Pengakhiran</span>
+            <span class="info-value">{{ selectedContract.terminationNote }}</span>
           </div>
 
         </div>
 
 
-        <!-- ACTIONS -->
-        <div class="modal-actions">
+        <!-- DOKUMEN KONTRAK -->
+        <section class="contract-document-card">
+          <div class="contract-document-top">
+            <div class="contract-pdf-icon" aria-hidden="true">PDF</div>
+            <div class="contract-document-info">
+              <h3>Dokumen Kontrak</h3>
+              <p>Dokumen PDF resmi berdasarkan data kontrak ini. Unduh untuk disimpan sebagai arsip.</p>
+              <div class="contract-document-meta">
+                <span>{{ selectedContract.number }}</span>
+                <span class="document-format">PDF</span>
+              </div>
+            </div>
+          </div>
 
-          <button type="button" class="outline-button" (click)="downloadContract()">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg> Download Kontrak
+          <div class="contract-document-actions">
+            <button type="button" class="primary-button" (click)="downloadContract()"
+              [disabled]="downloadingContract">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg>
+              {{ downloadingContract ? 'Menyiapkan PDF...' : 'Download PDF' }}
+            </button>
+          </div>
+
+          <p class="contract-document-error" *ngIf="contractDownloadError" role="alert">{{ contractDownloadError }}</p>
+          <p class="contract-document-notice" *ngIf="contractDownloadNotice" role="status">{{ contractDownloadNotice }}</p>
+
+        </section>
+
+        <!-- CHECK-OUT / END CONTRACT -->
+        <div class="modal-actions contract-end-actions" *ngIf="selectedContract.status === 'AKTIF'">
+          <button type="button" class="danger-button" (click)="endContract()">
+            {{ showEndContractForm ? 'Tutup Form Pengakhiran' : 'Akhiri Kontrak / Konfirmasi Keluar' }}
           </button>
-
-          <button *ngIf="selectedContract.status === 'AKTIF'" type="button" class="danger-button"
-            (click)="endContract()">
-            Akhiri Kontrak
-          </button>
-
         </div>
+
+        <section class="end-contract-form" *ngIf="showEndContractForm && selectedContract.status === 'AKTIF'">
+          <div class="end-contract-form-heading">
+            <h3>Konfirmasi Penghuni Keluar</h3>
+            <p>Gunakan proses ini setelah penghuni benar-benar meninggalkan kamar. Sistem akan menyelesaikan kontrak dan memperbarui status kamar.</p>
+          </div>
+
+          <div class="end-contract-fields">
+            <label class="end-date-picker-field">
+              <span>Tanggal Keluar</span>
+              <input type="date" name="tgl_keluar" [(ngModel)]="endForm.tgl_keluar"
+                [max]="todayDate" [disabled]="endingContract"
+                aria-label="Pilih tanggal keluar penghuni" />
+            </label>
+            <label>
+              <span>Alasan Pengakhiran</span>
+              <select [(ngModel)]="endForm.alasan_pengakhiran">
+                <option value="kontrak_berakhir">Masa kontrak berakhir</option>
+                <option value="permintaan_penghuni" *ngIf="hasApprovedExitRequest(selectedContract.id)">Permintaan penghuni yang disetujui</option>
+                <option value="keputusan_owner">Keputusan owner / penghuni dikeluarkan</option>
+              </select>
+            </label>
+            <label class="end-note-field">
+              <span>Catatan (opsional)</span>
+              <textarea rows="2" maxlength="255" [(ngModel)]="endForm.catatan_pengakhiran"
+                placeholder="Contoh: kamar sudah diperiksa dan kunci dikembalikan."></textarea>
+            </label>
+          </div>
+
+          <p class="end-contract-warning" *ngIf="endForm.alasan_pengakhiran === 'keputusan_owner'">
+            Pastikan pengakhiran lebih awal sudah sesuai kesepakatan dan ketentuan sewa.
+          </p>
+          <p class="end-contract-error" *ngIf="endContractError" role="alert">{{ endContractError }}</p>
+
+          <div class="end-contract-form-actions">
+            <button type="button" class="outline-button" (click)="showEndContractForm = false" [disabled]="endingContract">Batal</button>
+            <button type="button" class="danger-button" (click)="submitEndContract()" [disabled]="endingContract">
+              {{ endingContract ? 'Memproses...' : 'Konfirmasi Penghuni Keluar' }}
+            </button>
+          </div>
+        </section>
 
       </div>
 
     </div>
 
-  </div>
+    </div>
+
+    <div class="modal end-contract-confirmation-modal" *ngIf="showEndConfirmationModal">
+      <div class="modal-header">
+        <div>
+          <h2>Konfirmasi Penghuni Keluar</h2>
+          <p>Periksa kembali informasi sebelum mengakhiri kontrak.</p>
+        </div>
+        <button type="button" class="close-button" aria-label="Tutup konfirmasi"
+          (click)="showEndConfirmationModal = false" [disabled]="endingContract">×</button>
+      </div>
+
+      <div class="modal-body end-contract-confirmation-body">
+        <div class="action-confirmation-modal end-contract-confirmation-content">
+          <div class="action-confirmation-icon danger">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+          </div>
+          <h2>Apakah kamu yakin?</h2>
+          <p>Kontrak akan diubah menjadi status <strong>Selesai</strong>. Status kamar juga akan diperbarui menjadi tersedia apabila tidak ada kontrak aktif lainnya.</p>
+          <div class="action-confirmation-summary">
+            <span>Tanggal keluar</span>
+            <strong>{{ endForm.tgl_keluar | date:'dd MMMM yyyy' }}</strong>
+          </div>
+          <p class="action-confirmation-error" *ngIf="endConfirmationError" role="alert">{{ endConfirmationError }}</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="outline-button" (click)="showEndConfirmationModal = false"
+          [disabled]="endingContract">Batal</button>
+        <button type="button" class="danger-button" (click)="confirmEndContract()" [disabled]="endingContract">
+          {{ endingContract ? 'Memproses...' : 'Ya, Akhiri Kontrak' }}
+        </button>
+      </div>
+    </div>
+
   </ng-template>
+  </ion-modal>
+
+  <!-- MODAL KONFIRMASI PERSETUJUAN / PENOLAKAN PERMINTAAN KELUAR -->
+  <ion-modal class="owner-page-modal owner-page-modal--small" [isOpen]="showExitDecisionModal"
+    [backdropDismiss]="!processingExitDecision" (didDismiss)="onExitDecisionModalDismiss()">
+    <ng-template>
+      <div class="action-confirmation-modal">
+        <div class="action-confirmation-icon" [class.danger]="pendingExitDecision?.status === 'ditolak'">
+          <ion-icon [name]="pendingExitDecision?.status === 'ditolak' ? 'close-circle-outline' : 'log-out-outline'"></ion-icon>
+        </div>
+        <h2>{{ pendingExitDecision?.status === 'ditolak' ? 'Tolak Permintaan Keluar?' : 'Setujui Permintaan Keluar?' }}</h2>
+        <p *ngIf="pendingExitDecision">
+          {{ pendingExitDecision.status === 'ditolak' ? 'Permintaan keluar dari ' : 'Persetujuan ini akan mengakhiri kontrak ' }}
+          <strong>{{ pendingExitDecision.item.tenantName }}</strong>
+          {{ pendingExitDecision.status === 'ditolak' ? ' akan ditolak dan kontrak tetap aktif.' : ' dan memperbarui status kamar jika tidak ada kontrak aktif lainnya.' }}
+        </p>
+        <label class="action-confirmation-note" *ngIf="pendingExitDecision?.status === 'ditolak'">
+          <span>Catatan untuk penghuni (opsional)</span>
+          <textarea rows="3" maxlength="255" [(ngModel)]="exitDecisionNote"
+            placeholder="Tuliskan alasan penolakan jika diperlukan"></textarea>
+        </label>
+        <p class="action-confirmation-error" *ngIf="exitDecisionError" role="alert">{{ exitDecisionError }}</p>
+        <div class="action-confirmation-actions">
+          <button type="button" class="outline-button" (click)="showExitDecisionModal = false"
+            [disabled]="processingExitDecision">Batal</button>
+          <button type="button" [class.danger-button]="pendingExitDecision?.status === 'ditolak'"
+            [class.primary-button]="pendingExitDecision?.status !== 'ditolak'"
+            (click)="confirmExitRequestDecision()" [disabled]="processingExitDecision || !pendingExitDecision">
+            {{ processingExitDecision ? 'Memproses...' : (pendingExitDecision?.status === 'ditolak' ? 'Ya, Tolak' : 'Ya, Setujui') }}
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL INFORMASI HASIL TINDAKAN -->
+  <ion-modal class="owner-page-modal owner-page-modal--small" [isOpen]="showFeedbackModal"
+    [backdropDismiss]="true" (didDismiss)="closeFeedbackModal()">
+    <ng-template>
+      <div class="action-confirmation-modal feedback-modal-content">
+        <div class="action-confirmation-icon" [class.danger]="feedbackType === 'error'"
+          [class.info]="feedbackType === 'info'">
+          <ion-icon [name]="feedbackType === 'error' ? 'alert-circle-outline' : (feedbackType === 'info' ? 'information-circle-outline' : 'checkmark-circle-outline')"></ion-icon>
+        </div>
+        <h2>{{ feedbackTitle }}</h2>
+        <p>{{ feedbackMessage }}</p>
+        <div class="action-confirmation-actions single-action">
+          <button type="button" class="primary-button" (click)="closeFeedbackModal()">Tutup</button>
+        </div>
+      </div>
+    </ng-template>
   </ion-modal>
 </div>

@@ -32,60 +32,77 @@
       <p class="summary-label">Ditolak</p>
     </div>
 
+    <div class="summary-card">
+      <p class="summary-value">{{ cancelledCount }}</p>
+      <p class="summary-label">Dibatalkan</p>
+    </div>
+
   </div>
 
 
   <!-- Tabs -->
   <div class="tabs-container">
 
-    <button class="tab-button" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
+    <button type="button" class="tab-button" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
       Semua
       <span class="tab-count">
         {{ totalCount }}
       </span>
     </button>
 
-    <button class="tab-button" [class.active]="activeTab === 'MENUNGGU'" (click)="activeTab = 'MENUNGGU'">
+    <button type="button" class="tab-button" [class.active]="activeTab === 'MENUNGGU'" (click)="activeTab = 'MENUNGGU'">
       Menunggu
       <span class="tab-count">
         {{ waitingCount }}
       </span>
     </button>
 
-    <button class="tab-button" [class.active]="activeTab === 'DISETUJUI'" (click)="activeTab = 'DISETUJUI'">
+    <button type="button" class="tab-button" [class.active]="activeTab === 'DISETUJUI'" (click)="activeTab = 'DISETUJUI'">
       Disetujui
       <span class="tab-count">
         {{ approvedCount }}
       </span>
     </button>
 
-    <button class="tab-button" [class.active]="activeTab === 'DITOLAK'" (click)="activeTab = 'DITOLAK'">
+    <button type="button" class="tab-button" [class.active]="activeTab === 'DITOLAK'" (click)="activeTab = 'DITOLAK'">
       Ditolak
       <span class="tab-count">
         {{ rejectedCount }}
       </span>
     </button>
 
+    <button type="button" class="tab-button" [class.active]="activeTab === 'DIBATALKAN'" (click)="activeTab = 'DIBATALKAN'">
+      Dibatalkan
+      <span class="tab-count">{{ cancelledCount }}</span>
+    </button>
+
   </div>
 
 
-  <!-- Search -->
-  <div class="search-container">
+  <!-- Search dan filter kos -->
+  <div class="property-filter-controls">
+    <div class="search-container">
 
-    <div class="search-box">
+      <div class="search-box">
 
       <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
 
       <input type="text" [(ngModel)]="search" placeholder="Cari nama atau kode..." />
 
-      <button *ngIf="search" class="clear-search" (click)="search = ''">
+      <button type="button" *ngIf="search" class="clear-search" (click)="search = ''">
         ×
       </button>
 
+      </div>
     </div>
-
+    <div class="property-filter">
+      <label for="registrations-property-filter">Filter kos</label>
+      <select id="registrations-property-filter" class="property-filter-select" [(ngModel)]="selectedPropertyId">
+        <option value="all">Semua Kos</option>
+        <option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</option>
+      </select>
+    </div>
   </div>
-
 
   <!-- Registration Table -->
   <div class="table-card">
@@ -102,7 +119,7 @@
             <th>Kamar</th>
             <th>Tgl Daftar</th>
             <th>Rencana Masuk</th>
-            <th>Durasi</th>
+            <th>Durasi / Paket</th>
             <th>Status</th>
             <th>Aksi</th>
           </tr>
@@ -174,7 +191,7 @@
 
             <td>
               <span class="date-text">
-                {{ reg.duration }} bulan
+                {{ reg.bundleName ? (reg.bundleName + ' · ' + reg.duration + ' bulan') : (reg.duration + ' bulan') }}
               </span>
             </td>
 
@@ -185,12 +202,15 @@
               <span class="status-badge" [ngClass]="{
                   'status-waiting': reg.status === 'MENUNGGU',
                   'status-approved': reg.status === 'DISETUJUI',
-                  'status-rejected': reg.status === 'DITOLAK'
+                  'status-rejected': reg.status === 'DITOLAK',
+                  'status-cancelled': reg.status === 'DIBATALKAN'
                 }">
                 {{ reg.status === 'MENUNGGU'
                 ? 'Menunggu'
                 : reg.status === 'DISETUJUI'
                 ? 'Disetujui'
+                : reg.status === 'DIBATALKAN'
+                ? 'Dibatalkan'
                 : 'Ditolak'
                 }}
               </span>
@@ -203,11 +223,11 @@
 
               <div *ngIf="reg.status === 'MENUNGGU'; else detailButton" class="action-buttons">
 
-                <button class="action-button approve" (click)="openConfirm(reg, 'approve')">
+                <button type="button" class="action-button approve" (click)="openConfirm(reg, 'approve')">
                   Setujui
                 </button>
 
-                <button class="action-button reject" (click)="openConfirm(reg, 'reject')">
+                <button type="button" class="action-button reject" (click)="openConfirm(reg, 'reject')">
                   Tolak
                 </button>
 
@@ -216,7 +236,7 @@
 
               <ng-template #detailButton>
 
-                <button class="detail-button" (click)="selectRegistration(reg)">
+                <button type="button" class="detail-button" (click)="selectRegistration(reg)">
                   Detail
                 </button>
 
@@ -266,7 +286,7 @@
           <h2>Detail Pendaftaran</h2>
         </div>
 
-        <button class="modal-close" aria-label="Tutup" (click)="closeDetail()">
+        <button type="button" class="modal-close" aria-label="Tutup" (click)="closeDetail()">
           ×
         </button>
 
@@ -296,12 +316,15 @@
           <span class="status-badge" [ngClass]="{
             'status-waiting': selected.status === 'MENUNGGU',
             'status-approved': selected.status === 'DISETUJUI',
-            'status-rejected': selected.status === 'DITOLAK'
+            'status-rejected': selected.status === 'DITOLAK',
+            'status-cancelled': selected.status === 'DIBATALKAN'
           }">
             {{ selected.status === 'MENUNGGU'
             ? 'Menunggu'
             : selected.status === 'DISETUJUI'
             ? 'Disetujui'
+            : selected.status === 'DIBATALKAN'
+            ? 'Dibatalkan'
             : 'Ditolak'
             }}
           </span>
@@ -339,6 +362,44 @@
 
           </div>
 
+          <div class="ktp-action-row">
+            <button
+              *ngIf="getTenant(selected)?.hasKtp; else noRegistrationKtp"
+              type="button"
+              class="ktp-view-button"
+              (click)="toggleKtpPreview(selected.id)"
+              [disabled]="ktpLoading"
+            >
+              {{ ktpLoading ? 'Memuat...' : (ktpPreviewForId === selected.id && (ktpPreviewUrl || ktpErrorMessage) ? 'Sembunyikan KTP' : 'Lihat Foto KTP') }}
+            </button>
+            <ng-template #noRegistrationKtp>
+              <span class="ktp-missing">Dokumen KTP belum tersedia.</span>
+            </ng-template>
+          </div>
+
+          <div class="ktp-inline-preview" *ngIf="ktpPreviewForId === selected.id && (ktpLoading || ktpPreviewUrl || ktpErrorMessage)">
+            <div class="ktp-inline-preview-header">
+              <strong>Dokumen KTP</strong>
+              <button type="button" class="ktp-inline-close" (click)="closeKtpPreview()">Tutup</button>
+            </div>
+            <div class="ktp-inline-message" *ngIf="ktpLoading">Memuat foto KTP...</div>
+            <div class="ktp-inline-message ktp-inline-error" *ngIf="!ktpLoading && ktpErrorMessage">{{ ktpErrorMessage }}</div>
+            <img
+              *ngIf="!ktpLoading && ktpPreviewUrl && ktpPreviewMimeType.startsWith('image/')"
+              class="ktp-inline-image"
+              [src]="ktpPreviewUrl"
+              alt="Foto KTP calon penghuni"
+            />
+            <iframe
+              *ngIf="!ktpLoading && ktpPreviewUrl && ktpPreviewMimeType === 'application/pdf'"
+              class="ktp-inline-pdf"
+              [src]="ktpPreviewSafeUrl"
+              title="Dokumen KTP PDF"
+            ></iframe>
+            <div class="ktp-inline-message ktp-inline-error" *ngIf="!ktpLoading && ktpPreviewUrl && !ktpPreviewMimeType.startsWith('image/') && ktpPreviewMimeType !== 'application/pdf'">
+              Format dokumen tidak didukung untuk pratinjau.
+            </div>
+          </div>
 
           <div class="info-list">
 
@@ -367,19 +428,6 @@
                 ? 'Laki-laki'
                 : 'Perempuan'
                 }}
-              </span>
-
-            </div>
-
-
-            <div class="info-row">
-
-              <span class="info-label">
-                Alamat
-              </span>
-
-              <span class="info-value">
-                {{ getTenant(selected)?.address }}
               </span>
 
             </div>
@@ -471,21 +519,40 @@
             </div>
 
             <div class="info-row">
-
-              <span class="info-label">
-                Durasi Sewa
-              </span>
-
-              <span class="info-value">
-                {{ selected.duration }} bulan
-              </span>
-
+              <span class="info-label">Durasi Sewa</span>
+              <span class="info-value">{{ selected.duration }} bulan</span>
             </div>
+
+            <ng-container *ngIf="selected.bundleName">
+              <div class="info-row">
+                <span class="info-label">Paket Bundle</span>
+                <span class="info-value">{{ selected.bundleName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Harga Normal Paket</span>
+                <span class="info-value">{{ formatRupiah(selected.bundleNormalPrice) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Potongan Bundle</span>
+                <span class="info-value price">−{{ formatRupiah(selected.bundleDiscount) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Harga Bundle (Lunas)</span>
+                <span class="info-value price">{{ formatRupiah(selected.bundlePrice) }}</span>
+              </div>
+            </ng-container>
 
           </div>
 
         </div>
 
+
+        <!-- Cancellation details -->
+        <div *ngIf="selected.status === 'DIBATALKAN'" class="notes-section cancellation-detail-note">
+          <p class="notes-title">Informasi Pembatalan</p>
+          <p class="notes-text" *ngIf="selected.cancellationDate">Tanggal pembatalan: {{ formatDate(selected.cancellationDate) }}</p>
+          <p class="notes-text" *ngIf="selected.cancellationReason">Alasan: {{ selected.cancellationReason }}</p>
+        </div>
 
         <!-- Notes -->
         <div *ngIf="selected.notes" class="notes-section">
@@ -504,11 +571,11 @@
         <!-- Action Buttons -->
         <div *ngIf="selected.status === 'MENUNGGU'" class="modal-actions">
 
-          <button class="modal-action reject" (click)="openConfirm(selected, 'reject')">
+          <button type="button" class="modal-action reject" (click)="openConfirm(selected, 'reject')">
             Tolak Pendaftaran
           </button>
 
-          <button class="modal-action approve" (click)="openConfirm(selected, 'approve')">
+          <button type="button" class="modal-action approve" (click)="openConfirm(selected, 'approve')">
             Setujui Pendaftaran
           </button>
 
@@ -522,81 +589,47 @@
   </ion-modal>
 
   <!-- ===================================================== -->
-  <!-- CONFIRMATION MODAL -->
+  <!-- CONFIRMATION MODAL FULL SCREEN -->
   <!-- ===================================================== -->
-
-  <ion-modal class="owner-page-modal owner-page-modal--small" *ngIf="confirmAction" [isOpen]="true"
-    (didDismiss)="closeConfirm()">
+  <ion-modal #registrationConfirmModal class="owner-page-modal registration-confirm-overlay-modal"
+    (didDismiss)="onConfirmDidDismiss()" [backdropDismiss]="false">
     <ng-template>
+      @if (confirmAction) {
+      <div class="registration-confirm-screen" role="button" tabindex="0"
+        aria-label="Tutup konfirmasi pendaftaran" (click)="closeConfirm()"
+        (keydown.enter)="closeConfirm()" (keydown.space)="closeConfirm()">
+        <div class="registration-confirm-card" (click)="$event.stopPropagation()">
+          <div class="confirm-content">
+            <div class="confirm-icon">
+              {{ confirmAction.action === 'approve' ? '✓' : '×' }}
+            </div>
+            <h3>
+              {{ confirmAction.action === 'approve' ? 'Setujui Pendaftaran?' : 'Tolak Pendaftaran?' }}
+            </h3>
+            <p>
+              {{ confirmAction.action === 'approve'
+                ? 'Pendaftaran akan disetujui dan pesanan akan dibuat otomatis.'
+                : 'Pendaftaran akan ditolak dan penghuni akan diberitahu.' }}
+            </p>
 
-    <div class="modal modal-small">
+            @if (confirmErrorMessage) {
+              <p class="confirm-error-message" role="alert">{{ confirmErrorMessage }}</p>
+            }
 
-      <div class="confirm-content">
-
-        <!-- Icon -->
-        <div class="confirm-icon">
-
-          {{
-          confirmAction.action === 'approve'
-          ? '✓'
-          : '×'
-          }}
-
+            <div class="confirm-actions">
+              <button type="button" class="confirm-button cancel" (click)="closeConfirm()"
+                [disabled]="isProcessingAction">Batal</button>
+              <button type="button" class="confirm-button" [ngClass]="{
+                'confirm-approve': confirmAction.action === 'approve',
+                'confirm-reject': confirmAction.action === 'reject'
+              }" (click)="handleAction()" [disabled]="isProcessingAction">
+                {{ isProcessingAction ? 'Memproses...' : (confirmAction.action === 'approve' ? 'Ya, Setujui' : 'Ya, Tolak') }}
+              </button>
+            </div>
+          </div>
         </div>
-
-        <!-- Title -->
-        <h3>
-
-          {{
-          confirmAction.action === 'approve'
-          ? 'Setujui Pendaftaran?'
-          : 'Tolak Pendaftaran?'
-          }}
-
-        </h3>
-
-
-        <!-- Description -->
-        <p>
-
-          {{
-          confirmAction.action === 'approve'
-          ? 'Pendaftaran akan disetujui dan pesanan akan dibuat otomatis.'
-          : 'Pendaftaran akan ditolak dan penghuni akan diberitahu.'
-          }}
-
-        </p>
-
-
-        <!-- Buttons -->
-        <div class="confirm-actions">
-
-          <button class="confirm-button cancel" (click)="closeConfirm()">
-            Batal
-          </button>
-
-
-          <button class="confirm-button" [ngClass]="{
-            'confirm-approve':
-              confirmAction.action === 'approve',
-            'confirm-reject':
-              confirmAction.action === 'reject'
-          }" (click)="handleAction()">
-
-            {{
-            confirmAction.action === 'approve'
-            ? 'Ya, Setujui'
-            : 'Ya, Tolak'
-            }}
-
-          </button>
-
-        </div>
-
       </div>
-
-    </div>
-
+      }
     </ng-template>
   </ion-modal>
 </div>

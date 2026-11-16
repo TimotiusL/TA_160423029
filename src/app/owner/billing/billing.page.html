@@ -18,6 +18,33 @@
     </div>
 
 
+    <section class="cicilan-review-panel" *ngIf="pengajuanCicilanMenunggu.length">
+      <div class="cicilan-review-heading">
+        <div>
+          <h2>Pengajuan Cicilan Menunggu Persetujuan</h2>
+          <p>Periksa jumlah angsuran dan alasan penghuni sebelum menyetujui jadwal.</p>
+        </div>
+        <span>{{ pengajuanCicilanMenunggu.length }} pengajuan</span>
+      </div>
+      <article class="cicilan-review-item" *ngFor="let item of pengajuanCicilanMenunggu">
+        <div class="cicilan-review-main">
+          <strong>{{ item.tagihan?.kontrak?.penghuni?.user?.nama || 'Penghuni' }}</strong>
+          <span>{{ item.tagihan?.kode_tagihan }} · {{ item.tagihan?.kontrak?.kamar?.kos?.nama_kos || 'Kos' }}</span>
+          <p>{{ item.alasan }}</p>
+        </div>
+        <div class="cicilan-review-side">
+          <strong>{{ cicilanNominalRupiah(item) }}</strong>
+          <span>Diminta {{ item.jumlah_cicilan }} kali cicilan</span>
+          <div class="cicilan-review-actions">
+            <button type="button" class="approve-cicilan" (click)="putuskanCicilan(item, 'disetujui')" [disabled]="processingCicilanId !== null">
+              {{ processingCicilanId === item.id_persetujuanCicilan ? 'Memproses...' : 'Setujui' }}
+            </button>
+            <button type="button" class="reject-cicilan" (click)="putuskanCicilan(item, 'ditolak')" [disabled]="processingCicilanId !== null">Tolak</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
     <!-- =========================
        SUMMARY
   ========================= -->
@@ -130,24 +157,22 @@
        SEARCH
   ========================= -->
 
-    <div class="search-wrapper">
-
-      <div class="search-box">
-
-        <span class="search-icon">
-          <ion-icon name="search-outline"></ion-icon>
-        </span>
-
-        <input type="text" [(ngModel)]="search" placeholder="Cari nomor tagihan atau nama penghuni..." />
-
-        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
-          ×
-        </button>
-
+        <div class="property-filter-controls">
+      <div class="search-wrapper">
+        <div class="search-box">
+          <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+          <input type="text" [(ngModel)]="search" placeholder="Cari nomor tagihan atau nama penghuni..." />
+          <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">×</button>
+        </div>
       </div>
-
+      <div class="property-filter">
+        <label for="billing-property-filter">Filter kos</label>
+        <select id="billing-property-filter" class="property-filter-select" [(ngModel)]="selectedPropertyId">
+          <option value="all">Semua Kos</option>
+          <option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</option>
+        </select>
+      </div>
     </div>
-
 
     <!-- =========================
        TABLE
@@ -169,6 +194,10 @@
 
               <th>
                 Penghuni
+              </th>
+
+              <th>
+                Kos
               </th>
 
               <th>
@@ -227,6 +256,13 @@
 
 
               <td>
+                <span class="property-name">
+                  {{ getProperty(bill)?.name || '—' }}
+                </span>
+              </td>
+
+
+              <td>
                 <span class="room-name">
                   Kamar {{ getRoomNumber(bill) }}
                 </span>
@@ -248,9 +284,8 @@
 
 
               <td>
-                <span class="amount total">
-                  {{ formatRupiah(bill.total) }}
-                </span>
+                <span class="amount total">{{ formatRupiah(bill.totalDue) }}</span>
+                <small class="penalty-caption" *ngIf="bill.penalty > 0">Denda {{ formatRupiah(bill.penalty) }}</small>
               </td>
 
 
@@ -263,7 +298,7 @@
 
               <td>
                 <span class="amount remaining">
-                  {{ formatRupiah(bill.total - bill.paidAmount) }}
+                  {{ formatRupiah(bill.totalDue - bill.paidAmount) }}
                 </span>
               </td>
 
@@ -297,7 +332,7 @@
 
             <tr *ngIf="filteredBills.length === 0">
 
-              <td colspan="10">
+              <td colspan="11">
 
                 <div class="empty-state">
 
@@ -328,8 +363,8 @@
      DETAIL TAGIHAN MODAL
 ================================================== -->
 
-  <ion-modal class="owner-page-modal owner-page-modal--large" *ngIf="selectedBill" [isOpen]="true"
-    (didDismiss)="closeDetail()">
+  <ion-modal #detailModal class="owner-page-modal owner-page-modal--large" *ngIf="selectedBill" [isOpen]="true"
+    (didDismiss)="handleDetailDidDismiss()">
     <ng-template>
 
     <div class="modal large">
@@ -474,6 +509,11 @@
             </div>
 
 
+            <div class="paid-row" *ngIf="selectedBill.penalty > 0">
+              <span>Denda keterlambatan</span>
+              <strong>{{ formatRupiah(selectedBill.penalty) }}</strong>
+            </div>
+
             <!-- TOTAL -->
 
             <div class="total-row">
@@ -483,7 +523,7 @@
               </span>
 
               <strong>
-                {{ formatRupiah(selectedBill.total) }}
+                {{ formatRupiah(selectedBill.totalDue) }}
               </strong>
 
             </div>
@@ -514,7 +554,7 @@
 
               <strong>
                 {{ formatRupiah(
-                selectedBill.total -
+                selectedBill.totalDue -
                 selectedBill.paidAmount
                 ) }}
               </strong>
@@ -557,11 +597,6 @@
         <!-- ACTIONS -->
 
         <div class="modal-actions">
-
-          <button type="button" class="outline-button" (click)="sendReminder()">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg> Kirim Pengingat
-          </button>
-
 
           <button type="button" class="primary-button action-button" (click)="viewPayments()">
             Lihat Pembayaran

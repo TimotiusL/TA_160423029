@@ -1,0 +1,83 @@
+/* Admin shell: calm, legible management interface; visual-only. */
+@mixin shell {
+  :host {
+    --km-bg: #f6f7f5;
+    --km-ink: #1b2930;
+    --km-primary: #166c5f;
+    --km-border: #e0e6e3;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--km-ink);
+  }
+  :host .owner-layout { background: var(--km-bg); font-family: inherit; }
+  :host .sidebar { background: #17342d; color: #c9d9d1; }
+  :host .sidebar-header { height: 68px; border-bottom: 1px solid rgba(235,247,240,.10); }
+  :host .logo-box {
+    background: #e8f2ec;
+    color: #175b4e;
+    border-radius: 9px;
+    box-shadow: none;
+  }
+  :host .logo-text { font-size: 15px; letter-spacing: -.02em; font-weight: 730; }
+  :host .sidebar-navigation { padding: 14px 10px 24px; }
+  :host .nav-section { margin-bottom: 14px; }
+  :host .section-title {
+    color: #a5baae;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .09em;
+    padding: 8px 12px;
+  }
+  :host .nav-item {
+    min-height: 40px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #cfdfd7;
+    font-size: 12.5px;
+    font-weight: 530;
+    transition: color .15s ease, background-color .15s ease;
+  }
+  :host .nav-item:hover { color: #fff; background: #25463a; }
+  :host .nav-item.active { background: #2a614e; color: #fff; font-weight: 680; }
+  :host .nav-icon ion-icon { color: #abc3b7; }
+  :host .nav-item.active .nav-icon ion-icon,
+  :host .nav-item:hover .nav-icon ion-icon { color: #fff; }
+  :host .sidebar.collapsed .nav-item { min-height: 42px; }
+  :host .notification-badge { background: #af4b4b; }
+  :host .main-wrapper { background: var(--km-bg); }
+  :host .topbar {
+    height: 68px;
+    padding-inline: 26px;
+    border-bottom: 1px solid var(--km-border);
+    background: #fff;
+    box-shadow: none;
+  }
+  :host :is(.sidebar-toggle, .topbar-notification) {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    color: #577168;
+  }
+  :host :is(.sidebar-toggle, .topbar-notification):hover { background: #f1f6f2; color: #174b40; }
+  :host .topbar-user { color: var(--km-ink); font-size: 12px; }
+  :host .topbar-user:hover { background: #f1f6f2; }
+  :host .top-avatar {
+    background: #e8f2ec;
+    color: #175b4e;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 740;
+  }
+  :host .page-content { background: var(--km-bg); padding: 28px; }
+  :host :is(button, a):focus-visible { outline: 2px solid #52b19d; outline-offset: 3px; }
+  :host .sidebar-backdrop.visible { background: rgba(20,36,32,.52); }
+  @media (max-width: 768px) {
+    :host .topbar { height: 60px; padding-inline: 14px; }
+    :host .page-content { padding: 16px; }
+    :host .sidebar { width: min(280px, 86vw); }
+    :host .sidebar-header { height: 60px; }
+    :host .mobile-sidebar-close { width: 40px; height: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host * { transition-duration: .01ms !important; }
+  }
+}

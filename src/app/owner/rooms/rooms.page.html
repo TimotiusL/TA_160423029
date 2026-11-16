@@ -14,21 +14,21 @@
 
         <div class="view-switcher">
 
-          <button [class.active]="view === 'grid'" (click)="view = 'grid'">
+          <button type="button" [class.active]="view === 'grid'" (click)="view = 'grid'">
             Grid
           </button>
 
-          <button [class.active]="view === 'table'" (click)="view = 'table'">
+          <button type="button" [class.active]="view === 'table'" (click)="view = 'table'">
             Tabel
           </button>
 
-          <button [class.active]="view === 'visual'" (click)="view = 'visual'">
+          <button type="button" [class.active]="view === 'visual'" (click)="view = 'visual'">
             Visual
           </button>
 
         </div>
 
-        <button class="primary-button" (click)="openAdd()">
+        <button type="button" class="primary-button" (click)="openAdd()">
           Tambah Kamar
         </button>
 
@@ -144,7 +144,7 @@
       statusFilter
       ) {
 
-      <button class="reset-button" (click)="resetFilters()">
+      <button type="button" class="reset-button" (click)="resetFilters()">
         Reset
       </button>
 
@@ -185,7 +185,7 @@
 
             @for (room of group.rooms; track room.id) {
 
-            <button class="room-block" [class.available]="room.status === 'TERSEDIA'"
+            <button type="button" class="room-block" [class.available]="room.status === 'TERSEDIA'"
               [class.reserved]="room.status === 'DIPESAN'" [class.occupied]="room.status === 'TERISI'"
               (click)="openDetail(room)">
 
@@ -362,11 +362,11 @@
 
                 <div class="table-actions">
 
-                  <button (click)="openDetail(room); $event.stopPropagation()">
+                  <button type="button" (click)="openDetail(room); $event.stopPropagation()">
                     Detail
                   </button>
 
-                  <button (click)="editRoom(room); $event.stopPropagation()">
+                  <button type="button" (click)="editRoom(room); $event.stopPropagation()">
                     Edit
                   </button>
 
@@ -429,7 +429,7 @@
 
             </div>
 
-            <button class="close-button" aria-label="Tutup" (click)="closeDetail()">
+            <button type="button" class="close-button" aria-label="Tutup" (click)="closeDetail()">
               ×
             </button>
 
@@ -520,31 +520,24 @@
             </div>
 
 
-            @if (getType(selectedRoom)?.facilities?.length) {
-
             <div class="facilities">
+              <p>Fasilitas Kamar</p>
 
-              <p>
-                Fasilitas
-              </p>
-
+              @if (selectedRoom.facilities?.length) {
               <div>
-
-                @for (
-                facility of getType(selectedRoom)?.facilities;
-                track facility
-                ) {
-
+                @for (facility of selectedRoom.facilities; track facility.id) {
                 <span>
-                  {{ facility }}
+                  {{ facility.name }}
+                  ({{ facility.quantity }})
                 </span>
-
                 }
-
               </div>
+              } @else {
+              <p class="empty-facilities">
+                Belum ada fasilitas yang ditambahkan ke kamar ini.
+              </p>
+              }
             </div>
-
-            }
 
 
             <p class="description">
@@ -556,14 +549,14 @@
 
           <div class="modal-footer">
 
-            <button class="outline-button" (click)="editRoom(selectedRoom)">
+            <button type="button" class="outline-button" (click)="editRoom(selectedRoom)">
               Edit Kamar
             </button>
 
 
             @if (selectedRoom.status === 'TERSEDIA') {
 
-            <button class="danger-button" (click)="deleteRoom(selectedRoom)">
+            <button type="button" class="danger-button" (click)="deleteRoom(selectedRoom)">
               Hapus
             </button>
 
@@ -583,9 +576,7 @@
        ADD ROOM MODAL
   ====================================================== -->
 
-    @if (showAdd) {
-
-    <ion-modal class="owner-page-modal" [isOpen]="showAdd" (didDismiss)="closeAdd()">
+    <ion-modal #roomFormModal class="owner-page-modal" (didDismiss)="onFormDidDismiss()">
       <ng-template>
 
         <div class="modal add-modal">
@@ -605,7 +596,7 @@
             </div>
 
 
-            <button class="close-button" aria-label="Tutup" (click)="closeAdd()">
+            <button type="button" class="close-button" aria-label="Tutup" (click)="closeAdd()">
               ×
             </button>
 
@@ -633,7 +624,7 @@
                   Lantai *
                 </label>
 
-                <input type="number" [(ngModel)]="newRoom.floor" placeholder="1" />
+                <input type="number" [(ngModel)]="newRoom.floor" min="1" step="1" placeholder="1" required />
 
               </div>
 
@@ -707,10 +698,11 @@
               <div class="form-group full">
 
                 <label>
-                  Deskripsi
+                  Deskripsi *
                 </label>
 
-                <textarea [(ngModel)]="newRoom.description" rows="3" placeholder="Deskripsi kamar..."></textarea>
+                <textarea [(ngModel)]="newRoom.description" rows="3" maxlength="100"
+                  placeholder="Deskripsi kamar (maks. 100 karakter)..." required></textarea>
 
               </div>
 
@@ -742,11 +734,11 @@
 
           <div class="modal-footer">
 
-            <button class="outline-button" (click)="closeAdd()">
+            <button type="button" class="outline-button" (click)="closeAdd()">
               Batal
             </button>
 
-            <button class="primary-button" (click)="saveRoom()">
+            <button type="button" class="primary-button" (click)="saveRoom()">
               Simpan
             </button>
 
@@ -757,7 +749,18 @@
       </ng-template>
     </ion-modal>
 
-    }
+    <ion-modal #roomSuccessModal class="owner-page-modal room-success-modal"
+      (didDismiss)="onSaveSuccessDidDismiss()" [backdropDismiss]="true">
+      <ng-template>
+        <div class="save-success-screen" role="button" tabindex="0" aria-label="Tutup pesan berhasil disimpan"
+          (click)="dismissSaveSuccess()" (keydown.enter)="dismissSaveSuccess()" (keydown.space)="dismissSaveSuccess()">
+          <div class="save-success-card" role="status" (click)="$event.stopPropagation()">
+            <div class="save-success-icon">✓</div>
+            <h3>Berhasil disimpan</h3>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
 
   </div>
 
@@ -782,7 +785,7 @@
             </p>
           </div>
 
-          <button class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
+          <button type="button" class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
             ×
           </button>
 
@@ -798,11 +801,11 @@
 
         <div class="modal-footer">
 
-          <button class="outline-button" (click)="closeDeleteModal()">
+          <button type="button" class="outline-button" (click)="closeDeleteModal()">
             Batal
           </button>
 
-          <button class="danger-button" (click)="confirmDeleteRoom()">
+          <button type="button" class="danger-button" (click)="confirmDeleteRoom()">
             Hapus
           </button>
 

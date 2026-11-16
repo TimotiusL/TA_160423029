@@ -8,15 +8,12 @@
         <p>Kelola fasilitas yang tersedia pada kamar</p>
       </div>
 
-      <button class="primary-button" (click)="openAdd()">
+      <button type="button" class="primary-button" (click)="openAdd()">
         Tambah Fasilitas
       </button>
 
     </div>
 
-
-    <!-- MAIN CONTENT CARD -->
-    <div class="content-card">
 
       <!-- TOOLBAR -->
       <div class="toolbar">
@@ -27,7 +24,7 @@
 
           <input type="text" [(ngModel)]="search" placeholder="Cari fasilitas..." />
 
-          <button *ngIf="search" class="clear-search" (click)="search = ''">
+          <button type="button" *ngIf="search" class="clear-search" (click)="search = ''">
             ×
           </button>
 
@@ -73,11 +70,11 @@
 
             <div class="facility-actions">
 
-              <button class="edit-button" (click)="openEdit(facility)">
+              <button type="button" class="edit-button" (click)="openEdit(facility)">
                 Edit
               </button>
 
-              <button class="delete-button" (click)="deleteFacility(facility)">
+              <button type="button" class="delete-button" (click)="deleteFacility(facility)">
                 Hapus
               </button>
 
@@ -109,16 +106,12 @@
 
       }
 
-    </div>
-
 
     <!-- ============================= -->
     <!-- FORM MODAL -->
     <!-- ============================= -->
 
-    @if (showForm) {
-
-    <ion-modal class="owner-page-modal" [isOpen]="showForm" (didDismiss)="closeForm()">
+    <ion-modal #facilityFormModal class="owner-page-modal" (didDismiss)="onFormDidDismiss()">
       <ng-template>
 
       <div class="modal">
@@ -141,7 +134,7 @@
 
           </div>
 
-          <button class="close-button" aria-label="Tutup" (click)="closeForm()">
+          <button type="button" class="close-button" aria-label="Tutup" (click)="closeForm()">
             ×
           </button>
 
@@ -156,7 +149,7 @@
               Nama Fasilitas *
             </label>
 
-            <input type="text" [(ngModel)]="form.name" placeholder="Contoh: AC" />
+            <input type="text" [(ngModel)]="form.name" placeholder="Contoh: AC" maxlength="45" />
 
           </div>
 
@@ -167,7 +160,7 @@
               Deskripsi
             </label>
 
-            <textarea [(ngModel)]="form.description" rows="4" placeholder="Deskripsi fasilitas..."></textarea>
+            <textarea [(ngModel)]="form.description" rows="4" maxlength="100" placeholder="Deskripsi fasilitas (opsional)..."></textarea>
 
           </div>
 
@@ -176,11 +169,11 @@
 
         <div class="modal-footer">
 
-          <button class="outline-button" (click)="closeForm()">
+          <button type="button" class="outline-button" (click)="closeForm()">
             Batal
           </button>
 
-          <button class="primary-button" (click)="saveFacility()">
+          <button type="button" class="primary-button" (click)="saveFacility()">
             Simpan
           </button>
 
@@ -191,7 +184,18 @@
       </ng-template>
     </ion-modal>
 
-    }
+    <ion-modal #facilitySuccessModal class="owner-page-modal facility-success-modal"
+      (didDismiss)="onSaveSuccessDidDismiss()" [backdropDismiss]="true">
+      <ng-template>
+        <div class="save-success-screen" role="button" tabindex="0" aria-label="Tutup pesan berhasil disimpan"
+          (click)="dismissSaveSuccess()" (keydown.enter)="dismissSaveSuccess()" (keydown.space)="dismissSaveSuccess()">
+          <div class="save-success-card" role="status" (click)="$event.stopPropagation()">
+            <div class="save-success-icon">✓</div>
+            <h3>Berhasil disimpan</h3>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
   </div>
 
   @if (showDeleteModal) {
@@ -206,7 +210,7 @@
           <p>Konfirmasi penghapusan data</p>
         </div>
 
-        <button class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
+        <button type="button" class="close-button" aria-label="Tutup" (click)="closeDeleteModal()">
           ×
         </button>
       </div>
@@ -219,11 +223,11 @@
       </div>
 
       <div class="modal-footer">
-        <button class="outline-button" (click)="closeDeleteModal()">
+        <button type="button" class="outline-button" (click)="closeDeleteModal()">
           Batal
         </button>
 
-        <button class="delete-button" (click)="confirmDeleteFacility()">
+        <button type="button" class="delete-button" (click)="confirmDeleteFacility()">
           Hapus
         </button>
       </div>

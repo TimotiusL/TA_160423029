@@ -1,0 +1,252 @@
+<ion-content class="payment-history-content">
+  <main class="history-page">
+
+    <!-- Page Header -->
+    <header class="page-heading">
+      <div>
+        <span class="eyebrow">CATATAN TRANSAKSI</span>
+        <h1>Riwayat Pembayaran</h1>
+        <p class="subtitle">{{ scope === 'current' ? 'Transaksi pembayaran untuk kos yang sedang Anda tempati.' : 'Arsip transaksi dari kontrak kos yang sudah berakhir.' }}</p>
+      </div>
+    </header>
+
+    <div class="history-scope-switch" role="group" aria-label="Filter riwayat pembayaran">
+      <button type="button" [class.active]="scope === 'current'" (click)="changeScope('current')">Hunian Saat Ini</button>
+      <button type="button" [class.active]="scope === 'history'" (click)="changeScope('history')">Riwayat Kos</button>
+    </div>
+
+    <!-- Loading / Error States -->
+    <div class="panel state-card" *ngIf="loading">
+      <div class="state-spinner"></div>
+      <p>Memuat riwayat transaksi pembayaran...</p>
+    </div>
+
+    <div class="panel state-card state-error" *ngIf="errorMessage && !loading">
+      <div class="error-icon-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="retry-btn" (click)="loadPembayaran()">Coba Lagi</button>
+    </div>
+
+    <!-- Overview Cards -->
+    <section class="overview-grid">
+      <article class="overview-card">
+        <div class="overview-icon green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="overview-content">
+          <span class="overview-label">TOTAL PEMBAYARAN TERVERIFIKASI</span>
+          <strong class="overview-value">{{ formatRupiah(totalPembayaran) }}</strong>
+          <small>Akumulasi transaksi yang telah diverifikasi</small>
+        </div>
+      </article>
+
+      <article class="overview-card">
+        <div class="overview-icon blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+        </div>
+        <div class="overview-content">
+          <span class="overview-label">TOTAL TRANSAKSI TERCATAT</span>
+          <strong class="overview-value">{{ pembayaran.length }} <small>transaksi</small></strong>
+          <small>Seluruh riwayat pembayaran Anda</small>
+        </div>
+      </article>
+    </section>
+
+    <!-- Transaction List Card -->
+    <section class="history-card">
+      <div class="card-heading">
+        <div>
+          <h2>Daftar Transaksi</h2>
+          <p>{{ scope === 'current' ? 'Rincian pembayaran hunian saat ini.' : 'Rincian pembayaran dari kos lama.' }}</p>
+        </div>
+        <span class="record-count">{{ pembayaranTerfilter.length }} transaksi</span>
+      </div>
+
+      <!-- Filter Row -->
+      <div class="filter-row">
+        <label class="filter-field">
+          <span>Filter Periode Sewa</span>
+          <div class="select-wrapper">
+            <select name="filterPeriode" [(ngModel)]="filterPeriode">
+              <option value="semua">Semua Periode</option>
+              <option *ngFor="let item of pembayaran" [value]="item.periode">{{ item.periode }}</option>
+            </select>
+            <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </label>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="desktop-table">
+        <table>
+          <thead>
+            <tr>
+              <th>KODE TRANSAKSI</th>
+              <th>KOS</th>
+              <th>PERIODE</th>
+              <th>TANGGAL BAYAR</th>
+              <th>METODE</th>
+              <th>NOMINAL</th>
+              <th>STATUS</th>
+              <th>BUKTI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pembayaranTerfilter">
+              <td>
+                <div class="code-wrap">
+                  <strong class="tx-code">{{ item.kode }}</strong>
+                  <small class="bill-ref">{{ item.kodeTagihan }}</small>
+                </div>
+              </td>
+              <td>{{ item.kos }}</td>
+              <td>{{ item.periode }}</td>
+              <td>
+                <span class="date-cell">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  {{ item.tanggal }}
+                </span>
+              </td>
+              <td>
+                <span class="method-chip">{{ item.metode }}</span>
+              </td>
+              <td>
+                <strong class="amount-val">{{ formatRupiah(item.nominal) }}</strong>
+              </td>
+              <td>
+                <span class="status-pill" [class.waiting]="item.status === 'menunggu_verifikasi'" [class.rejected]="item.status === 'ditolak'">
+                  <span class="status-dot"></span>
+                  {{ item.statusText }}
+                </span>
+              </td>
+              <td>
+                <button class="view-button" (click)="lihatBukti(item.kode)" type="button">
+                  <svg *ngIf="item.buktiUrl" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span>{{ item.buktiUrl ? 'Lihat Bukti' : 'Detail' }}</span>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="pembayaranTerfilter.length === 0">
+              <td colspan="8" class="empty-cell">{{ scope === 'history' ? 'Belum ada transaksi dari kos lama.' : 'Belum ada transaksi untuk hunian saat ini.' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile List Cards -->
+      <div class="mobile-list">
+        <article class="payment-item" *ngFor="let item of pembayaranTerfilter">
+          <div class="payment-item-top">
+            <strong class="tx-code">{{ item.kode }}</strong>
+            <span class="status-pill" [class.waiting]="item.status === 'menunggu_verifikasi'" [class.rejected]="item.status === 'ditolak'">
+              <span class="status-dot"></span>
+              {{ item.statusText }}
+            </span>
+          </div>
+
+          <small class="invoice-ref">{{ item.kodeTagihan }}</small>
+          <h3 class="item-period">{{ item.kos }} · Periode {{ item.periode }}</h3>
+
+          <div class="payment-meta">
+            <span>Tanggal bayar:</span>
+            <strong>{{ item.tanggal }}</strong>
+          </div>
+          <div class="payment-meta">
+            <span>Metode:</span>
+            <strong>{{ item.metode }}</strong>
+          </div>
+
+          <div class="payment-item-bottom">
+            <strong class="amount-val">{{ formatRupiah(item.nominal) }}</strong>
+            <button class="view-button" (click)="lihatBukti(item.kode)" type="button">
+              <svg *ngIf="item.buktiUrl" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>{{ item.buktiUrl ? 'Lihat Bukti' : 'Detail' }}</span>
+            </button>
+          </div>
+        </article>
+
+        <div *ngIf="pembayaranTerfilter.length === 0" class="empty-cell mobile-empty">
+          {{ scope === 'history' ? 'Belum ada transaksi dari kos lama.' : 'Belum ada transaksi untuk hunian saat ini.' }}
+        </div>
+      </div>
+    </section>
+
+    <!-- Help Banner -->
+    <section class="help-banner">
+      <div class="help-icon-box">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="help-text">
+        <strong>Perlu Memeriksa Bukti Transaksi?</strong>
+        <p>Jika bukti pembayaran belum diverifikasi atau nominal tidak sesuai, silakan hubungi pengelola kos.</p>
+      </div>
+      <button class="help-back-btn" (click)="kembali()" type="button">
+        <span>Kembali ke Tagihan</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Modal Detail Struk Digital -->
+  <div class="history-modal-backdrop" *ngIf="selectedPayment" (click)="tutupDetail()">
+    <section class="history-modal" role="dialog" aria-modal="true" aria-label="Detail pembayaran" (click)="$event.stopPropagation()">
+      <header class="history-modal-heading">
+        <div>
+          <span class="eyebrow">BUKTI TRANSAKSI DIGITAL</span>
+          <h2>Detail Pembayaran</h2>
+        </div>
+        <button class="history-close" (click)="tutupDetail()" aria-label="Tutup" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </header>
+
+      <div class="history-receipt">
+        <div class="receipt-mark" [class.success]="selectedPayment.status === 'diverifikasi'" [class.waiting]="selectedPayment.status === 'menunggu_verifikasi'" [class.rejected]="selectedPayment.status === 'ditolak'">
+          <svg *ngIf="selectedPayment.status === 'diverifikasi'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <svg *ngIf="selectedPayment.status === 'menunggu_verifikasi'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <svg *ngIf="selectedPayment.status === 'ditolak'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+
+        <h3>{{ selectedPayment.statusText }}</h3>
+        <p class="receipt-code">{{ selectedPayment.kode }}</p>
+
+        <strong class="receipt-amount">{{ formatRupiah(selectedPayment.nominal) }}</strong>
+
+        <div class="receipt-divider"></div>
+
+        <div class="receipt-lines">
+          <div class="receipt-line">
+            <span>Kode Tagihan</span>
+            <strong>{{ selectedPayment.kodeTagihan }}</strong>
+          </div>
+          <div class="receipt-line">
+            <span>Periode Sewa</span>
+            <strong>{{ selectedPayment.periode }}</strong>
+          </div>
+          <div class="receipt-line">
+            <span>Tanggal Pembayaran</span>
+            <strong>{{ selectedPayment.tanggal }}</strong>
+          </div>
+          <div class="receipt-line">
+            <span>Metode</span>
+            <strong>{{ selectedPayment.metode }}</strong>
+          </div>
+        </div>
+
+        <!-- Bukti File Image / Preview -->
+        <div class="receipt-proof-box" *ngIf="selectedPayment.buktiUrl">
+          <span class="proof-label">Lampiran Bukti Transfer</span>
+          <a [href]="selectedPayment.buktiUrl" target="_blank" rel="noopener noreferrer" class="proof-link">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Buka File Bukti Pembayaran ↗</span>
+          </a>
+        </div>
+      </div>
+
+      <button type="button" class="receipt-close-btn" (click)="tutupDetail()">Tutup</button>
+    </section>
+  </div>
+</ion-content>

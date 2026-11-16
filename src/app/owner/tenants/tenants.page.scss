@@ -1,10 +1,12 @@
+@use '../theme' as km;
+
 /* =====================================================================
    KostManager Owner UI - design system bersama
    Blok ini identik di setiap halaman agar tampilan konsisten dan
    tidak bergantung pada stylesheet global.
 ===================================================================== */
 
-$font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
 $ink: #0f172a;
@@ -1057,3 +1059,164 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   .summary-card, .stat-card, .kpi-card { padding: 12px 14px; }
   .summary-value, .stat-card h2, .stat-card strong, .kpi-value { font-size: 18px; line-height: 26px; }
 }
+
+
+/* ---------- pratinjau KTP langsung di bawah tombol ---------- */
+.ktp-action-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 12px;
+}
+
+.ktp-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #0d9488;
+  border-radius: 8px;
+  background: #f0fdfa;
+  color: #0f766e;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ktp-view-button:hover { background: #ccfbf1; }
+.ktp-view-button:disabled { opacity: 0.65; cursor: wait; }
+.ktp-missing { color: #64748b; font-size: 13px; }
+
+.ktp-inline-preview {
+  margin: 12px 0 18px;
+  padding: 14px;
+  border: 1px solid #dbe3eb;
+  border-radius: 12px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.ktp-inline-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.ktp-inline-close {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ktp-inline-image {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  max-height: 560px;
+  margin: 0 auto;
+  object-fit: contain;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.ktp-inline-pdf {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.ktp-inline-message {
+  padding: 22px 12px;
+  color: #64748b;
+  font-size: 13px;
+  text-align: center;
+}
+
+.ktp-inline-error { color: #b91c1c; }
+
+@media (max-width: 600px) {
+  .ktp-inline-preview { padding: 10px; }
+  .ktp-inline-image { max-height: 360px; }
+  .ktp-inline-pdf { height: 420px; }
+}
+
+/* Filter kos: tetap dipertahankan bersama pratinjau KTP inline. */
+.property-filter-controls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.property-filter-controls .search-wrapper,
+.property-filter-controls .search-container {
+  flex: 1 1 300px;
+  width: auto;
+  max-width: 520px;
+  margin-bottom: 0;
+}
+
+.property-filter-controls .search-box {
+  width: 100%;
+  max-width: none;
+}
+
+.property-filter {
+  display: flex;
+  flex: 0 1 240px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.property-filter label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.property-filter-select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+}
+
+@media (max-width: 600px) {
+  .property-filter-controls {
+    align-items: stretch;
+  }
+
+  .property-filter-controls .search-wrapper,
+  .property-filter-controls .search-container,
+  .property-filter {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
+
+
+// Shared design system / visual styles only.
+@include km.page();
+
+
+/* Angka ringkasan total, aktif, dan nonaktif dibuat konsisten hitam. */
+.tenant-count-value { color: $ink !important; }

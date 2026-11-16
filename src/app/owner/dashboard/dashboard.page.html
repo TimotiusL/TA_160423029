@@ -14,11 +14,26 @@
         </p>
       </div>
 
-      <select [(ngModel)]="month">
-        <option>September 2026</option>
-        <option>Agustus 2026</option>
-        <option>Juli 2026</option>
-      </select>
+      <div class="dashboard-filters">
+        <label class="period-picker property-picker">
+          <span>Pilih kos</span>
+          <select [(ngModel)]="selectedKosId" (ngModelChange)="onKosChange()" aria-label="Filter dashboard berdasarkan kos">
+            <option value="all">Semua Kos</option>
+            @for (property of properties; track property.id) {
+              <option [value]="property.id">{{ property.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="period-picker">
+          <span>Periode dashboard</span>
+          <select [(ngModel)]="month" (ngModelChange)="onPeriodChange()" aria-label="Pilih periode dashboard">
+            @for (option of monthOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
 
     </div>
 
@@ -33,7 +48,7 @@
         <div>
           <span>Total Kos</span>
           <strong>
-            {{ properties.length }}
+            {{ dashboardProperties.length }}
           </strong>
         </div>
       </div>
@@ -98,7 +113,7 @@
       <div class="stat-card green">
 
         <div>
-          <span>Pendapatan Bulan Ini</span>
+          <span>Pendapatan Periode</span>
 
           <strong>
             {{ formatRupiah(totalIncome) }}
@@ -111,7 +126,7 @@
       <div class="stat-card amber">
 
         <div>
-          <span>Pengeluaran Bulan Ini</span>
+          <span>Pengeluaran Periode</span>
 
           <strong>
             {{ formatRupiah(totalExpense) }}
@@ -124,7 +139,7 @@
       <div class="stat-card teal">
 
         <div>
-          <span>Laba Bulan Ini</span>
+          <span>Laba Periode</span>
 
           <strong>
             {{ formatRupiah(totalProfit) }}
@@ -228,26 +243,28 @@
         </div>
 
 
-        <div class="bar-chart">
+        @if (hasFinancialData) {
+          <div class="bar-chart">
+            <canvas #financialChart></canvas>
+          </div>
 
-          <canvas #financialChart></canvas>
-
-        </div>
-
-
-        <div class="chart-legend">
-
-          <span>
-            <i class="dot teal-dot"></i>
-            Pendapatan
-          </span>
-
-          <span>
-            <i class="dot amber-dot"></i>
-            Pengeluaran
-          </span>
-
-        </div>
+          <div class="chart-legend">
+            <span>
+              <i class="dot teal-dot"></i>
+              Pendapatan
+            </span>
+            <span>
+              <i class="dot amber-dot"></i>
+              Pengeluaran
+            </span>
+          </div>
+        } @else {
+          <div class="empty-chart">
+            <div class="empty-icon">Rp</div>
+            <h3>Belum ada data keuangan</h3>
+            <p>Pendapatan dan pengeluaran akan ditampilkan setelah transaksi keuangan tercatat.</p>
+          </div>
+        }
 
       </div>
 
@@ -265,11 +282,17 @@
       </div>
 
 
-      <div class="profit-chart">
-
-        <canvas #profitChart></canvas>
-
-      </div>
+      @if (hasFinancialData) {
+        <div class="profit-chart">
+          <canvas #profitChart></canvas>
+        </div>
+      } @else {
+        <div class="empty-chart">
+          <div class="empty-icon">∅</div>
+          <h3>Belum ada data laba bersih</h3>
+          <p>Tren laba akan muncul setelah ada pendapatan atau pengeluaran yang tercatat.</p>
+        </div>
+      }
 
     </div>
 
@@ -284,17 +307,31 @@
         </h2>
       </div>
 
-      <button class="outline-button" (click)="navigate('properties')">
+      <button type="button" class="outline-button" (click)="navigate('properties')">
         Lihat Semua
       </button>
 
     </div>
 
 
+    @if (loading && dashboardProperties.length === 0) {
+      <div class="dashboard-card empty-dashboard-state">
+        <div class="empty-icon">⋯</div>
+        <h3>Memuat ringkasan kos...</h3>
+        <p>Data properti sedang diambil dari sistem.</p>
+      </div>
+    } @else if (dashboardProperties.length === 0) {
+      <div class="dashboard-card empty-dashboard-state">
+        <div class="empty-icon">⌂</div>
+        <h3>Belum ada data kos</h3>
+        <p>Tambahkan data kos terlebih dahulu. Ringkasan setiap kos akan muncul di bagian ini.</p>
+        <button type="button" class="outline-button" (click)="navigate('properties')">Kelola Kos</button>
+      </div>
+    } @else {
     <div class="property-grid">
 
       @for (
-      property of properties;
+      property of dashboardProperties;
       track property.id
       ) {
 
@@ -393,7 +430,7 @@
           <div>
 
             <span>
-              Pendapatan
+              Pendapatan Periode
             </span>
 
             <strong>
@@ -410,7 +447,7 @@
           <div>
 
             <span>
-              Pengeluaran
+              Pengeluaran Periode
             </span>
 
             <strong>
@@ -427,7 +464,7 @@
           <div class="profit-row">
 
             <span>
-              Laba
+              Laba Periode
             </span>
 
             <strong>
@@ -442,8 +479,7 @@
 
         </div>
 
-
-        <button class="outline-button full" (click)="navigate('properties')">
+        <button type="button" class="outline-button full" (click)="navigate('properties')">
           Lihat Detail
         </button>
 
@@ -452,6 +488,7 @@
       }
 
     </div>
+    }
 
 
     <!-- ================= BOTTOM ================= -->
@@ -468,7 +505,7 @@
             Pembayaran Perlu Diverifikasi
           </h2>
 
-          <button class="text-button" (click)="navigate('payments')">
+          <button type="button" class="text-button" (click)="navigate('payments')">
             Lihat Semua
           </button>
 
@@ -476,7 +513,7 @@
 
 
         @if (
-        pendingPayments.length === 0
+        filteredPendingPayments.length === 0
         ) {
 
         <p class="empty">
@@ -488,7 +525,7 @@
         <div class="payment-list">
 
           @for (
-          payment of pendingPayments;
+          payment of filteredPendingPayments;
           track payment.id
           ) {
 
@@ -527,14 +564,14 @@
 
               <div>
 
-                <button class="verify-button" (click)="
+                <button type="button" class="verify-button" (click)="
                       verifyPayment(payment)
                     ">
                   Verifikasi
                 </button>
 
 
-                <button class="reject-button" (click)="
+                <button type="button" class="reject-button" (click)="
                       rejectPayment(payment)
                     ">
                   Tolak
@@ -568,10 +605,23 @@
         </div>
 
 
+        @if (loading && filteredRecentActivity.length === 0) {
+          <div class="empty-dashboard-state compact">
+            <div class="empty-icon">⋯</div>
+            <h3>Memuat aktivitas...</h3>
+            <p>Aktivitas terbaru sedang diambil dari sistem.</p>
+          </div>
+        } @else if (filteredRecentActivity.length === 0) {
+          <div class="empty-dashboard-state compact">
+            <div class="empty-icon">✓</div>
+            <h3>Belum ada aktivitas terbaru</h3>
+            <p>Aktivitas pendaftaran, pembayaran, kontrak, dan komplain akan muncul di sini saat ada data baru.</p>
+          </div>
+        } @else {
         <div class="activity-list">
 
           @for (
-          activity of recentActivity;
+          activity of filteredRecentActivity;
           track activity.text
           ) {
 
@@ -596,6 +646,7 @@
           }
 
         </div>
+        }
 
       </div>
 
@@ -605,7 +656,7 @@
     <!-- ================= OVERDUE ================= -->
 
     @if (
-    overdueBills.length > 0
+    filteredOverdueBills.length > 0
     ) {
 
     <div class="dashboard-card overdue-card">
@@ -616,7 +667,7 @@
           Tagihan Mendekati Jatuh Tempo
         </h2>
 
-        <button class="text-button" (click)="navigate('billing')">
+        <button type="button" class="text-button" (click)="navigate('billing')">
           Lihat Semua
         </button>
 
@@ -667,7 +718,7 @@
           <tbody>
 
             @for (
-            bill of overdueBills;
+            bill of filteredOverdueBills;
             track bill.number
             ) {
 

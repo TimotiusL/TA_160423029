@@ -52,6 +52,7 @@ interface Payment {
   room: string;
   period: string;
   amount: number;
+  kosId?: string;
 }
 
 interface Bill {
@@ -62,12 +63,14 @@ interface Bill {
   dueDate: string;
   total: number;
   status: string;
+  kosId?: string;
 }
 
 interface Activity {
   icon: string;
   text: string;
   time: string;
+  kosId?: string;
 }
 
 @Component({
@@ -86,7 +89,9 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
   financialChartInstance?: Chart;
   profitChartInstance?: Chart;
 
-  month = this.getCurrentMonthLabel();
+  month = this.getCurrentMonthValue();
+  monthOptions: { value: string; label: string }[] = [];
+  selectedKosId = 'all';
   user = { name: 'Pengguna' };
 
   properties: Property[] = [];
@@ -94,6 +99,9 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
   pendingPayments: Payment[] = [];
   recentActivity: Activity[] = [];
   overdueBills: Bill[] = [];
+
+  private pemasukanData: any[] = [];
+  private pengeluaranData: any[] = [];
 
   loading = false;
   errorMessage = '';
@@ -161,6 +169,14 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
         const kontrak = this.toArray(result.kontrak);
         const komplain = this.toArray(result.komplain);
 
+        this.pemasukanData = pemasukan;
+        this.pengeluaranData = pengeluaran;
+        this.monthOptions = this.buildPeriodOptions(pemasukan, pengeluaran);
+
+        if (!this.monthOptions.some(option => option.value === this.month)) {
+          this.month = this.getCurrentMonthValue();
+        }
+
         this.properties = kos.map((item: any) => {
           // Endpoint /kos sudah mengembalikan ringkasan tiap kos.
           const roomsForKos = kamar.filter((room: any) =>
@@ -204,7 +220,10 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
               tenant: userItem.nama || 'Penghuni',
               room: String(kamarItem.no_kamar ?? '-'),
               period: tagihanItem.periode || '-',
-              amount: this.number(item.total)
+              amount: this.number(item.total),
+              kosId: String(
+                kamarItem.tKos_id_kos ?? kamarItem.kos?.id_kos ?? ''
+              )
             };
           });
 
@@ -227,11 +246,18 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
               period: item.periode || '-',
               dueDate: item.tgl_jatuhTempo,
               total: this.number(item.total_tagihan),
-              status: 'TERLAMBAT'
+              status: 'TERLAMBAT',
+              kosId: String(
+                kamarItem.tKos_id_kos ?? kamarItem.kos?.id_kos ?? ''
+              )
             };
           });
 
-        this.monthlyFinancials = this.buildMonthlyFinancials(pemasukan, pengeluaran);
+        this.monthlyFinancials = this.buildMonthlyFinancials(
+          this.recordsForSelectedKos(pemasukan),
+          this.recordsForSelectedKos(pengeluaran)
+        );
+        this.updatePropertyFinancials();
         this.recentActivity = this.buildRecentActivities(
           pendaftaran, pembayaran, komplain, kontrak
         );
@@ -250,42 +276,57 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
     });
   }
 
+  get dashboardProperties(): Property[] {
+    return this.selectedKosId === 'all'
+      ? this.properties
+      : this.properties.filter(property => property.id === this.selectedKosId);
+  }
+
+  get filteredPendingPayments(): Payment[] {
+    return this.selectedKosId === 'all'
+      ? this.pendingPayments
+      : this.pendingPayments.filter(item => item.kosId === this.selectedKosId);
+  }
+
+  get filteredOverdueBills(): Bill[] {
+    return this.selectedKosId === 'all'
+      ? this.overdueBills
+      : this.overdueBills.filter(item => item.kosId === this.selectedKosId);
+  }
+
+  get filteredRecentActivity(): Activity[] {
+    const activities = this.selectedKosId === 'all'
+      ? this.recentActivity
+      : this.recentActivity.filter(item => item.kosId === this.selectedKosId);
+    return activities.slice(0, 5);
+  }
+
   get totalRooms(): number {
-    return this.properties.reduce((sum, item) => sum + item.totalRooms, 0);
+    return this.dashboardProperties.reduce((sum, item) => sum + item.totalRooms, 0);
   }
 
   get totalOccupied(): number {
-    return this.properties.reduce((sum, item) => sum + item.occupiedRooms, 0);
+    return this.dashboardProperties.reduce((sum, item) => sum + item.occupiedRooms, 0);
   }
 
   get totalReserved(): number {
-    return this.properties.reduce((sum, item) => sum + item.reservedRooms, 0);
+    return this.dashboardProperties.reduce((sum, item) => sum + item.reservedRooms, 0);
   }
 
   get totalAvailable(): number {
-    return this.properties.reduce((sum, item) => sum + item.availableRooms, 0);
+    return this.dashboardProperties.reduce((sum, item) => sum + item.availableRooms, 0);
   }
 
   get totalTenants(): number {
-    return this.properties.reduce((sum, item) => sum + item.tenantCount, 0);
+    return this.dashboardProperties.reduce((sum, item) => sum + item.tenantCount, 0);
   }
 
   get totalIncome(): number {
-    const current = this.monthlyFinancials.find(
-      item => item.month === this.getCurrentMonthShort()
-    );
-    return current ? current.income : this.properties.reduce(
-      (sum, item) => sum + item.monthlyIncome, 0
-    );
+    return this.sumForPeriod(this.pemasukanData, 'tgl_pemasukan', 'jumlah');
   }
 
   get totalExpense(): number {
-    const current = this.monthlyFinancials.find(
-      item => item.month === this.getCurrentMonthShort()
-    );
-    return current ? current.expense : this.properties.reduce(
-      (sum, item) => sum + item.monthlyExpense, 0
-    );
+    return this.sumForPeriod(this.pengeluaranData, 'tgl_pengeluaran', 'jumlah');
   }
 
   get totalProfit(): number {
@@ -300,6 +341,144 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
   get profitMargin(): number {
     return this.totalIncome === 0 ? 0 :
       Math.round((this.totalProfit / this.totalIncome) * 100);
+  }
+
+  get hasFinancialData(): boolean {
+    const pemasukan = this.recordsForSelectedKos(this.pemasukanData);
+    const pengeluaran = this.recordsForSelectedKos(this.pengeluaranData);
+    return pemasukan.some(item => this.number(item.jumlah) !== 0) ||
+      pengeluaran.some(item => this.number(item.jumlah) !== 0);
+  }
+
+  get selectedPeriodLabel(): string {
+    return this.monthOptions.find(option => option.value === this.month)?.label || 'Periode dipilih';
+  }
+
+  onPeriodChange(): void {
+    this.updatePropertyFinancials();
+    this.cdr.detectChanges();
+  }
+
+  onKosChange(): void {
+    this.monthlyFinancials = this.buildMonthlyFinancials(
+      this.recordsForSelectedKos(this.pemasukanData),
+      this.recordsForSelectedKos(this.pengeluaranData)
+    );
+    this.updatePropertyFinancials();
+    this.cdr.detectChanges();
+    this.refreshCharts();
+  }
+
+  private recordsForSelectedKos(records: any[]): any[] {
+    if (this.selectedKosId === 'all') return records;
+    return records.filter(item =>
+      Number(item.tKos_id_kos ?? item.kos_id_kos) === Number(this.selectedKosId)
+    );
+  }
+
+  private updatePropertyFinancials(): void {
+    this.properties = this.properties.map(property => ({
+      ...property,
+      monthlyIncome: this.sumForProperty(
+        this.pemasukanData, property.id, 'tgl_pemasukan'
+      ),
+      monthlyExpense: this.sumForProperty(
+        this.pengeluaranData, property.id, 'tgl_pengeluaran'
+      )
+    }));
+  }
+
+  private sumForProperty(records: any[], propertyId: string, dateField: string): number {
+    return records
+      .filter(item => Number(item.tKos_id_kos ?? item.kos_id_kos) === Number(propertyId))
+      .filter(item => this.isInSelectedPeriod(item[dateField]))
+      .reduce((sum, item) => sum + this.number(item.jumlah), 0);
+  }
+
+  private sumForPeriod(records: any[], dateField: string, amountField: string): number {
+    return this.recordsForSelectedKos(records)
+      .filter(item => this.isInSelectedPeriod(item[dateField]))
+      .reduce((sum, item) => sum + this.number(item[amountField]), 0);
+  }
+
+  private isInSelectedPeriod(value: string | null | undefined): boolean {
+    return this.month === 'all' || this.monthKey(value) === this.month;
+  }
+
+  private monthKey(value: string | null | undefined): string {
+    if (!value) return '';
+    const date = new Date(String(value).replace(' ', 'T'));
+    if (Number.isNaN(date.getTime())) return '';
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private formatMonthLabel(key: string): string {
+    const [year, month] = key.split('-').map(Number);
+    return new Intl.DateTimeFormat('id-ID', {
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date(year, month - 1, 1));
+  }
+
+  private buildPeriodOptions(
+    pemasukan: any[],
+    pengeluaran: any[]
+  ): { value: string; label: string }[] {
+    const currentKey = this.getCurrentMonthValue();
+    const keys = [...pemasukan, ...pengeluaran]
+      .map(item => this.monthKey(item.tgl_pemasukan ?? item.tgl_pengeluaran))
+      .filter(Boolean)
+      .sort();
+
+    const currentDate = new Date();
+    const currentMonthStart = new Date(
+      currentDate.getFullYear(), currentDate.getMonth(), 1
+    );
+
+    let earliestDate: Date;
+    if (keys.length) {
+      const [year, month] = keys[0].split('-').map(Number);
+      earliestDate = new Date(year, month - 1, 1);
+    } else {
+      // Tetap sediakan pilihan bulan meskipun belum ada transaksi keuangan.
+      earliestDate = new Date(
+        currentDate.getFullYear(), currentDate.getMonth() - 11, 1
+      );
+    }
+
+    const options: { value: string; label: string }[] = [
+      { value: 'all', label: 'Semua Periode' }
+    ];
+
+    for (
+      let date = new Date(earliestDate);
+      date <= currentMonthStart;
+      date = new Date(date.getFullYear(), date.getMonth() + 1, 1)
+    ) {
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      options.push({ value: key, label: this.formatMonthLabel(key) });
+    }
+
+    // Pastikan bulan berjalan selalu tersedia.
+    if (!options.some(option => option.value === currentKey)) {
+      options.push({ value: currentKey, label: this.formatMonthLabel(currentKey) });
+    }
+
+    return options;
+  }
+
+  private formatCompactRupiah(value: number): string {
+    const absolute = Math.abs(value);
+    if (absolute >= 1_000_000_000) {
+      return `Rp ${(value / 1_000_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} M`;
+    }
+    if (absolute >= 1_000_000) {
+      return `Rp ${(value / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt`;
+    }
+    if (absolute >= 1_000) {
+      return `Rp ${(value / 1_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} rb`;
+    }
+    return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
   }
 
   formatRupiah(value: number): string {
@@ -370,7 +549,21 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
   }
 
   private number(value: any): number {
-    const parsed = Number(value);
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    if (value === null || value === undefined || value === '') return 0;
+
+    let normalized = String(value).trim().replace(/\s/g, '');
+    if (normalized.includes(',')) {
+      // Mendukung format 1.500.000,00 dari sumber data lokal.
+      normalized = normalized.replace(/\./g, '').replace(',', '.');
+    } else if (/^-?\d{1,3}(\.\d{3})+$/.test(normalized)) {
+      normalized = normalized.replace(/\./g, '');
+    }
+
+    const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
@@ -378,15 +571,35 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
     pemasukan: any[],
     pengeluaran: any[]
   ): { month: string; income: number; expense: number }[] {
+    const allDates = [
+      ...pemasukan.map(item => item.tgl_pemasukan),
+      ...pengeluaran.map(item => item.tgl_pengeluaran)
+    ].filter(Boolean);
+
     const now = new Date();
+    let earliest = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    for (const value of allDates) {
+      const date = new Date(String(value).replace(' ', 'T'));
+      if (!Number.isNaN(date.getTime())) {
+        const monthDate = new Date(date.getFullYear(), date.getMonth(), 1);
+        if (monthDate < earliest) earliest = monthDate;
+      }
+    }
+
     const result: { month: string; income: number; expense: number }[] = [];
 
-    for (let offset = 5; offset >= 0; offset--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    for (
+      let date = new Date(earliest);
+      date <= new Date(now.getFullYear(), now.getMonth(), 1);
+      date = new Date(date.getFullYear(), date.getMonth() + 1, 1)
+    ) {
       const year = date.getFullYear();
       const monthIndex = date.getMonth();
-      const label = new Intl.DateTimeFormat('id-ID', { month: 'short' })
-        .format(date);
+      const label = new Intl.DateTimeFormat('id-ID', {
+        month: 'short',
+        year: 'numeric'
+      }).format(date);
 
       const income = pemasukan
         .filter(item => this.sameMonth(item.tgl_pemasukan, year, monthIndex))
@@ -427,6 +640,7 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
         icon: 'clipboard-outline',
         text: `${nama} mengajukan pendaftaran kamar ${kamar}`,
         time: this.relativeTime(date),
+        kosId: String(item.kamar?.tKos_id_kos ?? item.kamar?.kos?.id_kos ?? ''),
         sortDate: this.timestamp(date)
       });
     });
@@ -439,6 +653,10 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
           ? 'checkmark-circle-outline' : 'card-outline',
         text: `${nama} melakukan pembayaran ${this.formatRupiah(this.number(item.total))} (${this.statusLabel(item.status)})`,
         time: this.relativeTime(date),
+        kosId: String(
+          item.tagihan?.kontrak?.kamar?.tKos_id_kos ??
+          item.tagihan?.kontrak?.kamar?.kos?.id_kos ?? ''
+        ),
         sortDate: this.timestamp(date)
       });
     });
@@ -446,10 +664,18 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
     komplain.forEach(item => {
       const date = item.tgl_komplain;
       const nama = item.penghuni?.user?.nama || 'Penghuni';
+      const penghuniId = Number(item.tPenghuni_id_penghuni ?? item.penghuni?.id_penghuni ?? 0);
+      const relatedContract = kontrak.find((contract: any) =>
+        Number(contract.tPenghuni_id_penghuni ?? contract.penghuni?.id_penghuni ?? 0) === penghuniId &&
+        contract.status === 'aktif'
+      ) || kontrak.find((contract: any) =>
+        Number(contract.tPenghuni_id_penghuni ?? contract.penghuni?.id_penghuni ?? 0) === penghuniId
+      );
       activities.push({
         icon: 'chatbubble-ellipses-outline',
         text: `${nama} mengajukan komplain: ${item.judul || item.deskripsi || '-'}`,
         time: this.relativeTime(date),
+        kosId: String(relatedContract?.kamar?.tKos_id_kos ?? relatedContract?.kamar?.kos?.id_kos ?? ''),
         sortDate: this.timestamp(date)
       });
     });
@@ -461,14 +687,14 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
         icon: 'reader-outline',
         text: `Kontrak ${nama} ${item.no_kontrak || ''} (${item.status || 'tercatat'})`,
         time: this.relativeTime(date),
+        kosId: String(item.kamar?.tKos_id_kos ?? item.kamar?.kos?.id_kos ?? ''),
         sortDate: this.timestamp(date)
       });
     });
 
     return activities
       .sort((a, b) => b.sortDate - a.sortDate)
-      .slice(0, 5)
-      .map(({ icon, text, time }) => ({ icon, text, time }));
+      .map(({ icon, text, time, kosId }) => ({ icon, text, time, kosId }));
   }
 
   private timestamp(value: string): number {
@@ -499,15 +725,9 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
     return labels[status] || status || 'tercatat';
   }
 
-  private getCurrentMonthLabel(): string {
-    return new Intl.DateTimeFormat('id-ID', {
-      month: 'long', year: 'numeric'
-    }).format(new Date());
-  }
-
-  private getCurrentMonthShort(): string {
-    return new Intl.DateTimeFormat('id-ID', { month: 'short' })
-      .format(new Date());
+  private getCurrentMonthValue(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }
 
   private refreshCharts(): void {
@@ -522,11 +742,25 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
   }
 
   private createCharts(): void {
-    if (!this.roomStatusChart || !this.financialChart || !this.profitChart) return;
-    this.destroyCharts();
-    this.createRoomStatusChart();
-    this.createFinancialChart();
-    this.createProfitChart();
+    this.roomStatusChartInstance?.destroy();
+    this.financialChartInstance?.destroy();
+    this.profitChartInstance?.destroy();
+
+    this.roomStatusChartInstance = undefined;
+    this.financialChartInstance = undefined;
+    this.profitChartInstance = undefined;
+
+    if (this.roomStatusChart) {
+      this.createRoomStatusChart();
+    }
+
+    if (this.hasFinancialData && this.financialChart) {
+      this.createFinancialChart();
+    }
+
+    if (this.hasFinancialData && this.profitChart) {
+      this.createProfitChart();
+    }
   }
 
   private createRoomStatusChart(): void {
@@ -601,7 +835,7 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
             ticks: {
               color: '#94A3B8',
               font: { size: 10 },
-              callback: value => `${Number(value) / 1000000}jt`
+              callback: value => this.formatCompactRupiah(Number(value))
             }
           }
         }
@@ -648,7 +882,7 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
             ticks: {
               color: '#94A3B8',
               font: { size: 10 },
-              callback: value => `${Number(value) / 1000000}jt`
+              callback: value => this.formatCompactRupiah(Number(value))
             }
           }
         }

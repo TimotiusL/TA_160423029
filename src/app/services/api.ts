@@ -45,6 +45,107 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/kos`, { headers });
   }
 
+  getKosBundles(kosId: string | number): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+    return this.http.get<any[]>(`${this.baseUrl}/kos/${kosId}/bundles`, { headers });
+  }
+
+  createKosBundle(kosId: string | number, data: any): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+    return this.http.post<any>(`${this.baseUrl}/kos/${kosId}/bundles`, data, { headers });
+  }
+
+  updateKosBundle(id: string | number, data: any): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+    return this.http.put<any>(`${this.baseUrl}/bundles/${id}`, data, { headers });
+  }
+
+  deleteKosBundle(id: string | number): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+    return this.http.delete<any>(`${this.baseUrl}/bundles/${id}`, { headers });
+  }
+
+  getTenantKatalog(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(`${this.baseUrl}/tenant/katalog`, { headers });
+  }
+
+  getTenantKatalogById(id: number): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any>(`${this.baseUrl}/tenant/katalog/${id}`, { headers });
+  }
+
+  getTenantDashboard(): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any>(`${this.baseUrl}/tenant/dashboard`, { headers });
+  }
+
+  getTenantPendaftaran(kode?: string): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+    const url = kode
+      ? `${this.baseUrl}/tenant/pendaftaran?kode=${encodeURIComponent(kode)}`
+      : `${this.baseUrl}/tenant/pendaftaran`;
+
+    return this.http.get<any[]>(url, { headers });
+  }
+
+  getTenantRegistrationEligibility(): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any>(`${this.baseUrl}/tenant/pendaftaran/eligibility`, { headers });
+  }
+
+  cancelTenantPendaftaran(id: number, alasan_pembatalan: string): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.post<any>(`${this.baseUrl}/tenant/pendaftaran/${id}/batalkan`, {
+      alasan_pembatalan
+    }, { headers });
+  }
+
+  createTenantPendaftaran(data: FormData): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    // Jangan set Content-Type manual; browser akan mengisi multipart boundary.
+    return this.http.post<any>(`${this.baseUrl}/tenant/pendaftaran`, data, { headers });
+  }
+
   register(data: FormData) {
     return this.http.post(`${this.baseUrl}/register`, data);
   }
@@ -340,6 +441,18 @@ export class ApiService {
     );
   }
 
+  getPendaftaranKtp(id: number): Observable<Blob> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/octet-stream'
+    });
+
+    return this.http.get(
+      `${this.baseUrl}/pendaftaran/${id}/ktp`,
+      { headers, responseType: 'blob' }
+    );
+  }
+
   updatePendaftaranStatus(
     id: number,
     status: 'menunggu' | 'disetujui' | 'ditolak'
@@ -390,6 +503,70 @@ export class ApiService {
     );
   }
 
+
+  endKontrak(id: string, data: {
+    tgl_keluar: string;
+    alasan_pengakhiran: 'kontrak_berakhir' | 'permintaan_penghuni' | 'keputusan_owner';
+    catatan_pengakhiran?: string;
+  }): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.put(`${this.baseUrl}/kontrak/${id}/akhiri`, data, { headers });
+  }
+
+  getPermintaanKeluar(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(`${this.baseUrl}/permintaan-keluar`, { headers });
+  }
+
+  updatePermintaanKeluarStatus(
+    id: string,
+    status: 'disetujui' | 'ditolak',
+    catatan_owner?: string
+  ): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.put(`${this.baseUrl}/permintaan-keluar/${id}/status`, {
+      status,
+      catatan_owner: catatan_owner || ''
+    }, { headers });
+  }
+
+  getTenantPermintaanKeluar(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(`${this.baseUrl}/tenant/permintaan-keluar`, { headers });
+  }
+
+  createTenantPermintaanKeluar(data: {
+    tKontrak_id_kontrak: number;
+    tgl_rencana_keluar: string;
+    alasan: string;
+  }): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post(`${this.baseUrl}/tenant/permintaan-keluar`, data, { headers });
+  }
+
   getPenghuni(): Observable<any[]> {
     const token = localStorage.getItem('token');
 
@@ -404,21 +581,31 @@ export class ApiService {
     );
   }
 
-  getTagihan(): Observable<any[]> {
-    const token = localStorage.getItem('token');
-
+  getPenghuniKtp(id: number): Observable<Blob> {
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/octet-stream'
+    });
+
+    return this.http.get(
+      `${this.baseUrl}/penghuni/${id}/ktp`,
+      { headers, responseType: 'blob' }
+    );
+  }
+
+  getTenantTagihanByKode(kode: string): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
       Accept: 'application/json'
     });
 
-    return this.http.get<any[]>(
-      `${this.baseUrl}/tagihan`,
+    return this.http.get<any>(
+      `${this.baseUrl}/tenant/tagihan/${encodeURIComponent(kode)}`,
       { headers }
     );
   }
 
-  getPembayaran(): Observable<any[]> {
+  getTagihan(scope: 'current' | 'history' = 'current'): Observable<any[]> {
     const token = localStorage.getItem('token');
 
     const headers = new HttpHeaders({
@@ -427,7 +614,77 @@ export class ApiService {
     });
 
     return this.http.get<any[]>(
+      `${this.baseUrl}/tagihan?scope=${scope}`,
+      { headers }
+    );
+  }
+
+  getPembayaran(scope: 'current' | 'history' = 'current'): Observable<any[]> {
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}/pembayaran?scope=${scope}`,
+      { headers }
+    );
+  }
+
+  getPersetujuanCicilan(): Observable<any[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any[]>(`${this.baseUrl}/persetujuan-cicilan`, { headers });
+  }
+
+  ajukanCicilan(data: {
+    tTagihan_id_tagihan: number;
+    jumlah_cicilan: number;
+    alasan: string;
+  }): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(`${this.baseUrl}/persetujuan-cicilan`, data, { headers });
+  }
+
+  putuskanCicilan(
+    id: number,
+    status: 'disetujui' | 'ditolak',
+    catatan_owner = ''
+  ): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.put<any>(
+      `${this.baseUrl}/persetujuan-cicilan/${id}`,
+      { status, catatan_owner },
+      { headers }
+    );
+  }
+
+  createPembayaran(formData: FormData): Observable<any> {
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.post<any>(
       `${this.baseUrl}/pembayaran`,
+      formData,
       { headers }
     );
   }
@@ -595,6 +852,40 @@ export class ApiService {
   }
 
 
+  // Endpoint komplain khusus tenant; endpoint /komplain tetap untuk admin.
+  getTenantKomplain(): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<any>(`${this.baseUrl}/tenant/komplain`, { headers });
+  }
+
+  createTenantKomplain(data: { judul: string; deskripsi: string }): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(`${this.baseUrl}/tenant/komplain`, data, { headers });
+  }
+
+  replyTenantKomplain(id: number, tanggapan: string): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(
+      `${this.baseUrl}/tenant/komplain/${id}/tanggapan`,
+      { tanggapan },
+      { headers }
+    );
+  }
+
   getKomplain(): Observable<any[]> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -647,6 +938,16 @@ export class ApiService {
     });
   }
 
+  updateTenantProfile(data: FormData): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    // Content-Type tidak diatur manual agar boundary multipart dibuat browser.
+    return this.http.post<any>(`${this.baseUrl}/tenant/profile`, data, { headers });
+  }
+
   updateProfile(data: any) {
     const token = localStorage.getItem('token');
 
@@ -667,6 +968,24 @@ export class ApiService {
     });
   }
 
+
+  getUnreadNotificationCount(): Observable<{ unread: number }> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<{ unread: number }>(`${this.baseUrl}/notifikasi/count`, { headers });
+  }
+
+  getTenantNotifikasiCount(): Observable<{ unread: number }> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
+    });
+
+    return this.http.get<{ unread: number }>(`${this.baseUrl}/tenant/notifikasi/count`, { headers });
+  }
 
   getNotifikasi() {
     const headers = new HttpHeaders({
@@ -705,4 +1024,6 @@ export class ApiService {
       { headers }
     );
   }
+
+
 }

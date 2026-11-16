@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from '../../services/api';
 
 interface Notification {
@@ -24,7 +25,7 @@ export class NotificationsPage {
   loading = false;
   errorMessage = '';
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private router: Router) {}
 
   // Dipanggil setiap kali halaman akan ditampilkan
   ionViewWillEnter(): void {
@@ -81,9 +82,35 @@ export class NotificationsPage {
         this.notifs = this.notifs.map(item =>
           item.id === id ? { ...item, read: true } : item
         );
+        this.cdr.detectChanges();
       },
       error: error => {
         console.error('Gagal menandai notifikasi:', error);
+      }
+    });
+  }
+
+  openNotification(item: Notification): void {
+    const navigate = () => {
+      if (item.link && item.link.startsWith('/') && !item.link.startsWith('//')) {
+        this.router.navigateByUrl(item.link);
+      }
+    };
+
+    if (item.read) {
+      navigate();
+      return;
+    }
+
+    this.api.markNotifikasiAsRead(item.id).subscribe({
+      next: () => {
+        item.read = true;
+        this.cdr.detectChanges();
+        navigate();
+      },
+      error: error => {
+        console.error('Gagal menandai notifikasi:', error);
+        navigate();
       }
     });
   }

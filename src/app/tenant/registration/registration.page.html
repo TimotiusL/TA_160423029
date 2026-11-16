@@ -1,0 +1,403 @@
+<ion-content class="registration-content">
+  <main class="registration-page">
+
+    <!-- Page Heading -->
+    <header class="page-heading">
+      <div>
+        <span class="eyebrow">PENDAFTARAN PENGHUNI</span>
+        <h1>Pendaftaran Kamar</h1>
+        <p class="subtitle">Lengkapi formulir berikut untuk mengajukan sewa kamar kos pilihan Anda.</p>
+      </div>
+    </header>
+
+    <!-- Stepper Navigation -->
+    <nav class="stepper" aria-label="Langkah pendaftaran">
+      <div class="step-item" *ngFor="let label of steps; let i = index" [class.active]="step === i" [class.done]="step > i">
+        <span class="step-indicator">
+          <svg *ngIf="step > i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span *ngIf="step <= i">{{ i + 1 }}</span>
+        </span>
+        <span class="step-label">{{ label }}</span>
+        <div class="step-connector" *ngIf="i < steps.length - 1"></div>
+      </div>
+    </nav>
+
+    <!-- Loading / Error States -->
+    <div class="panel state-card" *ngIf="loading">
+      <div class="state-spinner"></div>
+      <p>Memuat data kos dan informasi pendaftaran...</p>
+    </div>
+
+    <div class="panel state-card state-error" *ngIf="!loading && errorMessage">
+      <div class="error-icon-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="primary-button" (click)="reloadKatalog()">
+        <span>Coba Muat Ulang</span>
+      </button>
+    </div>
+
+    <!-- Main Registration Layout -->
+    <div class="registration-layout" *ngIf="!loading && !errorMessage">
+
+      <!-- Form Column -->
+      <section class="form-column">
+
+        <!-- STEP 0: Data Diri -->
+        <article class="form-card" *ngIf="step === 0">
+          <div class="section-heading">
+            <div class="section-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <h2>Informasi Pribadi & Identitas</h2>
+              <p>Periksa dan pastikan data diri Anda sesuai dengan kartu identitas resmi.</p>
+            </div>
+          </div>
+
+          <div class="alert-box alert-info">
+            <svg class="alert-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="alert-text">
+              <strong>Periksa data sebelum mendaftar</strong>
+              <p>NIK, tanggal lahir, jenis kelamin, dan file KTP akan disinkronkan dengan data profil penghuni Anda. Unggah KTP baru hanya jika ingin memperbarui file yang tersimpan.</p>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">Nama Lengkap</span>
+              <div class="input-lock-wrap">
+                <input [(ngModel)]="form.name" name="name" disabled aria-describedby="account-data-note" required>
+                <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+            </label>
+
+            <label class="field">
+              <span class="field-label">NIK (Nomor Induk Kependudukan) <b>*</b></span>
+              <input [(ngModel)]="form.nik" name="nik" inputmode="numeric" maxlength="16" placeholder="16 digit NIK sesuai KTP" required>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Alamat Email</span>
+              <div class="input-lock-wrap">
+                <input [(ngModel)]="form.email" name="email" type="email" disabled aria-describedby="account-data-note" required>
+                <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Nomor Telepon</span>
+              <div class="input-lock-wrap">
+                <input [(ngModel)]="form.phone" name="phone" type="tel" disabled aria-describedby="account-data-note" required>
+                <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Tanggal Lahir <b>*</b></span>
+              <input [(ngModel)]="form.birthDate" name="birthDate" type="date" [max]="today" required>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Jenis Kelamin <b>*</b></span>
+              <div class="select-wrapper">
+                <select [(ngModel)]="form.gender" name="gender" required>
+                  <option value="pria">Laki-laki</option>
+                  <option value="wanita">Perempuan</option>
+                </select>
+                <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </label>
+
+            <p class="field-note full" id="account-data-note">Nama, email, dan nomor telepon terhubung ke akun Anda. Jika ingin mengubahnya, silakan perbarui di menu Profil Saya.</p>
+
+            <!-- KTP Upload Area -->
+            <div class="field full">
+              <span class="field-label">Foto Kartu Tanda Penduduk (KTP) <b>*</b></span>
+
+              <!-- Existing KTP File Badge -->
+              <div class="saved-ktp-box" *ngIf="existingKtpPath && !ktpName">
+                <div class="saved-ktp-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+                </div>
+                <div class="saved-ktp-info">
+                  <strong>KTP Sudah Tersimpan</strong>
+                  <small>{{ existingKtpName }}</small>
+                </div>
+                <a [href]="existingKtpUrl" target="_blank" rel="noopener noreferrer" class="view-ktp-btn">
+                  <span>Lihat KTP</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                </a>
+              </div>
+
+              <!-- Upload Zone -->
+              <label class="upload-dropzone">
+                <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" (change)="onKtpChange($event)">
+                <div class="upload-icon-circle">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                </div>
+                <div class="upload-copy">
+                  <strong>{{ ktpName || (existingKtpPath ? 'Klik untuk mengganti file KTP (opsional)' : 'Pilih atau unggah file foto KTP') }}</strong>
+                  <small>{{ existingKtpPath ? 'KTP tersimpan akan otomatis digunakan jika tidak mengunggah file baru.' : 'Format JPG, JPEG, PNG, atau PDF · Ukuran maksimal 2 MB' }}</small>
+                </div>
+              </label>
+            </div>
+          </div>
+        </article>
+
+        <!-- STEP 1: Periode Sewa -->
+        <article class="form-card" *ngIf="step === 1">
+          <div class="section-heading">
+            <div class="section-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            </div>
+            <div>
+              <h2>Rencana Periode Sewa</h2>
+              <p>Tentukan tanggal mulai menghuni dan durasi sewa yang Anda inginkan.</p>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">Tanggal Rencana Masuk <b>*</b></span>
+              <input type="date" [(ngModel)]="form.startDate" name="startDate" [min]="today" required>
+            </label>
+
+            <div class="field full" *ngIf="availableBundles.length > 0">
+              <span class="field-label">Pilihan Sewa</span>
+              <div class="bundle-choice-wrap">
+                <label class="bundle-choice" [class.selected]="!form.bundleId">
+                  <input type="radio" name="bundleChoice" [checked]="!form.bundleId" (change)="onBundleChange('')">
+                  <span class="bundle-choice-copy">
+                    <strong>Sewa Normal</strong>
+                    <small>Pilih durasi sewa sesuai kebutuhan, tanpa paket promo.</small>
+                  </span>
+                </label>
+                <label class="bundle-choice" *ngFor="let bundle of availableBundles" [class.selected]="selectedBundle?.id_bundle === bundle.id_bundle">
+                  <input type="radio" name="bundleChoice" [checked]="selectedBundle?.id_bundle === bundle.id_bundle" (change)="onBundleChange('' + bundle.id_bundle)">
+                  <span class="bundle-choice-copy">
+                    <strong>{{ bundle.nama_bundle }}</strong>
+                    <small>{{ bundle.durasi_sewa_bulan }} bulan masa tinggal · Hemat {{ rupiah(bundle.potongan) }}</small>
+                  </span>
+                  <strong class="bundle-choice-price">{{ rupiah(bundle.harga_bundle) }}</strong>
+                </label>
+              </div>
+              <small class="field-helper">Bundle hanya berlaku untuk jenis kamar yang dipilih. Paket bundle wajib dibayar lunas dan tidak dapat dicicil.</small>
+            </div>
+
+            <div class="bundle-selected-detail full" *ngIf="selectedBundle">
+              <div class="bundle-selected-header">
+                <strong>{{ selectedBundle.nama_bundle }}</strong>
+                <span>{{ selectedBundle.durasi_sewa_bulan }} bulan masa tinggal</span>
+              </div>
+              <div class="bundle-selected-prices">
+                <div><span>Harga normal</span><strong>{{ rupiah(selectedBundle.harga_normal) }}</strong></div>
+                <div><span>Potongan</span><strong class="bundle-discount-value">−{{ rupiah(selectedBundle.potongan) }}</strong></div>
+                <div class="bundle-final-row"><span>Harga bundle</span><strong>{{ rupiah(selectedBundle.harga_bundle) }}</strong></div>
+                <div *ngIf="(selectedProperty?.deposit || 0) > 0"><span>Deposit terpisah</span><strong>{{ rupiah(selectedProperty?.deposit || 0) }}</strong></div>
+              </div>
+              <p>Pembayaran paket bundle harus dilunasi sekaligus. Deposit tetap ditagihkan terpisah jika kos menetapkannya.</p>
+            </div>
+
+            <label class="field" *ngIf="!selectedBundle">
+              <span class="field-label">Durasi Sewa (Bulan) <b>*</b></span>
+              <input type="number" [(ngModel)]="form.durationMonths" name="durationMonths" min="1" max="36" step="1" inputmode="numeric" placeholder="Contoh: 12" required>
+              <small class="field-helper">Durasi sewa normal antara 1 hingga 36 bulan.</small>
+            </label>
+            <div class="field" *ngIf="selectedBundle">
+              <span class="field-label">Durasi Sewa</span>
+              <div class="bundle-readonly-duration">{{ selectedBundle.durasi_sewa_bulan }} bulan termasuk masa bonus</div>
+            </div>
+
+            <label class="field full">
+              <span class="field-label">Catatan Tambahan untuk Pengelola <small>(opsional)</small></span>
+              <textarea [(ngModel)]="form.notes" name="notes" rows="4" placeholder="Misal: estimasi jam kedatangan atau kebutuhan fasilitas khusus..."></textarea>
+            </label>
+          </div>
+
+          <div class="alert-box alert-info">
+            <svg class="alert-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="alert-text">
+              <strong>Informasi Verifikasi</strong>
+              <p>Pengajuan sewa akan ditinjau dan diverifikasi oleh pemilik kos sebelum diterbitkan tagihan dan kontrak resmi.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- STEP 2: Review Pendaftaran -->
+        <article class="form-card" *ngIf="step === 2 && !submitted">
+          <div class="section-heading">
+            <div class="section-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+            </div>
+            <div>
+              <h2>Review Pendaftaran</h2>
+              <p>Periksa kembali seluruh data pengajuan sewa Anda sebelum dikirimkan.</p>
+            </div>
+          </div>
+
+          <!-- Review Blocks -->
+          <div class="review-block">
+            <span class="review-label">PROPERTI & KAMAR</span>
+            <strong class="review-title">{{ selectedProperty?.name || 'Belum dipilih' }}</strong>
+            <p class="review-sub">{{ selectedProperty?.address }}</p>
+            <p class="review-detail">Kamar {{ selectedRoom?.number }} · {{ selectedRoom?.type }}</p>
+            <strong class="review-price">{{ selectedRoom ? rupiah(selectedBundle ? selectedBundle.harga_bundle : selectedRoom.price) : '-' }}<small>{{ selectedBundle ? 'harga paket' : '/bulan' }}</small></strong>
+          </div>
+
+          <div class="review-block">
+            <span class="review-label">PERATURAN KOS</span>
+            <p class="review-rules">{{ selectedProperty?.rules || 'Pemilik kos belum menambahkan informasi peraturan untuk properti ini.' }}</p>
+          </div>
+
+          <div class="review-block">
+            <span class="review-label">DATA PENGHUNI</span>
+            <strong class="review-title">{{ form.name }}</strong>
+            <p class="review-detail">{{ form.email }} · {{ form.phone }}</p>
+            <p class="review-detail">NIK: {{ form.nik }}</p>
+            <p class="review-detail">Tanggal Lahir: {{ tanggal(form.birthDate) }} · Jenis Kelamin: {{ form.gender === 'pria' ? 'Laki-laki' : 'Perempuan' }}</p>
+            <p class="review-detail">File KTP: {{ ktpName || existingKtpName || 'Belum dipilih' }}</p>
+          </div>
+
+          <div class="review-block">
+            <span class="review-label">PERIODE SEWA</span>
+            <strong class="review-title">Mulai {{ tanggal(form.startDate) }}</strong>
+            <p class="review-detail">Durasi sewa: {{ selectedDurationMonths }} bulan</p>
+            <div class="review-bundle-breakdown" *ngIf="selectedBundle">
+              <strong>{{ selectedBundle.nama_bundle }}</strong>
+              <p class="review-detail">Harga normal: {{ rupiah(selectedBundle.harga_normal) }}</p>
+              <p class="review-detail">Potongan: −{{ rupiah(selectedBundle.potongan) }}</p>
+              <p class="review-bundle-total">Harga bundle: {{ rupiah(selectedBundle.harga_bundle) }}</p>
+              <p class="review-detail" *ngIf="(selectedProperty?.deposit || 0) > 0">Deposit terpisah: {{ rupiah(selectedProperty?.deposit || 0) }}</p>
+              <small>Tagihan bundle wajib dibayar lunas dan tidak dapat dicicil.</small>
+            </div>
+            <p class="review-detail" *ngIf="form.notes">Catatan: {{ form.notes }}</p>
+          </div>
+
+          <div class="alert-box alert-warning">
+            <svg class="alert-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div class="alert-text">
+              <strong>Konfirmasi Sebelum Mengirim</strong>
+              <p>Pastikan data NIK, identitas, dan tanggal mulai masuk sudah benar. Anda dapat menekan tombol Kembali jika ada data yang perlu disesuaikan.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- SUCCESS CARD -->
+        <article class="form-card success-card" *ngIf="submitted">
+          <div class="success-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>Pendaftaran Berhasil Dikirim!</h2>
+          <p class="success-desc">Pengajuan sewa Anda telah tercatat dan sedang menunggu verifikasi dari pemilik kos.</p>
+
+          <div class="code-box">
+            <span class="code-label">KODE PENDAFTARAN ANDA</span>
+            <strong class="code-value">{{ applicationCode }}</strong>
+            <small>Simpan atau catat kode ini untuk melacak perkembangan status pengajuan Anda.</small>
+          </div>
+
+          <button type="button" class="primary-button" (click)="keStatus()">
+            <span>Lihat Status Pengajuan</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </article>
+
+        <!-- Form Step Actions -->
+        <div class="form-actions" *ngIf="!submitted">
+          <button type="button" class="secondary-button" (click)="back()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            <span>{{ step === 0 ? 'Kembali ke Cari Kos' : 'Kembali' }}</span>
+          </button>
+
+          <button type="button" class="primary-button" *ngIf="step < 2" (click)="next()">
+            <span>Lanjutkan</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+
+          <button type="button" class="primary-button" *ngIf="step === 2" (click)="submit()" [disabled]="submitting">
+            <svg *ngIf="!submitting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>{{ submitting ? 'Mengirim Pendaftaran...' : 'Kirim Pendaftaran' }}</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Summary Sticky Column -->
+      <aside class="summary-column">
+        <section class="summary-card">
+          <span class="eyebrow">RINGKASAN PENDAFTARAN</span>
+
+          <div class="property-mini" *ngIf="selectedProperty; else choosePropertyHint">
+            <img [src]="selectedProperty.photo" [alt]="selectedProperty.name">
+            <div class="property-mini-text">
+              <strong>{{ selectedProperty.name }}</strong>
+              <small>{{ selectedProperty.address }}</small>
+            </div>
+          </div>
+
+          <ng-template #choosePropertyHint>
+            <div class="summary-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <p>Properti pilihan Anda akan muncul di sini.</p>
+            </div>
+          </ng-template>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row">
+            <span>Kamar Pilihan</span>
+            <strong>{{ selectedRoom ? 'Kamar ' + selectedRoom.number : 'Belum dipilih' }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Tipe Kamar</span>
+            <strong>{{ selectedRoom?.type || '-' }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Rencana Masuk</span>
+            <strong>{{ form.startDate ? tanggal(form.startDate) : 'Belum ditentukan' }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Durasi Sewa</span>
+            <strong>{{ selectedDurationMonths ? selectedDurationMonths + ' bulan' : 'Belum ditentukan' }}</strong>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total">
+            <span>{{ selectedBundle ? 'Harga Bundle' : 'Tarif Sewa' }}</span>
+            <strong>{{ selectedRoom ? rupiah(selectedBundle ? selectedBundle.harga_bundle : selectedRoom.price) : '-' }}<small>{{ selectedBundle ? 'paket' : '/bln' }}</small></strong>
+          </div>
+          <div class="summary-row" *ngIf="selectedBundle">
+            <span>Potongan Bundle</span>
+            <strong class="bundle-discount-value">−{{ rupiah(selectedBundle.potongan) }}</strong>
+          </div>
+          <div class="summary-row" *ngIf="selectedBundle && (selectedProperty?.deposit || 0) > 0">
+            <span>Deposit</span>
+            <strong>{{ rupiah(selectedProperty?.deposit || 0) }}</strong>
+          </div>
+
+          <div class="summary-footnote">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <p>Data identitas Anda aman dan hanya digunakan untuk keperluan verifikasi hunian.</p>
+          </div>
+        </section>
+
+        <section class="support-card">
+          <div class="support-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <strong>Perlu Bantuan?</strong>
+            <p>Pastikan nomor telepon dan email aktif untuk menerima notifikasi verifikasi.</p>
+          </div>
+        </section>
+      </aside>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-message" *ngIf="toastMessage">{{ toastMessage }}</div>
+  </main>
+</ion-content>

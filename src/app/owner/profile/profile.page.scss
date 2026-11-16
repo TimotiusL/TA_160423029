@@ -1,10 +1,12 @@
+@use '../theme' as km;
+
 /* =====================================================================
    KostManager Owner UI - design system bersama
    Blok ini identik di setiap halaman agar tampilan konsisten dan
    tidak bergantung pada stylesheet global.
 ===================================================================== */
 
-$font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
 $ink: #0f172a;
@@ -1496,3 +1498,6 @@ ion-modal.property-modal {
     line-height: 26px;
   }
 }
+
+// Shared design system / visual styles only.
+@include km.page();

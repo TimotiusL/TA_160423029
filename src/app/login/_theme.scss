@@ -1,0 +1,55 @@
+/* Unified sign-in / sign-up appearance. Does not change auth behavior. */
+@mixin auth {
+  :host {
+    --km-primary: #166c5f;
+    --km-primary-hover: #105348;
+    --km-border: #dce5df;
+    --km-ink: #1b2930;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--km-ink);
+  }
+  :host .login-page { background: #fff; }
+  :host .login-illustration { background: #173e34; }
+  :host .brand-icon { border-radius: 10px; background: #eaf4ee; border-color: #eaf4ee; color: #185d4f; }
+  :host .illustration-copy h2 { font-weight: 740; letter-spacing: -.035em; }
+  :host .description { color: #d3e5db; }
+  :host .feature-dot { background: #a5d4b9; }
+  :host .login-form-section { background: #fff; }
+  :host .form-container h1 { color: var(--km-ink); font-weight: 740; letter-spacing: -.035em; }
+  :host :is(.auth-heading .subtitle, .field-hint, .register-text) { color: #5a6c65; }
+  :host .auth-form label { color: var(--km-ink); font-size: 13px; font-weight: 650; }
+  :host :is(input, select, textarea) {
+    min-height: 46px;
+    border-radius: 9px;
+    border: 1px solid #cbd8d0;
+    background: #fff;
+    color: var(--km-ink);
+    font-size: 14px;
+    box-shadow: none;
+    font-family: inherit;
+  }
+  :host :is(input, textarea)::placeholder { color: #73877c; opacity: 1; }
+  :host :is(input, select, textarea):focus { border-color: var(--km-primary); }
+  :host .primary-button {
+    min-height: 46px;
+    border-radius: 9px;
+    background: var(--km-primary);
+    border: 1px solid var(--km-primary);
+    box-shadow: none;
+    font-size: 14px;
+    font-weight: 680;
+  }
+  :host .primary-button:hover:not(:disabled) { background: var(--km-primary-hover); border-color: var(--km-primary-hover); transform: none; }
+  :host :is(.text-button, .back-login) { color: var(--km-primary); font-weight: 650; }
+  :host .role-card { border-radius: 10px; border-color: var(--km-border); box-shadow: none; }
+  :host .role-card.selected { background: #eaf4ee; border-color: var(--km-primary); box-shadow: none; }
+  :host .role-check { background: var(--km-primary); }
+  :host :is(.verification-popup, .forgot-password-popup) { border-radius: 14px; border-color: var(--km-border); }
+  :host :is(button, a, input, select):focus-visible { outline: 2px solid var(--km-primary); outline-offset: 3px; }
+  @media (max-width: 700px) {
+    :host .login-illustration { background: #173e34; }
+    :host .illustration-copy h2 { font-size: 26px; }
+    :host .login-form-section { padding-top: 27px; }
+    :host :is(input, select) { font-size: 16px; }
+  }
+}

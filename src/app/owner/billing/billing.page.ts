@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonIcon, IonModal } from '@ionic/angular';
@@ -30,6 +30,8 @@ interface Bill {
   dueDate: string;
   details: BillDetail[];
   total: number;
+  penalty: number;
+  totalDue: number;
   paidAmount: number;
   status: 'BELUM_BAYAR' | 'SEBAGIAN' | 'LUNAS' | 'TERLAMBAT';
 }
@@ -50,6 +52,15 @@ interface ContractOption {
   tenantName: string;
   propertyName: string;
   roomNumber: string;
+}
+
+interface InstallmentRequest {
+  id_persetujuanCicilan: number;
+  jumlah_cicilan: number;
+  alasan: string;
+  status: string;
+  tgl_pengajuan: string;
+  tagihan?: any;
 }
 
 @Component({
@@ -73,13 +84,18 @@ export class BillingPage implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadProperties();
     this.loadBills();
+    this.loadCicilanRequests();
   }
 
   search = '';
+  selectedPropertyId = 'all';
   tab = 'all';
 
   selectedBill: Bill | null = null;
+  @ViewChild('detailModal') detailModal?: IonModal;
+  private pendingPaymentNavigationId: string | null = null;
 
   showGenerate = false;
 
@@ -125,7 +141,24 @@ export class BillingPage implements OnInit {
   tenants: Tenant[] = [];
   properties: Property[] = [];
   bills: Bill[] = [];
+  cicilanRequests: InstallmentRequest[] = [];
+  processingCicilanId: number | null = null;
 
+
+  loadProperties(): void {
+    this.apiService.getKos().subscribe({
+      next: (data: any[]) => {
+        this.properties = (Array.isArray(data) ? data : []).map(item => ({
+          id: String(item.id_kos),
+          name: item.nama_kos
+        }));
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Gagal mengambil daftar kos:', error);
+      }
+    });
+  }
 
   loadBills(): void {
     this.apiService.getTagihan().subscribe({
@@ -143,10 +176,19 @@ export class BillingPage implements OnInit {
             );
 
           const total = Number(item.total_tagihan);
-          const sisa = Math.max(0, total - paidAmount);
-          const terlambat =
-            item.status !== 'lunas' &&
-            new Date(item.tgl_jatuhTempo) < new Date();
+          const penalty = Number(item.denda_berjalan || 0);
+          const totalDue = Number(item.total_tagihan_berjalan ?? (total + penalty));
+          const sisa = Math.max(0, totalDue - paidAmount);
+          const approvedPlan = (Array.isArray(item.persetujuan_cicilan) ? item.persetujuan_cicilan : [])
+            .filter((request: any) => request.status === 'disetujui'
+              && Array.isArray(request.cicilan) && request.cicilan.length > 0)
+            .sort((a: any, b: any) => new Date(b.tgl_keputusan || 0).getTime() - new Date(a.tgl_keputusan || 0).getTime())[0];
+          const terlambat = item.status !== 'lunas' && (
+            approvedPlan
+              ? approvedPlan.cicilan.some((cicilan: any) => cicilan.status !== 'lunas'
+                && new Date(cicilan.tgl_jatuhTempo) < new Date())
+              : new Date(item.tgl_jatuhTempo) < new Date()
+          );
 
           let status: Bill['status'];
 
@@ -177,6 +219,8 @@ export class BillingPage implements OnInit {
               unitPrice: Number(detail.harga),
             })),
             total,
+            penalty,
+            totalDue,
             paidAmount,
             status,
           } as Bill;
@@ -187,10 +231,6 @@ export class BillingPage implements OnInit {
           name: item.kontrak?.penghuni?.user?.nama ?? 'Penghuni',
         }));
 
-        this.properties = response.map((item: any) => ({
-          id: String(item.kontrak?.kamar?.kos?.id_kos ?? ''),
-          name: item.kontrak?.kamar?.kos?.nama_kos ?? 'Properti',
-        }));
 
         this.cdr.detectChanges();
       },
@@ -204,6 +244,58 @@ export class BillingPage implements OnInit {
 
 
 
+  loadCicilanRequests(): void {
+    this.apiService.getPersetujuanCicilan().subscribe({
+      next: (rows: any[]) => {
+        this.cicilanRequests = (Array.isArray(rows) ? rows : []) as InstallmentRequest[];
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Gagal memuat pengajuan cicilan:', error);
+      }
+    });
+  }
+
+  get pengajuanCicilanMenunggu(): InstallmentRequest[] {
+    return this.cicilanRequests.filter(item => {
+      if (item.status !== 'menunggu_persetujuan') return false;
+      if (this.selectedPropertyId === 'all') return true;
+      return String(item.tagihan?.kontrak?.kamar?.kos?.id_kos || '') === this.selectedPropertyId;
+    });
+  }
+
+  putuskanCicilan(item: InstallmentRequest, status: 'disetujui' | 'ditolak'): void {
+    if (this.processingCicilanId !== null) return;
+
+    let catatan = '';
+    if (status === 'ditolak') {
+      const alasan = window.prompt('Masukkan alasan penolakan cicilan:', '');
+      if (alasan === null) return;
+      catatan = alasan.trim();
+    } else if (!window.confirm('Setujui pengajuan dan buat jadwal cicilan sesuai permintaan penghuni?')) {
+      return;
+    }
+
+    this.processingCicilanId = item.id_persetujuanCicilan;
+    this.apiService.putuskanCicilan(item.id_persetujuanCicilan, status, catatan).subscribe({
+      next: (response: any) => {
+        this.processingCicilanId = null;
+        alert(response?.message || 'Keputusan cicilan berhasil disimpan.');
+        this.loadCicilanRequests();
+        this.loadBills();
+      },
+      error: error => {
+        this.processingCicilanId = null;
+        this.cdr.detectChanges();
+        alert(error?.error?.message || 'Gagal memproses pengajuan cicilan.');
+      }
+    });
+  }
+
+  cicilanNominalRupiah(item: InstallmentRequest): string {
+    return this.formatRupiah(Number(item.tagihan?.total_tagihan || 0));
+  }
+
   /* =========================
      FILTERED DATA
   ========================= */
@@ -211,6 +303,10 @@ export class BillingPage implements OnInit {
   get filteredBills(): Bill[] {
 
     return this.bills.filter(bill => {
+
+      if (this.selectedPropertyId !== 'all' && bill.propertyId !== this.selectedPropertyId) {
+        return false;
+      }
 
       const tenant = this.getTenant(bill);
 
@@ -257,7 +353,7 @@ export class BillingPage implements OnInit {
       .filter(bill => bill.status !== 'LUNAS')
       .reduce(
         (sum, bill) =>
-          sum + (bill.total - bill.paidAmount),
+          sum + (bill.totalDue - bill.paidAmount),
         0
       );
   }
@@ -308,8 +404,26 @@ export class BillingPage implements OnInit {
     this.selectedBill = bill;
   }
 
-  closeDetail() {
+  closeDetail(): void {
+    if (this.detailModal?.isOpen) {
+      void this.detailModal.dismiss(undefined, 'close');
+      return;
+    }
+
     this.selectedBill = null;
+  }
+
+  handleDetailDidDismiss(): void {
+    const tagihanId = this.pendingPaymentNavigationId;
+    this.pendingPaymentNavigationId = null;
+    this.selectedBill = null;
+    this.cdr.detectChanges();
+
+    if (tagihanId) {
+      void this.router.navigate(['/owner/payments'], {
+        queryParams: { tagihan_id: tagihanId }
+      });
+    }
   }
 
 
@@ -395,12 +509,12 @@ export class BillingPage implements OnInit {
     bill: Bill
   ): number {
 
-    if (!bill.total) {
+    if (!bill.totalDue) {
       return 0;
     }
 
     return Math.round(
-      (bill.paidAmount / bill.total) * 100
+      (bill.paidAmount / bill.totalDue) * 100
     );
   }
 
@@ -423,39 +537,24 @@ export class BillingPage implements OnInit {
      OTHER ACTIONS
   ========================= */
 
-  sendReminder(): void {
-    if (!this.selectedBill) return;
-
-    const bill = this.selectedBill;
-    const tenant = this.getTenant(bill)?.name ?? 'Penghuni';
-    const room = this.getRoomNumber(bill);
-    const remaining = bill.total - bill.paidAmount;
-
-    const message =
-      `Halo ${tenant}, pengingat pembayaran tagihan ` +
-      `${bill.number} untuk Kamar ${room}. ` +
-      `Sisa tagihan: ${this.formatRupiah(remaining)}. ` +
-      `Mohon segera melakukan pembayaran.`;
-
-    if (confirm(
-      `Buat pengingat untuk ${tenant}?\n\n${message}`
-    )) {
-      navigator.clipboard.writeText(message)
-        .then(() => alert('Pesan pengingat berhasil disalin.'))
-        .catch(() => alert('Gagal menyalin pesan pengingat.'));
-    }
-  }
-
-  viewPayments(): void {
+  async viewPayments(): Promise<void> {
     const tagihanId = this.selectedBill?.id;
+    if (!tagihanId) return;
 
-    this.closeDetail();
+    // Simpan tujuan navigasi, lalu tunggu modal detail benar-benar selesai
+    // ditutup. Navigasi dilakukan dari handleDetailDidDismiss().
+    this.pendingPaymentNavigationId = tagihanId;
 
-    this.router.navigate(['/owner/payments'], {
-      queryParams: tagihanId
-        ? { tagihan_id: tagihanId }
-        : {}
-    });
+    if (this.detailModal?.isOpen) {
+      const dismissed = await this.detailModal.dismiss(undefined, 'view-payments');
+      if (!dismissed) {
+        this.pendingPaymentNavigationId = null;
+      }
+      return;
+    }
+
+    // Fallback jika elemen modal belum tersedia pada saat tombol dipencet.
+    this.handleDetailDidDismiss();
   }
 
 }

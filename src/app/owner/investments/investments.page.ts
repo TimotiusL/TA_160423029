@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonModal } from '@ionic/angular';
 import { ApiService } from '../../services/api';
@@ -26,6 +26,8 @@ interface Investment {
   styleUrls: ['./investments.page.scss']
 })
 export class InvestmentsPage implements OnInit {
+  @ViewChild('investmentFormModal') private investmentFormModal?: IonModal;
+  @ViewChild('investmentSuccessModal') private investmentSuccessModal?: IonModal;
 
   constructor(
     private api: ApiService,
@@ -36,6 +38,8 @@ export class InvestmentsPage implements OnInit {
   showAdd = false;
   editingId: number | null = null;
   loading = false;
+  saving = false;
+  saveSuccessMessage = 'Data investasi berhasil disimpan.';
 
   form = {
     propertyId: '',
@@ -175,7 +179,7 @@ export class InvestmentsPage implements OnInit {
     }).format(new Date(date + 'T00:00:00'));
   }
 
-  openAddModal(): void {
+  async openAddModal(): Promise<void> {
     this.editingId = null;
 
     this.form = {
@@ -187,14 +191,42 @@ export class InvestmentsPage implements OnInit {
     };
 
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.investmentFormModal?.present();
   }
 
-  closeAddModal(): void {
+  async closeAddModal(): Promise<void> {
+    const dismissed = await this.investmentFormModal?.dismiss(null, 'cancel');
+    if (!dismissed) this.onFormDidDismiss();
+  }
+
+  onFormDidDismiss(): void {
     this.showAdd = false;
     this.editingId = null;
+    this.saving = false;
+    this.cdr.detectChanges();
   }
 
-  editInvestment(investment: Investment): void {
+  private async completeSave(): Promise<void> {
+    this.saveSuccessMessage = this.editingId !== null
+      ? 'Data investasi berhasil diperbarui.'
+      : 'Data investasi berhasil ditambahkan.';
+
+    const dismissed = await this.investmentFormModal?.dismiss({ saved: true }, 'saved');
+    if (!dismissed) this.onFormDidDismiss();
+
+    this.showAdd = false;
+    this.saving = false;
+    this.loadInvestments();
+    this.cdr.detectChanges();
+    await this.investmentSuccessModal?.present();
+  }
+
+  async dismissSaveSuccess(): Promise<void> {
+    await this.investmentSuccessModal?.dismiss(null, 'backdrop');
+  }
+
+  async editInvestment(investment: Investment): Promise<void> {
     this.editingId = investment.id;
 
     this.form = {
@@ -206,6 +238,8 @@ export class InvestmentsPage implements OnInit {
     };
 
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.investmentFormModal?.present();
   }
 
   saveInvestment(): void {
@@ -225,6 +259,9 @@ export class InvestmentsPage implements OnInit {
       return;
     }
 
+    if (this.saving) return;
+    this.saving = true;
+
     const data = {
       tKos_id_kos: Number(this.form.propertyId),
       tgl_masuk: this.form.date,
@@ -238,17 +275,11 @@ export class InvestmentsPage implements OnInit {
       : this.api.createInvestasi(data);
 
     request.subscribe({
-      next: () => {
-        alert(
-          this.editingId !== null
-            ? 'Investasi berhasil diperbarui.'
-            : 'Investasi berhasil ditambahkan.'
-        );
-
-        this.closeAddModal();
-        this.loadInvestments();
+      next: async () => {
+        await this.completeSave();
       },
       error: error => {
+        this.saving = false;
         console.error('Gagal menyimpan investasi:', error);
         alert(
           error.error?.message ||

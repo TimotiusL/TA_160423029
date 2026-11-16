@@ -8,103 +8,96 @@
 
       <!-- HEADER -->
       <div class="sidebar-header">
-
-        <div class="logo-box">
-          K
-        </div>
+        <div class="logo-box">K</div>
 
         @if (sidebarOpen) {
-        <span class="logo-text">
-          KostManager
-        </span>
+          <span class="logo-text">KostManager</span>
         }
 
         <button type="button" class="mobile-sidebar-close" (click)="toggleSidebar()" aria-label="Tutup menu">
           ×
         </button>
-
       </div>
 
-      <!-- NAVIGATION -->
-      <div class="sidebar-navigation">
-
+      <!-- NAVIGATION ACCORDION -->
+      <nav class="sidebar-navigation" aria-label="Menu utama owner">
         @for (section of navSections; track section.title) {
+          <div class="nav-section" [class.expanded]="isSectionExpanded(section)">
+            <button
+              type="button"
+              class="section-toggle"
+              [class.active]="isSectionExpanded(section)"
+              [attr.aria-expanded]="isSectionExpanded(section)"
+              [attr.aria-label]="section.title"
+              [title]="!sidebarOpen ? section.title : ''"
+              (click)="toggleSection(section)">
 
-        <div class="nav-section">
+              <span class="section-icon">
+                <ion-icon [name]="section.icon"></ion-icon>
+              </span>
 
-          @if (sidebarOpen) {
-          <p class="section-title">
-            {{ section.title }}
-          </p>
-          }
+              @if (sidebarOpen) {
+                <span class="section-label">{{ section.title }}</span>
+              }
+            </button>
 
-          @for (item of section.items; track item.id) {
+            @if (sidebarOpen && isSectionExpanded(section)) {
+              <div class="section-items">
+                @for (item of section.items; track item.id) {
+                  <a
+                    [routerLink]="item.route"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="nav-item"
+                    (click)="onNavItemClick()">
 
-          <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-            class="nav-item" [title]="!sidebarOpen ? item.label : ''">
+                    <span class="nav-icon">
+                      <ion-icon [name]="item.icon"></ion-icon>
+                    </span>
 
-            <span class="nav-icon">
-              <ion-icon [name]="item.icon"></ion-icon>
-            </span>
-
-            @if (sidebarOpen) {
-            <span class="nav-label">
-              {{ item.label }}
-            </span>
+                    <span class="nav-label">{{ item.label }}</span>
+                    <span class="nav-dot" aria-hidden="true"></span>
+                  </a>
+                }
+              </div>
             }
-          </a>
-
-          }
-
-        </div>
-
+          </div>
         }
-
-      </div>
-
-
+      </nav>
 
     </aside>
-
 
     <!-- MAIN CONTENT -->
     <div class="main-wrapper" [class.sidebar-collapsed]="!sidebarOpen">
 
       <!-- TOPBAR -->
       <header class="topbar">
-
         <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Buka atau tutup menu">
-
           @if (sidebarOpen) {
-          <ion-icon name="chevron-back-outline"></ion-icon>
+            <ion-icon name="chevron-back-outline"></ion-icon>
           } @else {
-          <ion-icon name="chevron-forward-outline"></ion-icon>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
           }
-
         </button>
 
         <div class="topbar-spacer"></div>
 
         <!-- NOTIFICATION -->
         <button type="button" class="topbar-notification" [routerLink]="'/owner/notifications'" aria-label="Notifikasi">
-
           <ion-icon name="notifications-outline"></ion-icon>
-
+          <span class="top-notification-badge" *ngIf="unreadNotifications > 0">
+            {{ unreadNotifications > 99 ? '99+' : unreadNotifications }}
+          </span>
         </button>
 
         <!-- USER -->
         <a class="topbar-user" routerLink="/owner/profile">
-
           <div class="top-avatar">
             {{ (user.name || 'P').charAt(0).toUpperCase() }}
           </div>
-
           <span class="top-user-name">{{ user.name || 'Pemilik kos' }}</span>
-
         </a>
-
       </header>
-
 
       <!-- PAGE CONTENT -->
       <main class="page-content">
@@ -112,6 +105,5 @@
       </main>
 
     </div>
-
   </div>
 </div>

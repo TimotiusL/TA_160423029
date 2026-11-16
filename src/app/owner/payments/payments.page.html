@@ -34,10 +34,6 @@
           Menunggu Verifikasi
         </p>
 
-        <p class="summary-note" *ngIf="countWaiting > 0">
-          Perlu tindakan segera
-        </p>
-
       </div>
 
 
@@ -113,24 +109,22 @@
        SEARCH
   ========================= -->
 
-    <div class="search-wrapper">
-
-      <div class="search-box">
-
-        <span class="search-icon">
-          <ion-icon name="search-outline"></ion-icon>
-        </span>
-
-        <input type="text" [(ngModel)]="search" placeholder="Cari nama penghuni..." />
-
-        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
-          ×
-        </button>
-
+        <div class="property-filter-controls">
+      <div class="search-wrapper">
+        <div class="search-box">
+          <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+          <input type="text" [(ngModel)]="search" placeholder="Cari nama penghuni..." />
+          <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">×</button>
+        </div>
       </div>
-
+      <div class="property-filter">
+        <label for="payments-property-filter">Filter kos</label>
+        <select id="payments-property-filter" class="property-filter-select" [(ngModel)]="selectedPropertyId">
+          <option value="all">Semua Kos</option>
+          <option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</option>
+        </select>
+      </div>
     </div>
-
 
     <!-- =========================
        WAITING HIGHLIGHT
@@ -173,7 +167,7 @@
             <span>
               {{ formatDate(payment.date) }}
               ·
-              {{ payment.method }}
+              {{ payment.method === 'langsung' ? 'Pembayaran langsung' : payment.method === 'transfer' ? 'Transfer Bank' : payment.method }}
             </span>
 
           </div>
@@ -189,16 +183,16 @@
             <div class="waiting-buttons">
 
               <button type="button" class="proof-small" (click)="openProof(payment)">
-                Bukti
+                {{ payment.method === 'langsung' || !payment.proofUrl ? 'Detail' : 'Bukti' }}
               </button>
 
 
-              <button type="button" class="verify-small" (click)="verify(payment)">
-                Verifikasi
+              <button type="button" class="verify-small" [disabled]="processing" (click)="verify(payment)">
+                {{ processingPaymentId === payment.id ? 'Memproses...' : 'Verifikasi' }}
               </button>
 
 
-              <button type="button" class="reject-small" (click)="reject(payment)">
+              <button type="button" class="reject-small" [disabled]="processing" (click)="reject(payment)">
                 Tolak
               </button>
 
@@ -232,7 +226,7 @@
               </th>
 
               <th>
-                Properti
+                Kos
               </th>
 
               <th>
@@ -322,7 +316,7 @@
               <td>
 
                 <span class="method">
-                  {{ payment.method }}
+                  {{ payment.method === 'langsung' ? 'Pembayaran langsung' : payment.method === 'transfer' ? 'Transfer Bank' : payment.method }}
                 </span>
 
               </td>
@@ -334,7 +328,7 @@
                   $event.stopPropagation();
                   openProof(payment)
                 ">
-                  Lihat Bukti
+                  {{ payment.method === 'langsung' || !payment.proofUrl ? 'Detail Pembayaran' : 'Lihat Bukti' }}
                 </button>
 
               </td>
@@ -366,11 +360,11 @@
 
                   <div class="action-buttons">
 
-                    <button type="button" class="verify-button" (click)="verify(payment)">
-                      Verifikasi
+                    <button type="button" class="verify-button" [disabled]="processing" (click)="verify(payment)">
+                      {{ processingPaymentId === payment.id ? 'Memproses...' : 'Verifikasi' }}
                     </button>
 
-                    <button type="button" class="reject-button" (click)="reject(payment)">
+                    <button type="button" class="reject-button" [disabled]="processing" (click)="reject(payment)">
                       Tolak
                     </button>
 
@@ -421,10 +415,10 @@
      BUKTI PEMBAYARAN MODAL
 ================================================== -->
 
-  <ion-modal class="owner-page-modal" *ngIf="
+  <ion-modal #paymentDetailModal class="owner-page-modal" *ngIf="
     selectedPayment &&
     showProof
-  " [isOpen]="true" (didDismiss)="closeProof()">
+  " [isOpen]="true" (didDismiss)="onPaymentDetailDidDismiss()">
     <ng-template>
 
     <div class="modal">
@@ -436,11 +430,11 @@
         <div>
 
           <h2>
-            Bukti Pembayaran
+            {{ selectedPayment.method === 'langsung' ? 'Detail Pembayaran Langsung' : 'Bukti Pembayaran' }}
           </h2>
 
           <p>
-            Detail pembayaran dari penghuni
+            {{ selectedPayment.method === 'langsung' ? 'Periksa dan konfirmasi penerimaan uang dari penghuni.' : 'Detail pembayaran dan bukti transfer dari penghuni.' }}
           </p>
 
         </div>
@@ -511,7 +505,7 @@
             </span>
 
             <strong>
-              {{ selectedPayment.method }}
+              {{ selectedPayment.method === 'langsung' ? 'Pembayaran langsung' : selectedPayment.method === 'transfer' ? 'Transfer Bank' : selectedPayment.method }}
             </strong>
 
           </div>
@@ -543,10 +537,18 @@
 
         <!-- PROOF IMAGE -->
 
-        <div class="proof-image-wrapper">
-
+        <div class="proof-image-wrapper" *ngIf="selectedPayment.proofUrl">
           <img [src]="selectedPayment.proofUrl" alt="Bukti Pembayaran" (error)="$any($event.target).style.display = 'none'" />
+        </div>
 
+        <div class="direct-payment-note" *ngIf="selectedPayment.method === 'langsung'">
+          <strong>Tidak ada bukti digital untuk metode ini.</strong>
+          <p>Pastikan uang sudah diterima secara langsung sebelum menekan tombol Verifikasi. Pengajuan ini belum dianggap lunas sampai owner memverifikasinya.</p>
+        </div>
+
+        <div class="direct-payment-note" *ngIf="selectedPayment.method !== 'langsung' && !selectedPayment.proofUrl">
+          <strong>Bukti pembayaran tidak tersedia.</strong>
+          <p>Periksa transaksi sebelum memutuskan untuk memverifikasi atau menolak.</p>
         </div>
 
 
@@ -556,13 +558,13 @@
           selectedPayment.status === 'MENUNGGU'
         ">
 
-          <button type="button" class="modal-reject" (click)="reject(selectedPayment)">
+          <button type="button" class="modal-reject" [disabled]="processing" (click)="reject(selectedPayment)">
             Tolak
           </button>
 
 
-          <button type="button" class="modal-verify" (click)="verify(selectedPayment)">
-            Verifikasi
+          <button type="button" class="modal-verify" [disabled]="processing" (click)="verify(selectedPayment)">
+            {{ processingPaymentId === selectedPayment.id ? 'Memproses...' : 'Verifikasi' }}
           </button>
 
         </div>
@@ -571,6 +573,76 @@
 
     </div>
 
+    </ng-template>
+  </ion-modal>
+
+
+  <!-- KONFIRMASI VERIFIKASI PEMBAYARAN -->
+  <ion-modal #paymentVerifyConfirmModal class="owner-page-modal owner-page-modal--small"
+    [backdropDismiss]="false" (didDismiss)="onVerificationConfirmDidDismiss()">
+    <ng-template>
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <h2>Verifikasi Pembayaran</h2>
+            <p>Pastikan pembayaran sudah diterima sebelum melanjutkan.</p>
+          </div>
+          <button type="button" class="close-button" aria-label="Tutup"
+            [disabled]="processing" (click)="cancelVerification()">×</button>
+        </div>
+
+        <div class="modal-body" *ngIf="verificationPayment as payment">
+          <div class="verification-summary">
+            <div class="info-row">
+              <span>Penghuni</span>
+              <strong>{{ payment.tenantName }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Kode Tagihan</span>
+              <strong>{{ payment.billNumber }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Jumlah Pembayaran</span>
+              <strong class="teal-text">{{ formatRupiah(payment.amount) }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Metode</span>
+              <strong>{{ payment.method === 'langsung' ? 'Pembayaran langsung' : payment.method === 'transfer' ? 'Transfer Bank' : payment.method }}</strong>
+            </div>
+          </div>
+
+          <div class="verification-warning" *ngIf="payment.method === 'langsung'">
+            Pastikan uang sebesar <strong>{{ formatRupiah(payment.amount) }}</strong> dari
+            <strong>{{ payment.tenantName }}</strong> sudah benar-benar diterima secara langsung.
+          </div>
+          <div class="verification-warning" *ngIf="payment.method !== 'langsung'">
+            Pastikan bukti transfer dan nominal pembayaran sudah sesuai sebelum memverifikasi.
+          </div>
+          <p class="verification-error" *ngIf="verificationError">{{ verificationError }}</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" [disabled]="processing"
+            (click)="cancelVerification()">Batal</button>
+          <button type="button" class="btn-primary" [disabled]="processing"
+            (click)="confirmVerification()">
+            {{ processing ? 'Memproses...' : 'Ya, Verifikasi' }}
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- HASIL VERIFIKASI BERHASIL -->
+  <ion-modal #paymentVerifySuccessModal class="owner-page-modal owner-page-modal--small"
+    [backdropDismiss]="true">
+    <ng-template>
+      <div class="payment-verify-success">
+        <div class="payment-verify-success-icon">✓</div>
+        <h2>Pembayaran Terverifikasi</h2>
+        <p>{{ verificationSuccessMessage }}</p>
+        <button type="button" class="btn-primary" (click)="closeVerificationSuccess()">Selesai</button>
+      </div>
     </ng-template>
   </ion-modal>
 </div>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonModal } from '@ionic/angular';
@@ -31,6 +31,9 @@ interface Kos {
   ]
 })
 export class RoomTypesPage implements OnInit {
+
+  @ViewChild('roomTypeFormModal') private roomTypeFormModal?: IonModal;
+  @ViewChild('roomTypeSuccessModal') private roomTypeSuccessModal?: IonModal;
 
   showAdd = false;
   editingRoomType: RoomType | null = null;
@@ -92,7 +95,7 @@ export class RoomTypesPage implements OnInit {
     return new Intl.NumberFormat('id-ID').format(value);
   }
 
-  openAdd() {
+  async openAdd() {
     this.editingRoomType = null;
 
     this.form = {
@@ -103,9 +106,11 @@ export class RoomTypesPage implements OnInit {
     };
 
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.roomTypeFormModal?.present();
   }
 
-  openEdit(roomType: RoomType) {
+  async openEdit(roomType: RoomType) {
     this.editingRoomType = roomType;
 
     this.form = {
@@ -116,11 +121,38 @@ export class RoomTypesPage implements OnInit {
     };
 
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.roomTypeFormModal?.present();
   }
 
-  closeAdd() {
+  async closeAdd() {
+    const dismissed = await this.roomTypeFormModal?.dismiss(null, 'cancel');
+    if (!dismissed) this.onFormDidDismiss();
+  }
+
+  onFormDidDismiss(): void {
     this.showAdd = false;
     this.editingRoomType = null;
+    this.cdr.detectChanges();
+  }
+
+  private async completeSave(): Promise<void> {
+    const dismissed = await this.roomTypeFormModal?.dismiss({ saved: true }, 'saved');
+    if (!dismissed) this.onFormDidDismiss();
+
+    this.showAdd = false;
+    this.loadRoomTypes();
+    this.cdr.detectChanges();
+    await this.roomTypeSuccessModal?.present();
+  }
+
+  async dismissSaveSuccess(): Promise<void> {
+    const dismissed = await this.roomTypeSuccessModal?.dismiss(null, 'backdrop');
+    if (!dismissed) this.onSaveSuccessDidDismiss();
+  }
+
+  onSaveSuccessDidDismiss(): void {
+    this.cdr.detectChanges();
   }
 
   saveRoomType() {
@@ -141,9 +173,8 @@ export class RoomTypesPage implements OnInit {
         this.editingRoomType.id,
         data
       ).subscribe({
-        next: () => {
-          this.closeAdd();
-          this.loadRoomTypes();
+        next: async () => {
+          await this.completeSave();
         },
         error: (error) => {
           console.error('Gagal mengubah tipe kamar:', error);
@@ -153,9 +184,8 @@ export class RoomTypesPage implements OnInit {
 
     } else {
       this.api.createJenisKamar(data).subscribe({
-        next: () => {
-          this.closeAdd();
-          this.loadRoomTypes();
+        next: async () => {
+          await this.completeSave();
         },
         error: (error) => {
           console.error('Gagal menambahkan tipe kamar:', error);

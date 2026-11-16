@@ -8,7 +8,7 @@
         <h1>Manajemen Investasi</h1>
 
         <p>
-          Data investasi properti untuk kalkulasi ROI
+          Data investasi kos untuk kalkulasi ROI
         </p>
       </div>
 
@@ -55,7 +55,7 @@
         <select [(ngModel)]="propFilter">
 
           <option value="">
-            Semua Properti
+            Semua Kos
           </option>
 
           <option *ngFor="let property of properties" [value]="property.id">
@@ -97,7 +97,7 @@
 
               <th>Tanggal</th>
 
-              <th>Properti</th>
+              <th>Kos</th>
 
               <th>Kategori</th>
 
@@ -192,7 +192,7 @@
 
 
     <!-- ADD MODAL -->
-    <ion-modal class="owner-page-modal" *ngIf="showAdd" [isOpen]="true" (didDismiss)="closeAddModal()">
+    <ion-modal #investmentFormModal class="owner-page-modal" [backdropDismiss]="!saving" (didDismiss)="onFormDidDismiss()">
       <ng-template>
 
       <div class="modal">
@@ -207,13 +207,13 @@
             </h2>
 
             <p>
-              Tambahkan data investasi properti
+              Tambahkan data investasi kos
             </p>
 
           </div>
 
 
-          <button type="button" class="close-button" aria-label="Tutup" (click)="closeAddModal()">
+          <button type="button" class="close-button" aria-label="Tutup" [disabled]="saving" (click)="closeAddModal()">
             ×
           </button>
 
@@ -227,7 +227,7 @@
           <div class="form-group">
 
             <label>
-              Properti
+              Kos
               <span>*</span>
             </label>
 
@@ -236,7 +236,7 @@
               <select [(ngModel)]="form.propertyId">
 
                 <option value="">
-                  Pilih properti
+                  Pilih kos
                 </option>
 
                 <option *ngFor="let property of properties" [value]="property.id">
@@ -330,18 +330,30 @@
         <!-- MODAL FOOTER -->
         <div class="modal-footer">
 
-          <button type="button" class="btn-outline" (click)="closeAddModal()">
+          <button type="button" class="btn-outline" [disabled]="saving" (click)="closeAddModal()">
             Batal
           </button>
 
-          <button type="button" class="btn-primary" (click)="saveInvestment()">
-            Simpan
+          <button type="button" class="btn-primary" [disabled]="saving" (click)="saveInvestment()">
+            {{ saving ? 'Menyimpan...' : 'Simpan' }}
           </button>
 
         </div>
 
       </div>
 
+      </ng-template>
+    </ion-modal>
+
+    <ion-modal #investmentSuccessModal class="owner-page-modal investment-success-modal" [backdropDismiss]="true">
+      <ng-template>
+        <div class="save-success-screen" role="button" tabindex="0" aria-label="Tutup pesan berhasil disimpan"
+          (click)="dismissSaveSuccess()" (keydown.enter)="dismissSaveSuccess()" (keydown.space)="dismissSaveSuccess()">
+          <div class="save-success-card" role="status" (click)="$event.stopPropagation()">
+            <div class="save-success-icon">✓</div>
+            <h3>Berhasil disimpan</h3>
+          </div>
+        </div>
       </ng-template>
     </ion-modal>
 

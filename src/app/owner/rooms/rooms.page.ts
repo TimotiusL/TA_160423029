@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonIcon, IonModal } from '@ionic/angular';
@@ -67,6 +67,9 @@ interface Room {
 })
 export class RoomsPage implements OnInit {
 
+  @ViewChild('roomFormModal') private roomFormModal?: IonModal;
+  @ViewChild('roomSuccessModal') private roomSuccessModal?: IonModal;
+
   constructor(
     private api: ApiService,
     private cdr: ChangeDetectorRef,
@@ -109,7 +112,7 @@ export class RoomsPage implements OnInit {
 
   newRoom = {
     number: '',
-    floor: 0,
+    floor: 1,
     propertyId: '',
     roomTypeId: '',
     price: 0,
@@ -277,21 +280,28 @@ export class RoomsPage implements OnInit {
   }
 
 
-  openAdd(): void {
+  async openAdd(): Promise<void> {
     this.isEditMode = false;
     this.editingRoomId = null;
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.roomFormModal?.present();
   }
 
 
-  closeAdd(): void {
+  async closeAdd(): Promise<void> {
+    const dismissed = await this.roomFormModal?.dismiss(null, 'cancel');
+    if (!dismissed) this.onFormDidDismiss();
+  }
+
+  onFormDidDismiss(): void {
     this.showAdd = false;
     this.isEditMode = false;
     this.editingRoomId = null;
 
     this.newRoom = {
       number: '',
-      floor: 0,
+      floor: 1,
       propertyId: '',
       roomTypeId: '',
       price: 0,
@@ -302,10 +312,66 @@ export class RoomsPage implements OnInit {
         quantity: number;
       }[],
     };
+    this.cdr.detectChanges();
+  }
+
+  private async completeSave(): Promise<void> {
+    const dismissed = await this.roomFormModal?.dismiss({ saved: true }, 'saved');
+    if (!dismissed) this.onFormDidDismiss();
+
+    this.showAdd = false;
+    this.loadRooms();
+    this.cdr.detectChanges();
+    await this.roomSuccessModal?.present();
+  }
+
+  async dismissSaveSuccess(): Promise<void> {
+    const dismissed = await this.roomSuccessModal?.dismiss(null, 'backdrop');
+    if (!dismissed) this.onSaveSuccessDidDismiss();
+  }
+
+  onSaveSuccessDidDismiss(): void {
+    this.cdr.detectChanges();
   }
 
 
   saveRoom(): void {
+    if (!this.newRoom.number || !Number.isInteger(Number(this.newRoom.number)) || Number(this.newRoom.number) < 1) {
+      alert('Nomor kamar wajib diisi dengan angka bulat minimal 1.');
+      return;
+    }
+
+    if (!this.newRoom.propertyId) {
+      alert('Pilih kos terlebih dahulu.');
+      return;
+    }
+
+    if (!this.newRoom.roomTypeId) {
+      alert('Pilih tipe kamar terlebih dahulu.');
+      return;
+    }
+
+    if (!Number.isInteger(Number(this.newRoom.floor)) || Number(this.newRoom.floor) < 1) {
+      alert('Lantai harus berupa angka bulat minimal 1.');
+      return;
+    }
+
+    if (!this.newRoom.description.trim()) {
+      alert('Deskripsi kamar wajib diisi.');
+      return;
+    }
+
+    if (this.newRoom.description.trim().length > 100) {
+      alert('Deskripsi kamar maksimal 100 karakter.');
+      return;
+    }
+
+    const selectedType = this.roomTypes.find(type => type.id === this.newRoom.roomTypeId);
+    if (!selectedType || selectedType.propertyId !== this.newRoom.propertyId) {
+      alert('Tipe kamar tidak sesuai dengan kos yang dipilih. Silakan pilih ulang kos dan tipe kamar.');
+      return;
+    }
+
     const data = {
       tKos_id_kos: Number(this.newRoom.propertyId),
       tJenisKamar_id_jenisKamar: Number(this.newRoom.roomTypeId),
@@ -321,19 +387,15 @@ export class RoomsPage implements OnInit {
 
     if (this.isEditMode && this.editingRoomId !== null) {
       this.api.updateKamar(this.editingRoomId, data).subscribe({
-        next: () => {
-          alert('Kamar berhasil diperbarui!');
-          this.closeAdd();
-          this.loadRooms();
+        next: async () => {
+          await this.completeSave();
         },
         error: (error) => {
           console.error('Gagal memperbarui kamar:', error);
-
-          if (error.error?.message) {
-            alert(error.error.message);
-          } else {
-            alert('Gagal memperbarui kamar.');
-          }
+          const errors = error.error?.errors;
+          const firstKey = errors ? Object.keys(errors)[0] : null;
+          const validationMessage = firstKey ? errors[firstKey]?.[0] : '';
+          alert(validationMessage || error.error?.message || 'Gagal memperbarui kamar.');
         }
       });
 
@@ -341,25 +403,21 @@ export class RoomsPage implements OnInit {
     }
 
     this.api.createKamar(data).subscribe({
-      next: () => {
-        alert('Kamar berhasil ditambahkan!');
-        this.closeAdd();
-        this.loadRooms();
+      next: async () => {
+        await this.completeSave();
       },
       error: (error) => {
         console.error('Gagal menambahkan kamar:', error);
-
-        if (error.error?.message) {
-          alert(error.error.message);
-        } else {
-          alert('Gagal menambahkan kamar.');
-        }
+        const errors = error.error?.errors;
+        const firstKey = errors ? Object.keys(errors)[0] : null;
+        const validationMessage = firstKey ? errors[firstKey]?.[0] : '';
+        alert(validationMessage || error.error?.message || 'Gagal menambahkan kamar.');
       }
     });
   }
 
 
-  editRoom(room: Room): void {
+  async editRoom(room: Room): Promise<void> {
     this.isEditMode = true;
     this.editingRoomId = Number(room.id);
 
@@ -379,6 +437,8 @@ export class RoomsPage implements OnInit {
 
     this.selectedRoom = null;
     this.showAdd = true;
+    this.cdr.detectChanges();
+    await this.roomFormModal?.present();
   }
 
 

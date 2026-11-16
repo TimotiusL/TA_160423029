@@ -1,10 +1,11 @@
-/* KostManager - kerangka layout owner (sidebar + topbar) */
-$font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+@use '../layout-theme' as km;
+
+/* KostManager - owner sidebar dengan menu accordion */
+$font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $brand: #0d9488;
-$sidebar: #0f172a;
-$line: #e2e8f0;
-$muted: #64748b;
-$sidebar-w: 248px;
+$line: #edf0f3;
+$muted: #747b84;
+$sidebar-w: 270px;
 $sidebar-w-collapsed: 68px;
 
 :host { display: block; font-family: $font; }
@@ -18,7 +19,7 @@ $sidebar-w-collapsed: 68px;
   font-family: $font;
 }
 
-button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offset: 2px; }
+button:focus-visible, a:focus-visible { outline: 2px solid #5b86df; outline-offset: 2px; }
 
 /* ---------- sidebar ---------- */
 .sidebar {
@@ -31,8 +32,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   width: $sidebar-w;
   height: 100vh;
   overflow: hidden;
-  background: $sidebar;
-  color: #cbd5e1;
+  border-right: 1px solid #eef0f3;
+  background: #fff;
+  color: #525b66;
   transition: width 0.25s ease, transform 0.25s ease;
 
   &.collapsed { width: $sidebar-w-collapsed; }
@@ -42,11 +44,11 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   flex: none;
   height: 64px;
   padding: 0 20px;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+  border-bottom: 1px solid #f0f1f3;
 }
 
 .sidebar.collapsed .sidebar-header { justify-content: center; padding: 0; }
@@ -65,28 +67,87 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   font-weight: 800;
 }
 
-.logo-text { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+.logo-text {
+  color: #202833;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
 
 .sidebar-navigation {
   flex: 1;
-  padding: 12px 10px 20px;
+  padding: 12px 10px 22px;
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: #e7e9ed transparent;
 
-  &::-webkit-scrollbar { width: 0; }
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { border-radius: 99px; background: #e7e9ed; }
 }
 
-.nav-section { margin-bottom: 14px; }
-.sidebar.collapsed .nav-section { margin-bottom: 6px; padding-top: 6px; border-top: 1px solid rgba(51, 65, 85, 0.5); &:first-child { border-top: none; } }
+.nav-section {
+  margin: 0 0 7px;
+  border-bottom: 1px solid #f5f6f7;
+  padding-bottom: 6px;
 
-.section-title {
-  margin: 0;
-  padding: 0 12px 6px;
-  color: #64748b;
-  font-size: 11px;
+  &:last-child { border-bottom: 0; }
+}
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #202833;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+
+  &:hover { background: #f8f9fb; }
+  &.active { background: #f7f9fc; }
+}
+
+.section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  color: #6688d4;
+
+  ion-icon { width: 20px; height: 20px; font-size: 20px; }
+}
+
+.section-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #26313e;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.015em;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+
+.section-items {
+  margin: 2px 0 7px 21px;
+  padding: 2px 0 2px 14px;
+  border-left: 1px solid #f0f1f3;
+  animation: menuReveal 0.18s ease-out;
+}
+
+@keyframes menuReveal {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .nav-item {
@@ -94,17 +155,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin-bottom: 2px;
-  padding: 9px 12px;
+  min-height: 42px;
+  margin: 1px 0;
+  padding: 8px 10px;
   border-radius: 8px;
-  color: #cbd5e1;
+  color: $muted;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   transition: background-color 0.15s ease, color 0.15s ease;
 
-  &:hover { background: #1e293b; color: #fff; }
-  &.active { background: $brand; color: #fff; font-weight: 600; }
+  &:hover { background: #f8f9fb; color: #303946; }
+  &.active { background: #f2f6ff; color: #263b61; font-weight: 600; }
 }
 
 .nav-icon {
@@ -112,31 +174,32 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 20px;
+  width: 18px;
   height: 20px;
 
-  ion-icon { width: 19px; height: 19px; font-size: 19px; color: #94a3b8; }
+  ion-icon { width: 17px; height: 17px; font-size: 17px; color: #ed91a4; }
 }
 
-.nav-item:hover .nav-icon ion-icon,
-.nav-item.active .nav-icon ion-icon { color: #fff; }
+.nav-item:hover .nav-icon ion-icon { color: #dc7890; }
+.nav-item.active .nav-icon ion-icon { color: #5b86df; }
 
-.nav-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
-
-.notification-badge {
-  min-width: 20px;
+.nav-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
   margin-left: auto;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 16px;
-  text-align: center;
+  border-radius: 50%;
+  background: #c9cdd2;
 }
+
+.nav-item.active .nav-dot { background: #5b86df; }
+
+.sidebar.collapsed .sidebar-navigation { padding: 12px 7px; }
+.sidebar.collapsed .nav-section { margin-bottom: 7px; padding-bottom: 7px; }
+.sidebar.collapsed .section-toggle { justify-content: center; min-height: 46px; padding: 8px 0; }
+.sidebar.collapsed .section-icon { width: 24px; height: 24px; }
 
 .mobile-sidebar-close { display: none; }
 .sidebar-backdrop { display: none; }
@@ -163,7 +226,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   flex: none;
   height: 60px;
   padding: 0 20px;
-  border-bottom: 1px solid $line;
+  border-bottom: 1px solid #e2e8f0;
   background: #fff;
 }
 
@@ -179,7 +242,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: $muted;
+  color: #64748b;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 
@@ -262,8 +325,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
   .sidebar,
   .sidebar.collapsed {
     z-index: 1001;
-    width: 264px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+    width: 278px;
+    box-shadow: 0 0 40px rgba(15, 23, 42, 0.18);
   }
 
   .sidebar.collapsed { transform: translateX(-100%); box-shadow: none; }
@@ -273,7 +336,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
     inset: 0;
     z-index: 1000;
     display: block;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(15, 23, 42, 0.42);
   }
 
   .main-wrapper,
@@ -295,15 +358,89 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5eead4; outline-offs
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: #fff;
+    color: #475569;
     font-size: 24px;
     transform: translateY(-50%);
     cursor: pointer;
 
-    &:hover { background: rgba(255, 255, 255, 0.12); }
+    &:hover { background: #f1f5f9; }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  * { transition: none !important; animation: none !important; }
+}
+
+@include km.shell();
+
+
+/* ---------- final sidebar contrast overrides ---------- */
+/* Keep the existing dark-green owner theme, but make every label readable. */
+:host .owner-layout .sidebar {
+  background: #1e332d !important;
+  color: #f8fafc !important;
+}
+
+:host .owner-layout .sidebar .sidebar-header {
+  border-bottom-color: rgba(255, 255, 255, 0.13) !important;
+}
+
+:host .owner-layout .sidebar .logo-text {
+  color: #f8fafc !important;
+}
+
+:host .owner-layout .sidebar .nav-section {
+  border-bottom-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+:host .owner-layout .sidebar .section-toggle,
+:host .owner-layout .sidebar .section-label {
+  color: #f8fafc !important;
+}
+
+:host .owner-layout .sidebar .section-toggle:hover,
+:host .owner-layout .sidebar .section-toggle.active {
+  background: rgba(255, 255, 255, 0.09) !important;
+}
+
+:host .owner-layout .sidebar .section-icon {
+  color: #9bb5ff !important;
+}
+
+:host .owner-layout .sidebar .section-icon ion-icon {
+  color: #9bb5ff !important;
+}
+
+:host .owner-layout .sidebar .section-items {
+  border-left-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+:host .owner-layout .sidebar .nav-item {
+  color: #d7e1dc !important;
+}
+
+:host .owner-layout .sidebar .nav-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+:host .owner-layout .sidebar .nav-item.active {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+}
+
+:host .owner-layout .sidebar .nav-icon ion-icon {
+  color: #f29aae !important;
+}
+
+:host .owner-layout .sidebar .nav-item.active .nav-icon ion-icon {
+  color: #a9bdff !important;
+}
+
+:host .owner-layout .sidebar .nav-dot {
+  background: rgba(255, 255, 255, 0.42) !important;
+}
+
+:host .owner-layout .sidebar .nav-item.active .nav-dot {
+  background: #a9bdff !important;
 }

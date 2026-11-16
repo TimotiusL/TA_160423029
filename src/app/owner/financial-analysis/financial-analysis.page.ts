@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription, forkJoin } from 'rxjs';
 import { ApiService } from '../../services/api';
 import {
   Chart, BarController, BarElement, LineController, LineElement, PointElement, CategoryScale, LinearScale,
@@ -47,9 +48,14 @@ interface Investment {
 export class FinancialAnalysisPage
   implements OnInit, AfterViewInit, OnDestroy {
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private api: ApiService,
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
+  ) { }
 
   loading = false;
+  propertiesLoaded = false;
   loadError = '';
 
   @ViewChild('financialChart')
@@ -95,7 +101,7 @@ export class FinancialAnalysisPage
 
   propertyFilter = 'all';
 
-  year = 2026;
+  year: number | 'all' = 2026;
   month = 0;
 
   availableYears = [2025, 2026];
@@ -147,9 +153,20 @@ export class FinancialAnalysisPage
   marginChartInstance?: Chart;
   oerChartInstance?: Chart;
   roiChartInstance?: Chart;
+  private routeQuerySubscription?: Subscription;
 
 
   ngOnInit(): void {
+    this.routeQuerySubscription = this.route.queryParamMap.subscribe(params => {
+      this.propertyFilter = params.get('propertyId') || 'all';
+      this.year = params.get('period') === 'all' ? 'all' : 2026;
+      this.month = 0;
+
+      if (this.propertiesLoaded) {
+        this.loadFinancialAnalysis();
+      }
+    });
+
     this.loadProperties();
     this.loadInvestments();
   }
@@ -162,9 +179,12 @@ export class FinancialAnalysisPage
           name: kos.nama_kos
         }));
 
+        this.propertiesLoaded = true;
         this.loadFinancialAnalysis();
+        this.cdr.detectChanges();
       },
       error: error => {
+        this.propertiesLoaded = true;
         console.error('Gagal mengambil daftar kos:', error);
         this.loadError = 'Gagal mengambil daftar properti.';
         this.cdr.detectChanges();
@@ -192,6 +212,13 @@ export class FinancialAnalysisPage
   }
 
   private getPeriodDates(): { start: string; end: string } {
+    if (this.year === 'all') {
+      return {
+        start: '1900-01-01',
+        end: '2037-12-31'
+      };
+    }
+
     const year = this.year;
 
     if (this.month === 0) {
@@ -354,7 +381,16 @@ export class FinancialAnalysisPage
   }
 
   ngOnDestroy(): void {
+    this.routeQuerySubscription?.unsubscribe();
     this.destroyCharts();
+  }
+
+  get hasAnalysisData(): boolean {
+    return this.propertyAnalysis.some(property =>
+      property.income !== 0 ||
+      property.expense !== 0 ||
+      property.investment !== 0
+    );
   }
 
   get selectedProperty(): PropertyAnalysis | null {
@@ -650,6 +686,7 @@ export class FinancialAnalysisPage
   }
 
   changePeriod(): void {
+    if (this.year === 'all') this.month = 0;
     this.loadFinancialAnalysis();
   }
 
@@ -657,9 +694,6 @@ export class FinancialAnalysisPage
     window.print();
   }
 
-  exportReport(): void {
-    window.print();
-  }
 
   private destroyCharts(): void {
     this.financialChartInstance?.destroy();
@@ -955,6 +989,10 @@ export class FinancialAnalysisPage
             ...this.baseOptions().scales,
             y: {
               ...this.baseOptions().scales.y,
+              // Skala grafik perbandingan properti dimulai dari nol.
+              // Nilai laba asli tetap dipertahankan pada data dan ringkasan.
+              min: 0,
+              beginAtZero: true,
               ticks: {
                 ...this.baseOptions().scales.y.ticks,
                 callback: (value: string | number) =>

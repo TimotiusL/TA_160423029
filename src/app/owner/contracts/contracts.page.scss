@@ -1,10 +1,12 @@
+@use '../theme' as km;
+
 /* =====================================================================
    KostManager Owner UI - design system bersama
    Blok ini identik di setiap halaman agar tampilan konsisten dan
    tidak bergantung pada stylesheet global.
 ===================================================================== */
 
-$font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
 $ink: #0f172a;
@@ -843,8 +845,13 @@ ion-modal.owner-page-modal {
   --max-height: calc(100vh - 48px);
   --border-radius: 16px;
   --box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.35);
-  --backdrop-opacity: 0.5;
+  --backdrop-opacity: 0.68;
   font-family: $font;
+}
+
+ion-modal.owner-page-modal::part(backdrop) {
+  background: rgba(31, 41, 55, 0.78);
+  opacity: 1;
 }
 
 ion-modal.owner-page-modal--large { --width: min(760px, calc(100vw - 32px)); }
@@ -1091,4 +1098,422 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   .status-summary { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px !important; }
   .summary-card, .stat-card, .kpi-card { padding: 12px 14px; }
   .summary-value, .stat-card h2, .stat-card strong, .kpi-value { font-size: 18px; line-height: 26px; }
+}
+
+/* Filter daftar berdasarkan kos */
+.property-filter-controls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.property-filter-controls .search-wrapper,
+.property-filter-controls .search-container {
+  flex: 1 1 300px;
+  width: auto;
+  max-width: 520px;
+  margin-bottom: 0;
+}
+
+.property-filter-controls .search-box {
+  width: 100%;
+  max-width: none;
+}
+
+.property-filter {
+  display: flex;
+  flex: 0 1 240px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.property-filter label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.property-filter-select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+}
+
+@media (max-width: 600px) {
+  .property-filter-controls {
+    align-items: stretch;
+  }
+
+  .property-filter-controls .search-wrapper,
+  .property-filter-controls .search-container,
+  .property-filter {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
+
+
+
+/* Dokumen kontrak: pratinjau PDF di dalam detail kontrak */
+.contract-document-card {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid $line;
+  border-radius: $radius-card;
+  background: $bg-soft;
+}
+
+.contract-document-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.contract-pdf-icon {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.contract-document-info { min-width: 0; flex: 1; }
+.contract-document-info h3 { margin: 0; color: $ink; font-size: 14px; font-weight: 800; }
+.contract-document-info p { margin: 4px 0 8px; color: $muted; font-size: 12px; line-height: 1.55; }
+.contract-document-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; color: $text; font-family: $mono; font-size: 11px; overflow-wrap: anywhere; }
+.document-format { padding: 2px 7px; border-radius: 5px; background: #fee2e2; color: #b91c1c; font-family: $font; font-size: 10px; font-weight: 800; }
+
+.contract-document-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.contract-document-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.contract-document-actions button:disabled { cursor: wait; opacity: .65; }
+.contract-document-error { margin: 10px 0 0; color: #b91c1c; font-size: 12px; }
+
+.contract-preview-panel {
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid $line;
+  border-radius: 10px;
+  background: $surface;
+}
+
+.contract-preview-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid $line;
+  background: $surface;
+}
+
+.contract-preview-heading > div { display: flex; flex-direction: column; gap: 2px; }
+.contract-preview-heading strong { color: $ink; font-size: 12px; }
+.contract-preview-heading span { color: $muted; font-size: 11px; }
+.preview-close-button { flex: none; padding: 6px 10px; border: 1px solid $line; border-radius: 7px; background: $surface; color: $text; font-size: 12px; font-weight: 700; }
+.contract-pdf-frame { display: block; width: 100%; height: min(68vh, 720px); min-height: 400px; border: 0; background: #e2e8f0; }
+.contract-end-actions { justify-content: flex-end; }
+.contract-end-actions > button { flex: 0 0 auto; }
+
+@media (max-width: 600px) {
+  .contract-document-card { padding: 14px; }
+  .contract-document-actions { flex-direction: column; }
+  .contract-document-actions button { width: 100%; }
+  .contract-preview-heading { align-items: flex-start; }
+  .contract-pdf-frame { height: 60vh; min-height: 320px; }
+}
+
+/* Permintaan keluar lebih awal dan konfirmasi check-out */
+.exit-requests-section {
+  margin: 0 0 24px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.exit-requests-heading,
+.exit-request-title,
+.exit-request-item,
+.exit-request-actions,
+.end-contract-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.exit-requests-heading { margin-bottom: 16px; }
+.exit-requests-heading h2 { margin: 0; color: #0f172a; font-size: 17px; font-weight: 700; }
+.exit-requests-heading p { margin: 4px 0 0; color: #64748b; font-size: 13px; }
+.exit-request-count { padding: 5px 9px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.exit-requests-empty { padding: 16px; border: 1px dashed #cbd5e1; border-radius: 8px; color: #64748b; font-size: 13px; text-align: center; }
+.exit-request-list { display: grid; gap: 10px; }
+.exit-request-item { align-items: flex-start; padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; }
+.exit-request-main { min-width: 0; flex: 1; }
+.exit-request-title { justify-content: flex-start; flex-wrap: wrap; }
+.exit-request-title strong { color: #0f172a; font-size: 14px; }
+.exit-request-main p { margin: 4px 0 0; color: #64748b; font-size: 12px; overflow-wrap: anywhere; }
+.exit-request-main p strong { color: #334155; }
+.exit-request-reason { color: #334155 !important; }
+.exit-request-note { color: #0f766e !important; }
+.exit-request-status { padding: 3px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700; }
+.exit-request-status.waiting { background: #fef3c7; color: #92400e; }
+.exit-request-status.approved { background: #dcfce7; color: #166534; }
+.exit-request-status.rejected { background: #fee2e2; color: #991b1b; }
+.exit-request-actions { justify-content: flex-end; flex-wrap: wrap; }
+
+.end-contract-form { margin-top: 16px; padding: 18px; border: 1px solid #fecaca; border-radius: 12px; background: #fffafa; }
+.end-contract-form-heading h3 { margin: 0; color: #0f172a; font-size: 16px; }
+.end-contract-form-heading p { margin: 5px 0 16px; color: #64748b; font-size: 13px; }
+.end-contract-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.end-contract-fields label { display: flex; flex-direction: column; gap: 6px; color: #334155; font-size: 13px; font-weight: 600; }
+.end-contract-fields input, .end-contract-fields select, .end-contract-fields textarea { width: 100%; min-height: 40px; padding: 9px 11px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #0f172a; font: inherit; font-weight: 400; }
+.end-contract-fields textarea { resize: vertical; }
+.end-note-field { grid-column: 1 / -1; }
+.end-contract-warning { margin: 12px 0 0; color: #92400e; font-size: 12px; }
+.end-contract-error { margin: 12px 0 0; color: #b91c1c; font-size: 13px; }
+.end-contract-form-actions { justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .exit-requests-section { padding: 14px; }
+  .exit-request-item { flex-direction: column; }
+  .exit-request-actions { width: 100%; justify-content: flex-start; }
+  .end-contract-fields { grid-template-columns: 1fr; }
+  .end-note-field { grid-column: auto; }
+  .end-contract-form-actions > button { flex: 1 1 140px; }
+}
+
+
+// Shared design system / visual styles only.
+@include km.page();
+
+
+/* Semua angka ringkasan kontrak memakai warna teks hitam yang konsisten. */
+.summary-grid .summary-value {
+  color: $ink !important;
+}
+
+/* Date picker native berada di dalam field, dengan kontrol kalender di sisi kanan. */
+.end-date-picker-field input[type='date'] {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid $line-strong;
+  border-radius: 8px;
+  background: $surface;
+  color: $ink;
+  color-scheme: light;
+  font-family: $font;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.end-date-picker-field input[type='date']:focus {
+  outline: 2px solid rgba(34, 197, 94, .18);
+  border-color: $brand;
+}
+
+.end-date-picker-field input[type='date']:disabled {
+  cursor: not-allowed;
+  opacity: .7;
+}
+
+/* Modal konfirmasi dan hasil tindakan memiliki backdrop penuh seperti modal detail. */
+.action-confirmation-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 28px 24px 24px;
+  border-radius: 16px;
+  background: $surface;
+  color: $text;
+  text-align: center;
+}
+
+.action-confirmation-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 28px;
+}
+
+.action-confirmation-icon.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.action-confirmation-icon.info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.action-confirmation-modal h2 {
+  margin: 0;
+  color: $ink;
+  font-size: 18px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.action-confirmation-modal > p {
+  margin: 10px 0 0;
+  color: $muted;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.action-confirmation-modal > p strong { color: $ink; }
+
+.action-confirmation-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid $line;
+  border-radius: 9px;
+  background: $bg-soft;
+}
+
+.action-confirmation-summary span {
+  color: $muted;
+  font-size: 11px;
+}
+
+.action-confirmation-summary strong {
+  color: $ink;
+  font-size: 14px;
+}
+
+.action-confirmation-note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 16px;
+  color: $text;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.action-confirmation-note textarea {
+  width: 100%;
+  min-height: 76px;
+  padding: 10px 12px;
+  border: 1px solid $line-strong;
+  border-radius: 8px;
+  background: $surface;
+  color: $ink;
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.action-confirmation-error {
+  width: 100%;
+  margin: 12px 0 0 !important;
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c !important;
+  font-size: 12px !important;
+  text-align: left;
+}
+
+.action-confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.action-confirmation-actions > button { flex: 1; }
+.action-confirmation-actions.single-action > button { flex: 0 1 150px; }
+
+.contract-document-notice {
+  margin: 10px 0 0;
+  padding: 9px 11px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .action-confirmation-modal { padding: 24px 18px 20px; }
+  .action-confirmation-actions { flex-direction: column-reverse; }
+  .action-confirmation-actions > button { width: 100%; }
+}
+
+
+/* Tampilan konfirmasi memakai shell dan backdrop modal Detail Kontrak yang sama. */
+.end-contract-confirmation-modal {
+  border-radius: 16px;
+}
+
+.end-contract-confirmation-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.end-contract-confirmation-content {
+  max-width: 560px;
+  padding: 12px 16px;
+  background: transparent;
+  border-radius: 0;
+}
+
+.end-contract-confirmation-content .action-confirmation-icon {
+  margin-top: 2px;
+}
+
+.end-contract-confirmation-modal .modal-footer {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 560px) {
+  .end-contract-confirmation-content { padding: 8px 0; }
+  .end-contract-confirmation-modal .modal-footer { flex-direction: column-reverse; }
+  .end-contract-confirmation-modal .modal-footer > button { width: 100%; }
 }

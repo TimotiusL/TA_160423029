@@ -13,7 +13,7 @@
     <div class="summary-grid">
 
       <div class="summary-card">
-        <div class="summary-value neutral">
+        <div class="summary-value neutral tenant-count-value">
           {{ tenants.length }}
         </div>
         <div class="summary-label">
@@ -22,7 +22,7 @@
       </div>
 
       <div class="summary-card">
-        <div class="summary-value active">
+        <div class="summary-value active tenant-count-value">
           {{ activeTenants.length }}
         </div>
         <div class="summary-label">
@@ -31,7 +31,7 @@
       </div>
 
       <div class="summary-card">
-        <div class="summary-value inactive">
+        <div class="summary-value inactive tenant-count-value">
           {{ inactiveTenants.length }}
         </div>
         <div class="summary-label">
@@ -65,16 +65,21 @@
       </button>
     </div>
 
-    <!-- SEARCH -->
-    <div class="search-wrapper">
-      <div class="search-box">
-        <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
-
-        <input type="text" [(ngModel)]="search" placeholder="Cari nama, email, atau telepon..." />
-
-        <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">
-          ×
-        </button>
+    <!-- SEARCH DAN FILTER KOS -->
+    <div class="property-filter-controls">
+      <div class="search-wrapper">
+        <div class="search-box">
+          <span class="search-icon"><ion-icon name="search-outline"></ion-icon></span>
+          <input type="text" [(ngModel)]="search" placeholder="Cari nama, email, atau telepon..." />
+          <button *ngIf="search" type="button" class="clear-search" (click)="search = ''">×</button>
+        </div>
+      </div>
+      <div class="property-filter">
+        <label for="tenants-property-filter">Filter kos</label>
+        <select id="tenants-property-filter" class="property-filter-select" [(ngModel)]="selectedPropertyId">
+          <option value="all">Semua Kos</option>
+          <option *ngFor="let property of properties" [value]="property.id">{{ property.name }}</option>
+        </select>
       </div>
     </div>
 
@@ -304,6 +309,48 @@
 
         </div>
 
+        <!-- DOKUMEN KTP -->
+        <div class="info-section ktp-section">
+          <div class="section-title">Dokumen Identitas</div>
+          <div class="ktp-action-row">
+            <button
+              *ngIf="selectedTenant.hasKtp; else noTenantKtp"
+              type="button"
+              class="ktp-view-button"
+              (click)="toggleKtpPreview(selectedTenant.id)" [disabled]="ktpLoading"
+            >
+              {{ ktpLoading ? 'Memuat...' : (ktpPreviewForId === selectedTenant.id && (ktpPreviewUrl || ktpErrorMessage) ? 'Sembunyikan KTP' : 'Lihat Foto KTP') }}
+            </button>
+            <ng-template #noTenantKtp>
+              <span class="ktp-missing">Dokumen KTP belum tersedia.</span>
+            </ng-template>
+          </div>
+
+          <div class="ktp-inline-preview" *ngIf="ktpPreviewForId === selectedTenant.id && (ktpLoading || ktpPreviewUrl || ktpErrorMessage)">
+            <div class="ktp-inline-preview-header">
+              <strong>Dokumen KTP</strong>
+              <button type="button" class="ktp-inline-close" (click)="closeKtpPreview()">Tutup</button>
+            </div>
+            <div class="ktp-inline-message" *ngIf="ktpLoading">Memuat foto KTP...</div>
+            <div class="ktp-inline-message ktp-inline-error" *ngIf="!ktpLoading && ktpErrorMessage">{{ ktpErrorMessage }}</div>
+            <img
+              *ngIf="!ktpLoading && ktpPreviewUrl && ktpPreviewMimeType.startsWith('image/')"
+              class="ktp-inline-image"
+              [src]="ktpPreviewUrl"
+              alt="Foto KTP penghuni"
+            />
+            <iframe
+              *ngIf="!ktpLoading && ktpPreviewUrl && ktpPreviewMimeType === 'application/pdf'"
+              class="ktp-inline-pdf"
+              [src]="ktpPreviewSafeUrl"
+              title="Dokumen KTP PDF"
+            ></iframe>
+            <div class="ktp-inline-message ktp-inline-error" *ngIf="!ktpLoading && ktpPreviewUrl && !ktpPreviewMimeType.startsWith('image/') && ktpPreviewMimeType !== 'application/pdf'">
+              Format dokumen tidak didukung untuk pratinjau.
+            </div>
+          </div>
+        </div>
+
 
         <!-- KONTRAK AKTIF -->
         <div class="info-section contract-section" *ngIf="getContract(selectedTenant) as contract">
@@ -402,4 +449,5 @@
 
   </ng-template>
 </ion-modal>
+
 </div>

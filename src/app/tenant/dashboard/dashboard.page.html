@@ -1,0 +1,276 @@
+<ion-content class="page-content">
+  <main class="dashboard">
+
+    <!-- Welcome Hero Banner -->
+    <section class="welcome-banner">
+      <div class="welcome-content">
+        <span class="welcome-label">Selamat datang kembali</span>
+        <h1 class="welcome-title">{{ nama }}</h1>
+        <p class="welcome-subtitle">Pantau informasi hunian, tagihan bulanan, dan keluhan kos Anda dengan mudah.</p>
+        <div class="welcome-actions">
+          <a routerLink="/tenant/billing" class="hero-btn hero-btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v2m0 8v2"/></svg>
+            <span>Lihat Tagihan</span>
+          </a>
+          <a routerLink="/tenant/browse" class="hero-btn hero-btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Cari Kos Baru</span>
+          </a>
+        </div>
+      </div>
+      <div class="welcome-deco">
+        <div class="deco-circle deco-1"></div>
+        <div class="deco-circle deco-2"></div>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <section class="panel loading-panel" *ngIf="loading">
+      <div class="state-spinner"></div>
+      <p class="state-title">Memuat data dashboard...</p>
+      <p class="muted">Mengambil data hunian dan tagihan terbaru.</p>
+    </section>
+
+    <!-- Error State -->
+    <section class="panel error-panel" *ngIf="!loading && errorMessage">
+      <div class="error-icon-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      </div>
+      <div class="error-text">
+        <h3>Gagal memuat data</h3>
+        <p class="error-message">{{ errorMessage }}</p>
+      </div>
+      <button type="button" class="button button-outline" (click)="loadDashboard()">Coba Lagi</button>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <ng-container *ngIf="!loading && !errorMessage">
+
+      <!-- Active Contract Section -->
+      <section *ngIf="contract?.active; else noActiveContract" class="panel contract-panel">
+        <div class="panel-heading">
+          <div class="panel-heading-left">
+            <span class="section-label">HUNIAN SAAT INI</span>
+            <h2>{{ contract?.propertyName }}</h2>
+            <p class="muted-tag">{{ contract?.room }}</p>
+          </div>
+          <span class="badge badge-success">
+            <span class="status-dot"></span>
+            AKTIF
+          </span>
+        </div>
+
+        <div class="contract-details">
+          <div class="mini-detail">
+            <span class="mini-label">Mulai Masuk</span>
+            <strong>{{ tanggal(contract?.startDate || '') }}</strong>
+          </div>
+          <div class="mini-detail">
+            <span class="mini-label">Berakhir Pada</span>
+            <strong>{{ tanggal(contract?.endDate || '') }}</strong>
+          </div>
+          <div class="mini-detail rental">
+            <span class="mini-label">Sewa per Bulan</span>
+            <strong>{{ rupiah(contract?.rentalPrice || 0) }}</strong>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <a class="button button-outline" routerLink="/tenant/contract-detail">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Lihat Detail Kontrak</span>
+          </a>
+        </div>
+      </section>
+
+      <ng-template #noActiveContract>
+        <section class="panel empty-contract-panel">
+          <div class="empty-icon-box">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="empty-contract-body">
+            <span class="section-label">HUNIAN SAAT INI</span>
+            <h2>Belum ada kontrak aktif</h2>
+            <p class="muted">Informasi hunian ditampilkan selama kontrak masih berjalan. Kontrak yang telah selesai atau melewati tanggal akhir tidak lagi ditampilkan sebagai hunian saat ini.</p>
+          </div>
+          <a class="button button-primary" routerLink="/tenant/browse">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Cari Kos Sekarang</span>
+          </a>
+        </section>
+      </ng-template>
+
+      <!-- Outstanding Bill Section -->
+      <section *ngIf="currentBill as bill; else noOutstandingBill" class="panel bill-panel" [class.overdue]="bill.status === 'TERLAMBAT'">
+        <div class="panel-heading">
+          <div>
+            <span class="section-label">TAGIHAN YANG PERLU DIBAYAR</span>
+            <h2>Periode {{ bill.period }}</h2>
+            <p class="muted due-date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              Jatuh tempo: {{ tanggal(bill.dueDate) }}
+            </p>
+          </div>
+          <span class="badge" [ngClass]="badgeClass(bill.status)">
+            <span class="status-dot"></span>
+            {{ statusLabel(bill.status) }}
+          </span>
+        </div>
+
+        <div class="bill-amounts">
+          <div class="amount-col">
+            <span>Total Tagihan</span>
+            <strong>{{ rupiah(bill.total) }}</strong>
+          </div>
+          <div class="amount-col remaining">
+            <span>Sisa Tagihan</span>
+            <strong class="highlight-price">{{ rupiah(remainingBill) }}</strong>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-heading">
+            <span>Progress Pelunasan</span>
+            <strong>{{ paymentProgress }}%</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="paymentProgress"></div>
+          </div>
+        </div>
+
+        <div class="bill-actions">
+          <a class="button button-outline" routerLink="/tenant/billing">
+            <span>Lihat Semua Tagihan</span>
+          </a>
+          <a class="button button-primary" *ngIf="bill.code; else chooseBill" routerLink="/tenant/bill-detail" [queryParams]="{ kode: bill.code }" [attr.aria-label]="'Bayar tagihan ' + bill.code">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            <span>Bayar Sekarang</span>
+          </a>
+          <ng-template #chooseBill>
+            <a class="button button-primary" routerLink="/tenant/billing">Pilih Tagihan</a>
+          </ng-template>
+        </div>
+      </section>
+
+      <ng-template #noOutstandingBill>
+        <section class="panel no-bill-panel">
+          <div class="no-bill-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="no-bill-info">
+            <span class="section-label">STATUS KEUANGAN</span>
+            <h2>Semua tagihan lunas!</h2>
+            <p class="muted">Tidak ada tagihan yang tertunggak saat ini. Terima kasih telah membayar tepat waktu.</p>
+          </div>
+          <div class="panel-footer">
+            <a class="button button-outline" routerLink="/tenant/billing">Lihat Riwayat Tagihan</a>
+          </div>
+        </section>
+      </ng-template>
+
+      <!-- Quick KPI Stats Grid -->
+      <section class="stats-grid">
+        <a class="stat-card stat-unpaid" routerLink="/tenant/billing">
+          <div class="stat-icon-wrap amber-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ unpaidBillCount }}</span>
+            <span class="stat-label">Tagihan Belum Lunas</span>
+          </div>
+        </a>
+
+        <a class="stat-card stat-complaints" routerLink="/tenant/complaints">
+          <div class="stat-icon-wrap blue-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalComplaints }}</span>
+            <span class="stat-label">Laporan Komplain</span>
+          </div>
+        </a>
+
+        <a class="stat-card stat-notif" routerLink="/tenant/notifications">
+          <div class="stat-icon-wrap teal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value teal">{{ unreadNotifications }}</span>
+            <span class="stat-label">Notifikasi Baru</span>
+          </div>
+        </a>
+      </section>
+
+      <!-- Recent Payments Section -->
+      <section class="panel">
+        <div class="panel-heading compact-heading">
+          <div>
+            <h2>Riwayat Pembayaran Terbaru</h2>
+            <p class="muted">Catatan transaksi terakhir Anda</p>
+          </div>
+          <a class="view-all" routerLink="/tenant/payment-history">
+            <span>Lihat Semua</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <div class="payment-list" *ngIf="payHistory.length; else noPayments">
+          <div class="payment-row" *ngFor="let payment of payHistory; trackBy: trackByPaymentId">
+            <div class="payment-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+            <div class="payment-info">
+              <div class="payment-title-row">
+                <strong class="payment-amount">{{ rupiah(payment.amount) }}</strong>
+                <span class="payment-code" *ngIf="payment.billCode">{{ payment.billCode }}</span>
+              </div>
+              <span class="payment-meta">{{ tanggal(payment.date) }} · Metode {{ payment.method }}</span>
+            </div>
+            <span class="badge" [ngClass]="badgeClass(payment.status)">
+              <span class="status-dot"></span>
+              {{ statusLabel(payment.status) }}
+            </span>
+          </div>
+        </div>
+
+        <ng-template #noPayments>
+          <div class="empty-list-state">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            <p>Belum ada riwayat transaksi pembayaran.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <!-- Recent Complaints Section -->
+      <section class="panel" *ngIf="myComplaints.length">
+        <div class="panel-heading compact-heading">
+          <div>
+            <h2>Komplain Terbaru</h2>
+            <p class="muted">Perkembangan tindak lanjut komplain</p>
+          </div>
+          <a class="view-all" routerLink="/tenant/complaints">
+            <span>Lihat Semua</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <div class="complaint-list">
+          <div class="complaint-row" *ngFor="let complaint of recentComplaints; trackBy: trackByComplaintId">
+            <div class="complaint-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            </div>
+            <div class="complaint-info">
+              <strong>{{ complaint.title }}</strong>
+              <span class="complaint-meta">{{ tanggal(complaint.date) }} · {{ complaint.responseCount }} tanggapan</span>
+            </div>
+            <span class="badge" [ngClass]="badgeClass(complaint.status)">
+              <span class="status-dot"></span>
+              {{ statusLabel(complaint.status) }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+    </ng-container>
+  </main>
+</ion-content>

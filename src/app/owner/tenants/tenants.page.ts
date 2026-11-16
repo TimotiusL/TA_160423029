@@ -5,6 +5,7 @@ import { IonIcon, IonModal } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { searchOutline } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 addIcons({
   searchOutline
@@ -19,7 +20,7 @@ interface Tenant {
   gender: 'L' | 'P';
   birthDate: string;
   address: string;
-  ktpUrl: string;
+  hasKtp: boolean;
   currentRoomId?: string;
   currentPropertyId?: string;
   currentContractId?: string;
@@ -70,19 +71,47 @@ interface Contract {
 export class TenantsPage implements OnInit {
 
   search = '';
+  selectedPropertyId = 'all';
   activeTab: 'all' | 'aktif' | 'nonaktif' = 'all';
 
   selectedTenant: Tenant | null = null;
+
+  ktpLoading = false;
+  ktpPreviewForId: string | null = null;
+  ktpPreviewUrl: string | null = null;
+  ktpPreviewSafeUrl: SafeResourceUrl | null = null;
+  ktpPreviewMimeType = '';
+  ktpErrorMessage = '';
   tenants: Tenant[] = [];
   properties: Property[] = [];
   roomTypes: RoomType[] = [];
   rooms: Room[] = [];
   contracts: Contract[] = [];
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private api: ApiService,
+    private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer
+  ) { }
 
   ngOnInit() {
+    this.loadProperties();
     this.loadTenants();
+  }
+
+  loadProperties(): void {
+    this.api.getKos().subscribe({
+      next: (data: any[]) => {
+        this.properties = (Array.isArray(data) ? data : []).map(item => ({
+          id: String(item.id_kos),
+          name: item.nama_kos
+        }));
+        this.cdr.detectChanges();
+      },
+      error: (error: any) => {
+        console.error('Gagal mengambil daftar kos:', error);
+      }
+    });
   }
 
   loadTenants() {
@@ -103,7 +132,7 @@ export class TenantsPage implements OnInit {
 
             birthDate: item.tgl_lahir ?? '',
             address: '-',
-            ktpUrl: item.foto_ktp ?? '',
+            hasKtp: !!item.foto_ktp,
 
             currentRoomId: contract
               ? String(contract.kamar?.id_kamar)
@@ -158,7 +187,6 @@ export class TenantsPage implements OnInit {
 
   loadContractData(data: any[]) {
 
-    this.properties = [];
     this.rooms = [];
     this.roomTypes = [];
     this.contracts = [];
@@ -220,6 +248,10 @@ export class TenantsPage implements OnInit {
   get filteredTenants(): Tenant[] {
     return this.tenants.filter(t => {
 
+      if (this.selectedPropertyId !== 'all' && t.currentPropertyId !== this.selectedPropertyId) {
+        return false;
+      }
+
       if (this.activeTab === 'aktif' && !t.activeContractId) {
         return false;
       }
@@ -250,11 +282,92 @@ export class TenantsPage implements OnInit {
   }
 
   openDetail(tenant: Tenant) {
+    this.clearKtpPreview();
     this.selectedTenant = tenant;
   }
 
   closeDetail() {
+    this.clearKtpPreview();
     this.selectedTenant = null;
+  }
+
+  toggleKtpPreview(tenantId: string | number): void {
+    const id = String(tenantId);
+    const previewVisible = !!(this.ktpPreviewUrl || this.ktpErrorMessage || this.ktpLoading);
+
+    if (this.ktpPreviewForId === id && previewVisible && !this.ktpLoading) {
+      this.closeKtpPreview();
+      return;
+    }
+
+    if (this.ktpLoading) {
+      return;
+    }
+
+    this.clearKtpPreview();
+    this.ktpPreviewForId = id;
+    this.ktpLoading = true;
+    this.cdr.detectChanges();
+
+    this.api.getPenghuniKtp(Number(tenantId)).subscribe({
+      next: (file: Blob) => {
+        if (this.ktpPreviewForId !== id) {
+          return;
+        }
+        this.ktpLoading = false;
+
+        if (!file || file.size === 0) {
+          this.ktpErrorMessage = 'Dokumen KTP kosong atau tidak tersedia.';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        if (file.type === 'application/json' || file.type.startsWith('text/')) {
+          this.ktpErrorMessage = 'Dokumen KTP tidak dapat dimuat. Periksa endpoint dan izin akses Laravel.';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.ktpPreviewMimeType = file.type || 'image/jpeg';
+        this.ktpPreviewUrl = URL.createObjectURL(file);
+        this.ktpPreviewSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.ktpPreviewUrl);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        if (this.ktpPreviewForId !== id) {
+          return;
+        }
+        console.error('Gagal mengambil dokumen KTP penghuni:', error);
+        this.ktpLoading = false;
+        this.ktpErrorMessage = error.status === 404
+          ? 'Laravel mengembalikan 404. Route KTP belum termuat atau file KTP tidak ditemukan di storage. Lihat Network > Response untuk detailnya.'
+          : error.status === 401 || error.status === 403
+            ? 'Akses dokumen KTP ditolak. Silakan login ulang dan periksa hak akses akun owner.'
+            : `Foto KTP gagal dimuat (HTTP ${error.status || 'tidak diketahui'}). Periksa koneksi dan log Laravel.`;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeKtpPreview(): void {
+    this.clearKtpPreview();
+    this.cdr.detectChanges();
+  }
+
+  private clearKtpPreview(): void {
+    if (this.ktpPreviewUrl) {
+      URL.revokeObjectURL(this.ktpPreviewUrl);
+    }
+    this.ktpPreviewForId = null;
+    this.ktpPreviewUrl = null;
+    this.ktpPreviewSafeUrl = null;
+    this.ktpPreviewMimeType = '';
+    this.ktpErrorMessage = '';
+    this.ktpLoading = false;
+  }
+
+  ngOnDestroy(): void {
+    this.clearKtpPreview();
   }
 
   getRoom(tenant: Tenant | null): Room | undefined {

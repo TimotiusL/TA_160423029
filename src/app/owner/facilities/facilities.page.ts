@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonIcon, IonModal } from '@ionic/angular';
@@ -30,6 +30,9 @@ interface Facility {
   ]
 })
 export class FacilitiesPage {
+
+  @ViewChild('facilityFormModal') private facilityFormModal?: IonModal;
+  @ViewChild('facilitySuccessModal') private facilitySuccessModal?: IonModal;
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
 
@@ -69,7 +72,7 @@ export class FacilitiesPage {
   }
 
 
-  openAdd(): void {
+  async openAdd(): Promise<void> {
     this.editingFacility = null;
 
     this.form = {
@@ -78,10 +81,12 @@ export class FacilitiesPage {
     };
 
     this.showForm = true;
+    this.cdr.detectChanges();
+    await this.facilityFormModal?.present();
   }
 
 
-  openEdit(facility: Facility): void {
+  async openEdit(facility: Facility): Promise<void> {
     this.editingFacility = facility;
 
     this.form = {
@@ -90,18 +95,40 @@ export class FacilitiesPage {
     };
 
     this.showForm = true;
+    this.cdr.detectChanges();
+    await this.facilityFormModal?.present();
   }
 
 
-  closeForm(): void {
+  async closeForm(): Promise<void> {
+    const dismissed = await this.facilityFormModal?.dismiss(null, 'cancel');
+    if (!dismissed) this.onFormDidDismiss();
+  }
+
+  onFormDidDismiss(): void {
     this.showForm = false;
-
     this.editingFacility = null;
+    this.form = { name: '', description: '' };
+    this.cdr.detectChanges();
+  }
 
-    this.form = {
-      name: '',
-      description: ''
-    };
+  private async completeSave(): Promise<void> {
+    const dismissed = await this.facilityFormModal?.dismiss({ saved: true }, 'saved');
+    if (!dismissed) this.onFormDidDismiss();
+
+    this.showForm = false;
+    this.loadFacilities();
+    this.cdr.detectChanges();
+    await this.facilitySuccessModal?.present();
+  }
+
+  async dismissSaveSuccess(): Promise<void> {
+    const dismissed = await this.facilitySuccessModal?.dismiss(null, 'backdrop');
+    if (!dismissed) this.onSaveSuccessDidDismiss();
+  }
+
+  onSaveSuccessDidDismiss(): void {
+    this.cdr.detectChanges();
   }
 
 
@@ -121,28 +148,36 @@ export class FacilitiesPage {
         this.editingFacility.id,
         data
       ).subscribe({
-        next: () => {
-          this.closeForm();
-          this.loadFacilities();
+        next: async () => {
+          await this.completeSave();
         },
         error: (error) => {
           console.error('Gagal mengubah fasilitas:', error);
+          this.showSaveError(error, 'mengubah');
         }
       });
 
     } else {
       this.api.createFasilitas(data).subscribe({
-        next: () => {
-          this.closeForm();
-          this.loadFacilities();
+        next: async () => {
+          await this.completeSave();
         },
         error: (error) => {
           console.error('Gagal menambahkan fasilitas:', error);
+          this.showSaveError(error, 'menambahkan');
         }
       });
     }
   }
 
+
+  private showSaveError(error: any, action: string): void {
+    const errors = error?.error?.errors;
+    const firstKey = errors ? Object.keys(errors)[0] : null;
+    const validationMessage = firstKey ? errors[firstKey]?.[0] : '';
+    const message = validationMessage || error?.error?.message || `Gagal ${action} fasilitas.`;
+    alert(message);
+  }
 
   deleteFacility(facility: Facility): void {
     if (facility.usageCount > 0) {
