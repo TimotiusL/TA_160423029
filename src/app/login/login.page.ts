@@ -63,6 +63,19 @@ export class LoginPage {
     private cdr: ChangeDetectorRef
   ) { }
 
+  /**
+   * Ionic keeps routed pages alive between navigations. Clear the login
+   * credentials whenever this page becomes active again (for example,
+   * after an owner or tenant logs out).
+   */
+  ionViewWillEnter(): void {
+    this.email = '';
+    this.password = '';
+    this.error = '';
+    this.needsEmailVerification = false;
+    this.cdr.markForCheck();
+  }
+
   handleLogin(): void {
     // Cegah pengiriman request berulang saat proses login masih berjalan.
     if (this.isLoggingIn) return;
@@ -107,6 +120,10 @@ export class LoginPage {
 
           this.error = '';
           this.needsEmailVerification = false;
+
+          // Do not leave credentials in the cached login page after sign-in.
+          this.email = '';
+          this.password = '';
           this.cdr.detectChanges();
 
           if (user.role === 'admin') {

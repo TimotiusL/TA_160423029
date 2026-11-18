@@ -182,14 +182,9 @@
 :host .hero-topline {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
 }
 
-:host .hero-document-icon,
-:host .section-icon,
-:host .exit-icon-wrap,
-:host .property-mark,
 :host .document-file-icon,
 :host .state-icon,
 :host .finished-icon {
@@ -377,12 +372,6 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-
-  .exit-icon-wrap {
-    background: var(--km-warning-bg);
-    border-color: var(--km-warning-border);
-    color: var(--km-warning);
-  }
 
   .exit-panel-title {
     flex: 1;
@@ -686,7 +675,6 @@
 :host .property-detail {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 12px 14px;
   border-radius: 8px;
   background: var(--km-surface-subtle);
@@ -823,14 +811,6 @@
   gap: 16px;
   position: sticky;
   top: 20px;
-}
-
-:host .cost-card {
-  .section-icon-cost {
-    background: var(--km-success-bg);
-    border-color: var(--km-success-border);
-    color: var(--km-success);
-  }
 }
 
 :host .cost-row {

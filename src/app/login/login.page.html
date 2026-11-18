@@ -43,17 +43,17 @@
               <h1>Masuk ke akun</h1>
             </div>
 
-            <form class="auth-form" (ngSubmit)="handleLogin()">
+            <form class="auth-form" (ngSubmit)="handleLogin()" autocomplete="off">
               <div class="form-group">
                 <label for="login-email">Email</label>
                 <input id="login-email" type="email" [(ngModel)]="email" name="email"
-                  placeholder="nama@email.com" autocomplete="email" required />
+                  placeholder="nama@email.com" autocomplete="off" required />
               </div>
 
               <div class="form-group">
                 <label for="login-password">Password</label>
                 <input id="login-password" type="password" [(ngModel)]="password" name="password"
-                  placeholder="Masukkan password" autocomplete="current-password" required />
+                  placeholder="Masukkan password" autocomplete="off" required />
               </div>
 
               <div class="form-options">

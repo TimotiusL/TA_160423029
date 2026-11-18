@@ -292,9 +292,9 @@ export class ContractDetailPage implements OnInit {
   get exitPanelDescription(): string {
     const endDate = this.formatDateInput(this.contract.endDate);
     if (endDate && endDate <= this.localDateToday()) {
-      return 'Masa kontrak sudah mencapai tanggal akhir. Kirim permintaan kepada owner agar rencana keluar dan serah terima kamar dapat dikonfirmasi.';
+      return 'Masa kontrak sudah mencapai tanggal akhir. Kirim permintaan kepada pemilik kos agar rencana keluar dan serah terima kamar dapat dikonfirmasi.';
     }
-    return 'Kirim permintaan jika kamu berencana pindah sebelum masa kontrak berakhir. Kontrak dan status kamar tidak langsung berubah sampai proses dikonfirmasi owner.';
+    return 'Kirim permintaan jika kamu berencana pindah sebelum masa kontrak berakhir. Kontrak dan status kamar tidak langsung berubah sampai proses dikonfirmasi pemilik kos.';
   }
 
   get minimumExitDate(): string {
