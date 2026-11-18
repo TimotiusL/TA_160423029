@@ -4,15 +4,13 @@
     <!-- Page Heading -->
     <header class="page-heading">
       <div>
-        <span class="eyebrow">PENGATURAN AKUN</span>
         <h1>Profil Saya</h1>
-        <p class="subtitle">Kelola informasi data pribadi, identitas penghuni, dan kata sandi akun Anda.</p>
       </div>
     </header>
 
     <!-- Loading State -->
-    <div class="panel state-card" *ngIf="loading">
-      <div class="state-spinner"></div>
+    <div class="panel state-card" *ngIf="loading" aria-live="polite">
+      <div class="state-spinner" aria-hidden="true"></div>
       <h2>Memuat profil...</h2>
       <p>Mengambil data akun dan data identitas penghuni.</p>
     </div>
@@ -22,12 +20,15 @@
       <!-- Profile Hero Card -->
       <section class="profile-hero-card">
         <div class="avatar-wrap">
-          <div class="avatar">{{ initial }}</div>
+          <div class="avatar" aria-hidden="true">{{ initial }}</div>
         </div>
         <div class="profile-identity">
           <h2>{{ form.name || 'Penghuni' }}</h2>
           <p class="profile-email">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="20" height="16" x="2" y="4" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
             <span>{{ form.email }}</span>
           </p>
           <span class="role-badge">
@@ -41,29 +42,31 @@
       <section class="profile-card">
         <!-- Account Information Section -->
         <div class="section-heading">
-          <div class="section-icon-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div class="section-icon-wrap" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
           </div>
           <div>
             <h3>Informasi Akun</h3>
-            <p>Data login dan kontak utama akun Anda.</p>
           </div>
         </div>
 
         <div class="field-grid">
           <label class="field">
             <span class="field-label">Nama Lengkap <b>*</b></span>
-            <input [(ngModel)]="form.name" name="name" maxlength="45" placeholder="Nama lengkap Anda" required>
+            <input [(ngModel)]="form.name" name="name" maxlength="45" placeholder="Nama lengkap Anda" required />
           </label>
 
           <label class="field">
             <span class="field-label">Alamat Email <b>*</b></span>
-            <input [(ngModel)]="form.email" name="email" type="email" maxlength="45" autocomplete="email" placeholder="nama@email.com" required>
+            <input [(ngModel)]="form.email" name="email" type="email" maxlength="45" autocomplete="email" placeholder="nama@email.com" required />
           </label>
 
           <label class="field full">
             <span class="field-label">Nomor Telepon / WhatsApp <b>*</b></span>
-            <input [(ngModel)]="form.phone" name="phone" type="tel" inputmode="tel" maxlength="16" placeholder="08xxxxxxxxxx" required>
+            <input [(ngModel)]="form.phone" name="phone" type="tel" inputmode="tel" maxlength="16" placeholder="08xxxxxxxxxx" required />
           </label>
         </div>
 
@@ -71,24 +74,28 @@
 
         <!-- Resident Identity Section -->
         <div class="section-heading identity-heading">
-          <div class="section-icon-wrap teal-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><circle cx="8" cy="12" r="2"/><line x1="14" x2="18" y1="10" y2="10"/><line x1="14" x2="18" y1="14" y2="14"/></svg>
+          <div class="section-icon-wrap teal-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="20" height="14" x="2" y="5" rx="2" />
+              <circle cx="8" cy="12" r="2" />
+              <line x1="14" x2="18" y1="10" y2="10" />
+              <line x1="14" x2="18" y1="14" y2="14" />
+            </svg>
           </div>
           <div>
             <h3>Data Identitas Penghuni</h3>
-            <p>Data ini digunakan secara otomatis saat Anda mengajukan sewa kamar kos.</p>
           </div>
         </div>
 
         <div class="field-grid">
           <label class="field">
             <span class="field-label">NIK (Nomor Induk Kependudukan) <b>*</b></span>
-            <input [(ngModel)]="form.nik" name="nik" inputmode="numeric" maxlength="16" placeholder="16 digit NIK sesuai KTP" required>
+            <input [(ngModel)]="form.nik" name="nik" inputmode="numeric" maxlength="16" placeholder="16 digit NIK sesuai KTP" required />
           </label>
 
           <label class="field">
             <span class="field-label">Tanggal Lahir <b>*</b></span>
-            <input [(ngModel)]="form.birthDate" name="birthDate" type="date" [max]="today" required>
+            <input [(ngModel)]="form.birthDate" name="birthDate" type="date" [max]="today" required />
           </label>
 
           <label class="field">
@@ -98,7 +105,9 @@
                 <option value="pria">Laki-laki</option>
                 <option value="wanita">Perempuan</option>
               </select>
-              <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
             </div>
           </label>
 
@@ -108,19 +117,31 @@
 
             <div class="ktp-current" *ngIf="ktpPath">
               <div class="ktp-info-left">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" x2="8" y1="13" y2="13" />
+                  <line x1="16" x2="8" y1="17" y2="17" />
+                </svg>
                 <span>{{ ktpName }}</span>
               </div>
-              <a [href]="ktpUrl" target="_blank" rel="noopener" class="ktp-view-link">
+              <a [href]="ktpUrl" target="_blank" rel="noopener noreferrer" class="ktp-view-link">
                 <span>Lihat KTP Tersimpan</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
               </a>
             </div>
 
             <label class="field-upload">
-              <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" (change)="onKtpChange($event)">
+              <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" (change)="onKtpChange($event)" />
               <div class="upload-inner">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" x2="12" y1="3" y2="15" />
+                </svg>
                 <span>{{ ktpFileNameLabel }}</span>
               </div>
             </label>
@@ -129,9 +150,10 @@
         </div>
 
         <div class="form-footer">
-          <p class="helper">Perubahan profil akan langsung disinkronkan ke server.</p>
           <button type="button" class="primary-button" (click)="save()" [disabled]="isSaving">
-            <svg *ngIf="!isSaving" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg *ngIf="!isSaving" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Perubahan' }}</span>
           </button>
         </div>
@@ -140,19 +162,23 @@
       <!-- Account Security Card -->
       <section class="profile-card password-card">
         <div class="section-heading">
-          <div class="section-icon-wrap blue-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div class="section-icon-wrap blue-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
           </div>
           <div>
-            <h3>Keamanan & Kata Sandi</h3>
-            <p>Ubah kata sandi akun Anda secara berkala untuk menjaga keamanan data.</p>
+            <h3>Keamanan &amp; Kata Sandi</h3>
           </div>
         </div>
 
         <div class="password-toggle-wrap">
           <button type="button" class="secondary-button" (click)="togglePasswordForm()">
             <span>{{ showPasswordForm ? 'Tutup Formulir Sandi' : 'Ubah Kata Sandi' }}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline [attr.points]="showPasswordForm ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline [attr.points]="showPasswordForm ? '18 15 12 9 6 15' : '6 9 12 15 18 9'" />
+            </svg>
           </button>
         </div>
 
@@ -160,17 +186,17 @@
           <div class="field-grid">
             <label class="field full">
               <span class="field-label">Kata Sandi Saat Ini <b>*</b></span>
-              <input [(ngModel)]="passwordForm.oldPassword" name="oldPassword" type="password" autocomplete="current-password" placeholder="Masukkan kata sandi lama" required>
+              <input [(ngModel)]="passwordForm.oldPassword" name="oldPassword" type="password" autocomplete="current-password" placeholder="Masukkan kata sandi lama" required />
             </label>
 
             <label class="field">
               <span class="field-label">Kata Sandi Baru <b>*</b></span>
-              <input [(ngModel)]="passwordForm.newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Minimal 8 karakter" required>
+              <input [(ngModel)]="passwordForm.newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Minimal 8 karakter" required />
             </label>
 
             <label class="field">
               <span class="field-label">Konfirmasi Kata Sandi Baru <b>*</b></span>
-              <input [(ngModel)]="passwordForm.confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Ulangi kata sandi baru" required>
+              <input [(ngModel)]="passwordForm.confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Ulangi kata sandi baru" required />
             </label>
           </div>
 
@@ -187,17 +213,46 @@
       <section class="logout-card">
         <div class="logout-copy">
           <h3>Keluar dari Akun</h3>
-          <p>Akhiri sesi aktif Anda pada perangkat ini jika telah selesai menggunakan aplikasi.</p>
         </div>
         <button type="button" class="danger-button" (click)="logout()" [disabled]="isLoggingOut">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" x2="9" y1="12" y2="12" />
+          </svg>
           <span>{{ isLoggingOut ? 'Mengakhiri Sesi...' : 'Keluar dari Akun' }}</span>
         </button>
       </section>
 
     </ng-container>
 
-    <!-- Toast Notification -->
-    <div class="toast-message" role="status" *ngIf="savedMessage">{{ savedMessage }}</div>
   </main>
 </ion-content>
+
+<!-- Toast Notification -->
+<div class="toast-message" role="status" *ngIf="savedMessage">{{ savedMessage }}</div>
+
+<!-- Modal konfirmasi keluar akun -->
+<div class="logout-modal-backdrop" *ngIf="showLogoutModal" (click)="cancelLogout()">
+  <section
+    class="logout-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="logoutModalTitle"
+    (click)="$event.stopPropagation()">
+    <div class="logout-modal-icon" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" x2="9" y1="12" y2="12" />
+      </svg>
+    </div>
+    <h2 id="logoutModalTitle">Keluar dari Akun?</h2>
+    <div class="logout-modal-actions">
+      <button type="button" class="secondary-button" (click)="cancelLogout()" [disabled]="isLoggingOut">Batal</button>
+      <button type="button" class="danger-button" (click)="confirmLogout()" [disabled]="isLoggingOut">
+        {{ isLoggingOut ? 'Mengakhiri Sesi...' : 'Ya, Keluar' }}
+      </button>
+    </div>
+  </section>
+</div>

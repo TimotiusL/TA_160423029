@@ -64,13 +64,4 @@ export class TenantLayoutPage implements OnInit {
     this.showMoreMenu = false;
     this.cdr.markForCheck();
   }
-
-  logout(): void {
-    if (confirm('Apakah kamu yakin ingin keluar?')) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      this.router.navigateByUrl('/login', { replaceUrl: true });
-      this.cdr.markForCheck();
-    }
-  }
 }

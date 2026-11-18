@@ -1,280 +1,263 @@
 <ion-content class="contract-content">
-  <section class="state-card" *ngIf="loading" aria-live="polite">
-    <div class="state-spinner"></div>
-    <h2>Memuat kontrak</h2>
-    <p>Mengambil data kontrak terbaru dari sistem.</p>
-  </section>
+  <div class="page-shell">
 
-  <section class="state-card state-error" *ngIf="errorMessage && !loading">
-    <div class="state-icon"><ion-icon name="alert-circle-outline"></ion-icon></div>
-    <h2>Kontrak belum dapat dimuat</h2>
-    <p>{{ errorMessage }}</p>
-    <button type="button" class="button button-primary" (click)="loadContract()">Coba Lagi</button>
-  </section>
-
-  <section class="state-card" *ngIf="!loading && !errorMessage && !hasContract">
-    <div class="state-icon"><ion-icon name="document-text-outline"></ion-icon></div>
-    <h2>Belum ada kontrak</h2>
-    <p>Saat ini kamu tidak memiliki kontrak yang masih berjalan. Kontrak yang sudah selesai atau dibatalkan tidak ditampilkan lagi sebagai hunian saat ini.</p>
-    <button type="button" class="button button-primary" (click)="kembaliDashboard()">Kembali ke Dashboard</button>
-  </section>
-
-  <div class="page-shell" *ngIf="!loading && !errorMessage && hasContract">
-    <header class="page-header">
-      <div class="page-title">
-        <p class="eyebrow">AREA PENGHUNI</p>
-        <h1>Kontrak Saya</h1>
-        <p class="page-subtitle">Ringkasan masa sewa, kamar, biaya, dan status kontrakmu.</p>
-      </div>
-      <div class="header-actions">
-        <button
-          type="button"
-          class="button button-exit"
-          *ngIf="canRequestExit"
-          (click)="openExitRequestForm()">
-          <ion-icon name="log-out-outline"></ion-icon>
-          {{ showExitRequestForm ? 'Tutup Form Keluar' : exitButtonLabel }}
-        </button>
-        <button type="button" class="button button-primary" (click)="downloadContract()" [disabled]="downloading">
-          <ion-icon name="download-outline"></ion-icon>
-          {{ downloading ? 'Mengunduh...' : 'Unduh PDF' }}
-        </button>
-      </div>
-    </header>
-
-    <p class="form-error download-error" *ngIf="downloadError" role="alert">{{ downloadError }}</p>
-
-    <section class="contract-hero">
-      <div class="hero-topline">
-        <div class="hero-document-icon"><ion-icon name="document-text-outline"></ion-icon></div>
-        <span class="contract-status" [ngClass]="contractStatusClass">
-          <span class="status-indicator"></span>{{ contract.status }}
-        </span>
-      </div>
-      <div class="hero-title-block">
-        <span class="hero-label">NOMOR KONTRAK</span>
-        <h2>{{ contract.number }}</h2>
-        <p>{{ contract.propertyName }} <span *ngIf="contract.roomNumber !== '-'">· Kamar {{ contract.roomNumber }}</span></p>
-      </div>
-      <div class="hero-meta-grid">
-        <div class="hero-meta-item">
-          <span>Mulai sewa</span>
-          <strong>{{ contract.startDate ? (contract.startDate | date:'dd MMM yyyy') : '-' }}</strong>
-        </div>
-        <div class="hero-meta-item">
-          <span>Akhir sewa</span>
-          <strong>{{ contract.endDate ? (contract.endDate | date:'dd MMM yyyy') : '-' }}</strong>
-        </div>
-        <div class="hero-meta-item">
-          <span>{{ isContractExpired ? 'Masa kontrak berakhir' : 'Sisa masa sewa' }}</span>
-          <strong *ngIf="contract.statusCode === 'aktif'">{{ isContractExpired ? ('Lewat ' + contractOverdueDays + ' hari') : (remainingDays + ' hari') }}</strong>
-          <strong *ngIf="contract.statusCode !== 'aktif'">{{ contract.status }}</strong>
-        </div>
-      </div>
-      <div class="lease-progress" *ngIf="contract.statusCode === 'aktif'">
-        <div class="lease-progress-track"><span [style.width.%]="leaseProgressPercent"></span></div>
-        <div class="lease-progress-labels"><span>Periode sewa berlangsung</span><strong>{{ leaseProgressPercent }}%</strong></div>
-      </div>
+    <section class="state-card" *ngIf="loading" aria-live="polite">
+      <div class="state-spinner" aria-hidden="true"></div>
+      <h2>Memuat kontrak</h2>
+      <p>Mengambil data kontrak terbaru dari sistem.</p>
     </section>
 
-    <section class="exit-panel" *ngIf="isActiveContract">
-      <div class="exit-panel-header">
-        <div class="exit-icon-wrap"><ion-icon name="log-out-outline"></ion-icon></div>
-        <div class="exit-panel-title">
-          <div class="section-kicker">AKSI KONTRAK</div>
-          <h2>Rencana Keluar dari Kos</h2>
-          <p>{{ exitPanelDescription }}</p>
-        </div>
-        <span class="exit-status-chip" [ngClass]="exitStatusClass">{{ exitStatusLabel }}</span>
-      </div>
+    <section class="state-card state-error" *ngIf="errorMessage && !loading" role="alert">
+      <div class="state-icon" aria-hidden="true"><ion-icon name="alert-circle-outline"></ion-icon></div>
+      <h2>Kontrak belum dapat dimuat</h2>
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="button button-primary" (click)="loadContract()">Coba Lagi</button>
+    </section>
 
-      <div class="exit-request-summary" *ngIf="contract.exitRequestStatus !== 'tidak_ada'">
-        <div class="request-summary-grid">
-          <div>
-            <span class="detail-label">Tanggal pengajuan</span>
-            <strong>{{ contract.exitRequestedAt ? (contract.exitRequestedAt | date:'dd MMM yyyy, HH:mm') : '-' }}</strong>
-          </div>
-          <div>
-            <span class="detail-label">Rencana keluar</span>
-            <strong>{{ contract.plannedExitDate ? (contract.plannedExitDate | date:'dd MMMM yyyy') : '-' }}</strong>
-          </div>
-        </div>
-        <div class="request-reason" *ngIf="contract.exitReason">
-          <span class="detail-label">Alasan dari penghuni</span>
-          <p>{{ contract.exitReason }}</p>
-        </div>
-        <div class="owner-note" *ngIf="contract.exitOwnerNote">
-          <span class="detail-label">Catatan owner</span>
-          <p>{{ contract.exitOwnerNote }}</p>
-        </div>
-        <p class="exit-help" *ngIf="contract.exitRequestStatus === 'menunggu'">
-          Permintaan sedang ditinjau. Kontrak dan status kamar belum berubah.
-        </p>
-        <p class="exit-help" *ngIf="contract.exitRequestStatus === 'disetujui'">
-          Owner sudah menyetujui rencana keluar. Kontrak baru berakhir setelah owner mengonfirmasi bahwa kamu benar-benar sudah keluar.
-        </p>
-        <p class="exit-help exit-help-rejected" *ngIf="contract.exitRequestStatus === 'ditolak'">
-          Permintaan sebelumnya ditolak. Kamu bisa mengajukan kembali setelah membaca catatan owner, jika ada.
-        </p>
-      </div>
+    <section class="state-card" *ngIf="!loading && !errorMessage && !hasContract">
+      <h2>Belum ada kontrak</h2>
+      <button type="button" class="button button-primary" (click)="kembaliDashboard()">Kembali ke Dashboard</button>
+    </section>
 
-      <div class="exit-form-wrap" *ngIf="showExitRequestForm && canRequestExit">
-        <form class="exit-form" (ngSubmit)="submitExitRequest()">
-          <div class="form-intro">
-            <h3>{{ exitButtonLabel }}</h3>
-            <p>Owner akan meninjau rencanamu. Pengajuan ini tidak langsung membatalkan kontrak atau mengosongkan kamar.</p>
+    <ng-container *ngIf="!loading && !errorMessage && hasContract">
+      <header class="page-header">
+        <div class="page-title">
+          <h1>Kontrak Saya</h1>
+        </div>
+        <div class="header-actions">
+          <button
+            type="button"
+            class="button button-exit"
+            *ngIf="canRequestExit"
+            (click)="openExitRequestForm()">
+            <ion-icon name="log-out-outline"></ion-icon>
+            {{ showExitRequestForm ? 'Tutup Form Keluar' : exitButtonLabel }}
+          </button>
+          <button type="button" class="button button-primary" (click)="downloadContract()" [disabled]="downloading">
+            <ion-icon name="download-outline"></ion-icon>
+            {{ downloading ? 'Mengunduh...' : 'Unduh PDF' }}
+          </button>
+        </div>
+      </header>
+
+      <p class="form-error download-error" *ngIf="downloadError" role="alert">{{ downloadError }}</p>
+
+      <section class="contract-hero">
+        <div class="hero-topline">
+          <div class="hero-document-icon" aria-hidden="true"><ion-icon name="document-text-outline"></ion-icon></div>
+          <span class="contract-status" [ngClass]="contractStatusClass">
+            <span class="status-indicator"></span>{{ contract.status }}
+          </span>
+        </div>
+        <div class="hero-title-block">
+          <h2>{{ contract.number }}</h2>
+          <p>{{ contract.propertyName }} <span *ngIf="contract.roomNumber !== '-'">· Kamar {{ contract.roomNumber }}</span></p>
+        </div>
+        <div class="hero-meta-grid">
+          <div class="hero-meta-item">
+            <span>Mulai sewa</span>
+            <strong>{{ contract.startDate ? (contract.startDate | date:'dd MMM yyyy') : '-' }}</strong>
           </div>
-          <div class="form-grid">
-            <label class="form-field">
-              <span>Tanggal rencana keluar <b>*</b></span>
-              <input
-                type="date"
-                name="exitDate"
-                [(ngModel)]="exitRequestDate"
-                [min]="minimumExitDate"
-                [max]="maximumExitDate || ''"
-                required />
-              <small *ngIf="maximumExitDate">Pilih tanggal sampai dengan tanggal akhir kontrak.</small>
-              <small *ngIf="!maximumExitDate">Masa kontrak telah mencapai tanggal akhir; pilih tanggal rencana keluar mulai hari ini.</small>
-            </label>
-            <label class="form-field form-field-reason">
-              <span>Alasan keluar <b>*</b></span>
-              <textarea
-                name="exitReason"
-                [(ngModel)]="exitReason"
-                rows="3"
-                maxlength="255"
-                placeholder="Contoh: pindah tempat kerja atau pindah kota"
-                required></textarea>
-              <small>Maksimal 255 karakter.</small>
-            </label>
+          <div class="hero-meta-item">
+            <span>Akhir sewa</span>
+            <strong>{{ contract.endDate ? (contract.endDate | date:'dd MMM yyyy') : '-' }}</strong>
           </div>
-          <p class="form-error" *ngIf="exitRequestError" role="alert">{{ exitRequestError }}</p>
-          <div class="form-actions">
-            <button type="button" class="button button-outline" (click)="showExitRequestForm = false" [disabled]="exitRequestLoading">Batal</button>
-            <button type="submit" class="button button-exit" [disabled]="exitRequestLoading">
-              <ion-icon name="send-outline"></ion-icon>
-              {{ exitRequestLoading ? 'Mengirim permintaan...' : 'Kirim Permintaan' }}
+          <div class="hero-meta-item">
+            <span>{{ isContractExpired ? 'Masa kontrak berakhir' : 'Sisa masa sewa' }}</span>
+            <strong *ngIf="contract.statusCode === 'aktif'">{{ isContractExpired ? ('Lewat ' + contractOverdueDays + ' hari') : (remainingDays + ' hari') }}</strong>
+            <strong *ngIf="contract.statusCode !== 'aktif'">{{ contract.status }}</strong>
+          </div>
+        </div>
+        <div class="lease-progress" *ngIf="contract.statusCode === 'aktif'">
+          <div class="lease-progress-track"><span [style.width.%]="leaseProgressPercent"></span></div>
+          <div class="lease-progress-labels"><span>Periode sewa berlangsung</span><strong>{{ leaseProgressPercent }}%</strong></div>
+        </div>
+      </section>
+
+      <section class="exit-panel" *ngIf="isActiveContract">
+        <div class="exit-panel-header">
+          <div class="exit-icon-wrap" aria-hidden="true"><ion-icon name="log-out-outline"></ion-icon></div>
+          <div class="exit-panel-title">
+            <div class="section-kicker">AKSI KONTRAK</div>
+            <h2>Rencana Keluar dari Kos</h2>
+            <p>{{ exitPanelDescription }}</p>
+          </div>
+          <span class="exit-status-chip" [ngClass]="exitStatusClass">{{ exitStatusLabel }}</span>
+        </div>
+
+        <div class="exit-request-summary" *ngIf="contract.exitRequestStatus !== 'tidak_ada'">
+          <div class="request-summary-grid">
+            <div>
+              <span class="detail-label">Tanggal pengajuan</span>
+              <strong>{{ contract.exitRequestedAt ? (contract.exitRequestedAt | date:'dd MMM yyyy, HH:mm') : '-' }}</strong>
+            </div>
+            <div>
+              <span class="detail-label">Rencana keluar</span>
+              <strong>{{ contract.plannedExitDate ? (contract.plannedExitDate | date:'dd MMMM yyyy') : '-' }}</strong>
+            </div>
+          </div>
+          <div class="request-reason" *ngIf="contract.exitReason">
+            <span class="detail-label">Alasan dari penghuni</span>
+            <p>{{ contract.exitReason }}</p>
+          </div>
+          <div class="owner-note" *ngIf="contract.exitOwnerNote">
+            <span class="detail-label">Catatan owner</span>
+            <p>{{ contract.exitOwnerNote }}</p>
+          </div>
+          <p class="exit-help" *ngIf="contract.exitRequestStatus === 'menunggu'">
+            Permintaan sedang ditinjau. Kontrak dan status kamar belum berubah.
+          </p>
+          <p class="exit-help" *ngIf="contract.exitRequestStatus === 'disetujui'">
+            Owner sudah menyetujui rencana keluar. Kontrak baru berakhir setelah owner mengonfirmasi bahwa kamu benar-benar sudah keluar.
+          </p>
+          <p class="exit-help exit-help-rejected" *ngIf="contract.exitRequestStatus === 'ditolak'">
+            Permintaan sebelumnya ditolak. Kamu bisa mengajukan kembali setelah membaca catatan owner, jika ada.
+          </p>
+        </div>
+
+        <div class="exit-form-wrap" *ngIf="showExitRequestForm && canRequestExit">
+          <form class="exit-form" (ngSubmit)="submitExitRequest()">
+            <div class="form-intro">
+              <h3>{{ exitButtonLabel }}</h3>
+              <p>Owner akan meninjau rencanamu. Pengajuan ini tidak langsung membatalkan kontrak atau mengosongkan kamar.</p>
+            </div>
+            <div class="form-grid">
+              <label class="form-field">
+                <span>Tanggal rencana keluar <b>*</b></span>
+                <input
+                  type="date"
+                  name="exitDate"
+                  [(ngModel)]="exitRequestDate"
+                  [min]="minimumExitDate"
+                  [max]="maximumExitDate || ''"
+                  required />
+                <small *ngIf="maximumExitDate">Pilih tanggal sampai dengan tanggal akhir kontrak.</small>
+                <small *ngIf="!maximumExitDate">Masa kontrak telah mencapai tanggal akhir; pilih tanggal rencana keluar mulai hari ini.</small>
+              </label>
+              <label class="form-field form-field-reason">
+                <span>Alasan keluar <b>*</b></span>
+                <textarea
+                  name="exitReason"
+                  [(ngModel)]="exitReason"
+                  rows="3"
+                  maxlength="255"
+                  placeholder="Contoh: pindah tempat kerja atau pindah kota"
+                  required></textarea>
+                <small>Maksimal 255 karakter.</small>
+              </label>
+            </div>
+            <p class="form-error" *ngIf="exitRequestError" role="alert">{{ exitRequestError }}</p>
+            <div class="form-actions">
+              <button type="button" class="button button-outline" (click)="showExitRequestForm = false" [disabled]="exitRequestLoading">Batal</button>
+              <button type="submit" class="button button-exit" [disabled]="exitRequestLoading">
+                <ion-icon name="send-outline"></ion-icon>
+                {{ exitRequestLoading ? 'Mengirim permintaan...' : 'Kirim Permintaan' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="finished-panel" *ngIf="contract.statusCode === 'selesai'">
+        <div class="finished-icon" aria-hidden="true"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+        <div>
+          <h2>Kontrak telah berakhir</h2>
+          <p *ngIf="contract.checkoutDate">Tanggal keluar tercatat pada {{ contract.checkoutDate | date:'dd MMMM yyyy' }}.</p>
+          <p *ngIf="!contract.checkoutDate">Kontrak ini sudah ditandai selesai oleh owner.</p>
+          <p>Alasan pengakhiran: <strong>{{ terminationReasonLabel }}</strong></p>
+          <p *ngIf="contract.terminationNote">Catatan owner: {{ contract.terminationNote }}</p>
+        </div>
+      </section>
+
+      <div class="contract-layout">
+        <main class="main-column">
+          <section class="info-card">
+            <div class="section-heading">
+              <div class="section-icon" aria-hidden="true"><ion-icon name="calendar-outline"></ion-icon></div>
+              <div><h2>Periode Sewa</h2></div>
+            </div>
+            <div class="date-range">
+              <div class="date-block">
+                <span class="detail-label">Tanggal mulai</span>
+                <strong>{{ contract.startDate ? (contract.startDate | date:'dd MMMM yyyy') : '-' }}</strong>
+              </div>
+              <div class="date-arrow" aria-hidden="true"><ion-icon name="arrow-forward-outline"></ion-icon></div>
+              <div class="date-block">
+                <span class="detail-label">Tanggal berakhir</span>
+                <strong>{{ contract.endDate ? (contract.endDate | date:'dd MMMM yyyy') : '-' }}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="info-card">
+            <div class="section-heading">
+              <div class="section-icon" aria-hidden="true"><ion-icon name="home-outline"></ion-icon></div>
+              <div><h2>Informasi Kos dan Kamar</h2></div>
+            </div>
+            <div class="property-detail">
+              <div class="property-mark" aria-hidden="true"><ion-icon name="business-outline"></ion-icon></div>
+              <div class="property-copy"><strong>{{ contract.propertyName }}</strong><span>{{ contract.address }}</span></div>
+            </div>
+            <div class="detail-grid">
+              <div class="detail-cell"><span class="detail-label">Tipe kamar</span><strong>{{ contract.roomName }}</strong></div>
+              <div class="detail-cell"><span class="detail-label">Nomor kamar</span><strong>{{ contract.roomNumber }}</strong></div>
+              <div class="detail-cell"><span class="detail-label">Lantai</span><strong>{{ contract.floor }}</strong></div>
+            </div>
+            <div class="owner-contact" *ngIf="contract.propertyPhone || contract.propertyEmail">
+              <span class="detail-label">Kontak pengelola</span>
+              <a *ngIf="contract.propertyPhone" [href]="'tel:' + contract.propertyPhone"><ion-icon name="call-outline"></ion-icon>{{ contract.propertyPhone }}</a>
+              <a *ngIf="contract.propertyEmail" [href]="'mailto:' + contract.propertyEmail"><ion-icon name="mail-outline"></ion-icon>{{ contract.propertyEmail }}</a>
+            </div>
+          </section>
+
+          <section class="info-card">
+            <div class="section-heading">
+              <div class="section-icon" aria-hidden="true"><ion-icon name="clipboard-outline"></ion-icon></div>
+              <div><h2>Asal Pendaftaran</h2></div>
+            </div>
+            <div class="detail-grid detail-grid-application">
+              <div class="detail-cell"><span class="detail-label">Kode pendaftaran</span><strong>{{ contract.applicationCode }}</strong></div>
+              <div class="detail-cell"><span class="detail-label">Tanggal pendaftaran</span><strong>{{ contract.applicationDate ? (contract.applicationDate | date:'dd MMMM yyyy') : '-' }}</strong></div>
+              <div class="detail-cell"><span class="detail-label">Durasi sewa</span><strong>{{ contract.durationMonths ? contract.durationMonths + ' bulan' : '-' }}</strong></div>
+            </div>
+            <div class="bundle-contract-summary" *ngIf="contract.bundleName">
+              <strong>{{ contract.bundleName }}</strong>
+              <span>{{ contract.durationMonths }} bulan masa tinggal · wajib dibayar lunas di awal</span>
+              <div class="bundle-price-row"><span>Harga normal</span><span>{{ contract.bundleNormalPrice | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</span></div>
+              <div class="bundle-price-row"><span>Potongan paket</span><span>−{{ contract.bundleDiscount | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</span></div>
+              <div class="bundle-price-total"><span>Harga paket</span><b>{{ contract.bundlePrice | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</b></div>
+            </div>
+          </section>
+        </main>
+
+        <aside class="side-column">
+          <section class="info-card cost-card">
+            <div class="section-heading">
+              <div class="section-icon section-icon-cost" aria-hidden="true"><ion-icon name="wallet-outline"></ion-icon></div>
+              <div><h2>Ringkasan Biaya</h2><p>Nilai yang tercantum pada kontrak.</p></div>
+            </div>
+            <div class="cost-row"><span>Sewa per bulan</span><strong>{{ contract.rent | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</strong></div>
+            <div class="cost-row"><span>Deposit</span><strong>{{ contract.deposit | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</strong></div>
+            <div class="cost-note"><ion-icon name="information-circle-outline"></ion-icon><p>Deposit terpisah dari biaya sewa bulanan. Ketentuan pengembalian mengikuti kebijakan kos dan kondisi saat penghuni keluar.</p></div>
+            <button type="button" class="button button-outline button-full" (click)="lihatTagihan()">
+              <ion-icon name="receipt-outline"></ion-icon>
+              Lihat Tagihan
             </button>
-          </div>
-        </form>
-      </div>
-    </section>
+          </section>
 
-    <section class="finished-panel" *ngIf="contract.statusCode === 'selesai'">
-      <div class="finished-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
-      <div>
-        <h2>Kontrak telah berakhir</h2>
-        <p *ngIf="contract.checkoutDate">Tanggal keluar tercatat pada {{ contract.checkoutDate | date:'dd MMMM yyyy' }}.</p>
-        <p *ngIf="!contract.checkoutDate">Kontrak ini sudah ditandai selesai oleh owner.</p>
-        <p>Alasan pengakhiran: <strong>{{ terminationReasonLabel }}</strong></p>
-        <p *ngIf="contract.terminationNote">Catatan owner: {{ contract.terminationNote }}</p>
-      </div>
-    </section>
-
-    <div class="contract-layout">
-      <main class="main-column">
-        <section class="info-card">
-          <div class="section-heading">
-            <div class="section-icon"><ion-icon name="calendar-outline"></ion-icon></div>
-            <div><h2>Periode Sewa</h2><p>Tanggal sesuai kontrak yang telah dibuat.</p></div>
-          </div>
-          <div class="date-range">
-            <div class="date-block">
-              <span class="detail-label">Tanggal mulai</span>
-              <strong>{{ contract.startDate ? (contract.startDate | date:'dd MMMM yyyy') : '-' }}</strong>
+          <section class="info-card tenant-card">
+            <div class="section-heading">
+              <div class="section-icon" aria-hidden="true"><ion-icon name="person-outline"></ion-icon></div>
+              <div><h2>Data Penghuni</h2><p>Data penyewa pada kontrak ini.</p></div>
             </div>
-            <div class="date-arrow"><ion-icon name="arrow-forward-outline"></ion-icon></div>
-            <div class="date-block">
-              <span class="detail-label">Tanggal berakhir</span>
-              <strong>{{ contract.endDate ? (contract.endDate | date:'dd MMMM yyyy') : '-' }}</strong>
+            <div class="tenant-profile">
+              <div class="tenant-avatar" aria-hidden="true">{{ contract.tenantName.charAt(0) || 'P' }}</div>
+              <div><strong>{{ contract.tenantName }}</strong><span>{{ contract.tenantEmail }}</span></div>
             </div>
-          </div>
-        </section>
+          </section>
+        </aside>
+      </div>
+    </ng-container>
 
-        <section class="info-card">
-          <div class="section-heading">
-            <div class="section-icon"><ion-icon name="home-outline"></ion-icon></div>
-            <div><h2>Informasi Kos dan Kamar</h2><p>Properti dan kamar yang tercatat pada kontrak ini.</p></div>
-          </div>
-          <div class="property-detail">
-            <div class="property-mark"><ion-icon name="business-outline"></ion-icon></div>
-            <div class="property-copy"><strong>{{ contract.propertyName }}</strong><span>{{ contract.address }}</span></div>
-          </div>
-          <div class="detail-grid">
-            <div class="detail-cell"><span class="detail-label">Tipe kamar</span><strong>{{ contract.roomName }}</strong></div>
-            <div class="detail-cell"><span class="detail-label">Nomor kamar</span><strong>{{ contract.roomNumber }}</strong></div>
-            <div class="detail-cell"><span class="detail-label">Lantai</span><strong>{{ contract.floor }}</strong></div>
-          </div>
-          <div class="owner-contact" *ngIf="contract.propertyPhone || contract.propertyEmail">
-            <span class="detail-label">Kontak pengelola</span>
-            <a *ngIf="contract.propertyPhone" [href]="'tel:' + contract.propertyPhone"><ion-icon name="call-outline"></ion-icon>{{ contract.propertyPhone }}</a>
-            <a *ngIf="contract.propertyEmail" [href]="'mailto:' + contract.propertyEmail"><ion-icon name="mail-outline"></ion-icon>{{ contract.propertyEmail }}</a>
-          </div>
-        </section>
-
-        <section class="info-card">
-          <div class="section-heading">
-            <div class="section-icon"><ion-icon name="clipboard-outline"></ion-icon></div>
-            <div><h2>Asal Pendaftaran</h2><p>Pengajuan yang menjadi dasar penerbitan kontrak.</p></div>
-          </div>
-          <div class="detail-grid detail-grid-application">
-            <div class="detail-cell"><span class="detail-label">Kode pendaftaran</span><strong>{{ contract.applicationCode }}</strong></div>
-            <div class="detail-cell"><span class="detail-label">Tanggal pendaftaran</span><strong>{{ contract.applicationDate ? (contract.applicationDate | date:'dd MMMM yyyy') : '-' }}</strong></div>
-            <div class="detail-cell"><span class="detail-label">Durasi sewa</span><strong>{{ contract.durationMonths ? contract.durationMonths + ' bulan' : '-' }}</strong></div>
-          </div>
-          <div class="bundle-contract-summary" *ngIf="contract.bundleName">
-            <strong>{{ contract.bundleName }}</strong>
-            <span>{{ contract.durationMonths }} bulan masa tinggal · wajib dibayar lunas di awal</span>
-            <div>Harga normal: {{ contract.bundleNormalPrice | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</div>
-            <div>Potongan: −{{ contract.bundleDiscount | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</div>
-            <b>Harga paket: {{ contract.bundlePrice | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</b>
-          </div>
-        </section>
-      </main>
-
-      <aside class="side-column">
-        <section class="info-card cost-card">
-          <div class="section-heading">
-            <div class="section-icon section-icon-cost"><ion-icon name="wallet-outline"></ion-icon></div>
-            <div><h2>Ringkasan Biaya</h2><p>Nilai yang tercantum pada kontrak.</p></div>
-          </div>
-          <div class="cost-row"><span>Sewa per bulan</span><strong>{{ contract.rent | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</strong></div>
-          <div class="cost-row"><span>Deposit</span><strong>{{ contract.deposit | currency:'IDR':'symbol':'1.0-0':'id-ID' }}</strong></div>
-          <div class="cost-note"><ion-icon name="information-circle-outline"></ion-icon><p>Deposit terpisah dari biaya sewa bulanan. Ketentuan pengembalian mengikuti kebijakan kos dan kondisi saat penghuni keluar.</p></div>
-          <button type="button" class="button button-outline button-full" (click)="lihatTagihan()">
-            <ion-icon name="receipt-outline"></ion-icon>
-            Lihat Tagihan
-          </button>
-        </section>
-
-        <section class="info-card document-card">
-          <div class="section-heading">
-            <div class="section-icon"><ion-icon name="document-attach-outline"></ion-icon></div>
-            <div><h2>Dokumen Kontrak</h2><p>Simpan salinan perjanjian sewa.</p></div>
-          </div>
-          <div class="document-preview">
-            <div class="document-file-icon"><ion-icon name="document-text-outline"></ion-icon></div>
-            <div><strong>{{ contract.number }}.pdf</strong><span>Dokumen kontrak sewa</span></div>
-          </div>
-          <button type="button" class="button button-primary button-full" (click)="downloadContract()" [disabled]="downloading">
-            <ion-icon name="download-outline"></ion-icon>{{ downloading ? 'Mengunduh...' : 'Unduh Dokumen' }}
-          </button>
-        </section>
-
-        <section class="info-card tenant-card">
-          <div class="section-heading">
-            <div class="section-icon"><ion-icon name="person-outline"></ion-icon></div>
-            <div><h2>Data Penghuni</h2><p>Data penyewa pada kontrak ini.</p></div>
-          </div>
-          <div class="tenant-profile">
-            <div class="tenant-avatar">{{ contract.tenantName.charAt(0) || 'P' }}</div>
-            <div><strong>{{ contract.tenantName }}</strong><span>{{ contract.tenantEmail }}</span></div>
-          </div>
-          <p class="tenant-note"><ion-icon name="shield-checkmark-outline"></ion-icon>Informasi ditampilkan sesuai data akun dan kontrak.</p>
-        </section>
-      </aside>
-    </div>
   </div>
-
 </ion-content>

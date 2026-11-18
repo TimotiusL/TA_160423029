@@ -112,30 +112,7 @@ export class ApplicationStatusPage {
     this.loadLatestApplication();
   }
 
-  resetPencarian(): void {
-    this.kodePendaftaran = '';
-    this.tidakDitemukan = false;
-    this.sedangCari = false;
-    this.pesanError = '';
-    this.belumAdaPengajuan = false;
-    this.pesanAksi = '';
-    this.errorAksi = '';
-    this.showCancelModal = false;
-    this.alasanPembatalanInput = '';
-    this.errorPembatalanModal = '';
-    this.melihatRiwayat = false;
-    this.melihatPengajuanMenungguLain = false;
 
-    if (this.pengajuanTerbaru) {
-      this.pendaftaran = { ...this.pengajuanTerbaru };
-      this.sudahCari = true;
-      this.belumAdaPengajuanMenunggu = false;
-    } else {
-      this.sudahCari = false;
-      this.belumAdaPengajuanMenunggu = this.riwayatPengajuan.length > 0;
-    }
-    this.cdr.markForCheck();
-  }
 
   cariStatus(preserveActionMessage = false): void {
     const kode = this.kodePendaftaran.trim().toUpperCase();
@@ -338,11 +315,6 @@ export class ApplicationStatusPage {
     } else {
       this.loadLatestApplication();
     }
-  }
-
-  muatUlangPengajuanMenunggu(): void {
-    this.kodePendaftaran = '';
-    this.loadLatestApplication();
   }
 
   private formatTanggal(value: string | null): string {

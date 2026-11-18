@@ -1,12 +1,12 @@
 <div class="ion-page">
   <ion-content [fullscreen]="true" class="auth-content">
     <main class="login-page">
-      <!-- Panel hijau identitas KostManager -->
-      <section class="login-illustration" aria-label="Tentang KostManager">
+      <!-- Panel hijau identitas Kos Manager -->
+      <section class="login-illustration" aria-label="Tentang Kos Manager">
         <div class="illustration-inner">
           <div class="brand">
-            <span class="brand-icon" aria-hidden="true">K</span>
-            <span>KostManager</span>
+            <img class="brand-logo" src="assets/images/logo.png" alt="" aria-hidden="true" />
+            <span>Kos Manager</span>
           </div>
 
           <div class="illustration-copy">
@@ -16,7 +16,7 @@
             </p>
           </div>
 
-          <ul class="feature-list" aria-label="Fitur KostManager">
+          <ul class="feature-list" aria-label="Fitur Kos Manager">
             <li><span class="feature-dot" aria-hidden="true"></span>Data kamar dan penghuni</li>
             <li><span class="feature-dot" aria-hidden="true"></span>Tagihan dan pembayaran</li>
             <li><span class="feature-dot" aria-hidden="true"></span>Kontrak dan pengajuan komplain</li>
@@ -24,24 +24,23 @@
         </div>
 
         <div class="illustration-footer">
-          <span>© 2026 KostManager</span>
+          <span>© 2026 Kos Manager</span>
           <span>Sistem Informasi Manajemen Indekos</span>
         </div>
       </section>
 
       <!-- Form autentikasi -->
-      <section class="login-form-section" aria-label="Akses akun KostManager">
+      <section class="login-form-section" aria-label="Akses akun Kos Manager">
         <div class="form-container">
           <div class="mobile-brand">
-            <span class="mobile-brand-icon" aria-hidden="true">K</span>
-            <span>KostManager</span>
+            <img class="mobile-brand-logo" src="assets/images/logo.png" alt="" aria-hidden="true" />
+            <span>Kos Manager</span>
           </div>
 
           <!-- LOGIN -->
           <ng-container *ngIf="mode === 'login'">
             <div class="auth-heading">
               <h1>Masuk ke akun</h1>
-              <p class="subtitle">Gunakan email dan password yang sudah terdaftar.</p>
             </div>
 
             <form class="auth-form" (ngSubmit)="handleLogin()">
@@ -67,7 +66,7 @@
 
               <div class="verification-warning" *ngIf="needsEmailVerification" role="alert" aria-live="polite">
                 <strong>Email belum diverifikasi</strong>
-                <p>Akun Anda belum bisa masuk sebelum email diverifikasi. Buka inbox email yang digunakan saat registrasi, lalu klik tautan verifikasi dari KostManager. Periksa juga folder Spam/Junk.</p>
+                <p>Akun Anda belum bisa masuk sebelum email diverifikasi. Buka inbox email yang digunakan saat registrasi, lalu klik tautan verifikasi dari Kos Manager. Periksa juga folder Spam/Junk.</p>
               </div>
 
               <button type="submit" class="primary-button" [disabled]="isLoggingIn">
@@ -88,7 +87,7 @@
 
             <div class="auth-heading">
               <h1>Buat akun</h1>
-              <p class="subtitle">Lengkapi data untuk membuat akun KostManager.</p>
+              <p class="subtitle">Lengkapi data untuk membuat akun Kos Manager.</p>
             </div>
 
             <div class="role-section">
@@ -286,7 +285,7 @@
     <div class="verification-overlay" *ngIf="showVerificationPopup">
       <section class="verification-popup" role="dialog" aria-modal="true" aria-labelledby="verification-title">
         <h2 id="verification-title">Periksa email Anda</h2>
-        <p>Silakan periksa email untuk melakukan verifikasi akun KostManager.</p>
+        <p>Silakan periksa email untuk melakukan verifikasi akun Kos Manager.</p>
         <button type="button" class="primary-button" (click)="showVerificationPopup = false; mode = 'login'">
           Kembali ke login
         </button>

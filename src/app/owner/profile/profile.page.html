@@ -1,168 +1,92 @@
 <div class="ion-page">
   <div class="profile-page">
 
-    <!-- TOAST -->
-    <div class="toast" *ngIf="showToast">
-      <span>✓</span>
+    <div class="toast" *ngIf="showToast" [class.toast-error]="toastType === 'error'">
+      <span>{{ toastType === 'success' ? '✓' : '!' }}</span>
       {{ toastMessage }}
     </div>
 
-
-    <!-- HEADER -->
     <div class="page-header">
-
       <div>
         <h1>Profil & Pengaturan</h1>
-
-        <p>
-          Kelola informasi akun Anda
-        </p>
       </div>
-
     </div>
 
-
-    <!-- PROFILE -->
     <div class="profile-card">
-
-      <!-- USER HEADER -->
       <div class="user-header">
-
-        <div class="avatar">
-          {{ user.name.charAt(0) }}
-        </div>
-
+        <div class="avatar">{{ avatarInitial }}</div>
         <div class="user-info">
-
-          <h3>
-            {{ user.name }}
-          </h3>
-
-          <p>
-            {{ user.email }}
-          </p>
-
-          <span class="role-badge" *ngIf="user.role">
-            {{ user.role }}
-          </span>
-
+          <h3>{{ user.name || 'Nama belum tersedia' }}</h3>
+          <p>{{ user.email || 'Email belum tersedia' }}</p>
+          <span class="role-badge" *ngIf="user.role">{{ user.role }}</span>
         </div>
-
       </div>
 
-
-      <!-- PROFILE FORM -->
       <div class="form-grid">
-
         <div class="form-field">
-
-          <label>
-            Nama Lengkap
-          </label>
-
-          <input type="text" [(ngModel)]="user.name" />
-
+          <label for="owner-name">Nama Lengkap</label>
+          <input id="owner-name" type="text" [(ngModel)]="user.name"
+            placeholder="Masukkan nama lengkap" autocomplete="name" [disabled]="isLoadingProfile || isSavingProfile" />
         </div>
 
-
         <div class="form-field">
-
-          <label>
-            Email
-          </label>
-
-          <input type="email" [(ngModel)]="user.email" />
-
+          <label for="owner-email">Email</label>
+          <input id="owner-email" type="email" [(ngModel)]="user.email"
+            placeholder="nama@email.com" autocomplete="email" [disabled]="isLoadingProfile || isSavingProfile" />
         </div>
 
-
         <div class="form-field">
-
-          <label>
-            Telepon
-          </label>
-
-          <input type="text" [(ngModel)]="user.phone" />
-
+          <label for="owner-phone">Telepon</label>
+          <input id="owner-phone" type="tel" [(ngModel)]="user.phone"
+            placeholder="Masukkan nomor telepon" autocomplete="tel" [disabled]="isLoadingProfile || isSavingProfile" />
         </div>
+      </div><br>
 
-      </div>
-
-
-      <button type="button" class="btn-primary" (click)="saveProfile()">
-        Simpan Perubahan
+      <button type="button" class="btn-primary" (click)="saveProfile()"
+        [disabled]="isLoadingProfile || isSavingProfile">
+        {{ isSavingProfile ? 'Menyimpan...' : 'Simpan Perubahan' }}
       </button>
-
+      <p class="form-hint" *ngIf="isLoadingProfile">Memuat data profil terbaru...</p>
     </div>
 
-
-    <!-- CHANGE PASSWORD -->
     <div class="profile-card">
-
-      <h3 class="card-title">
-        Ubah Password
-      </h3>
-
+      <h3 class="card-title">Ubah Password</h3>
+      <p class="form-hint">Gunakan minimal 8 karakter untuk password baru.</p>
 
       <div class="password-form">
-
         <div class="form-field">
-
-          <label>
-            Password Lama
-          </label>
-
-          <input type="password" [(ngModel)]="oldPassword" placeholder="••••••••" />
-
+          <label for="old-password">Password Lama</label>
+          <input id="old-password" type="password" [(ngModel)]="oldPassword"
+            placeholder="Masukkan password lama" autocomplete="current-password"
+            [disabled]="isChangingPassword" />
         </div>
 
-
         <div class="form-field">
-
-          <label>
-            Password Baru
-          </label>
-
-          <input type="password" [(ngModel)]="newPassword" placeholder="••••••••" />
-
+          <label for="new-password">Password Baru</label>
+          <input id="new-password" type="password" [(ngModel)]="newPassword"
+            placeholder="Minimal 8 karakter" autocomplete="new-password"
+            [disabled]="isChangingPassword" />
         </div>
 
-
         <div class="form-field">
-
-          <label>
-            Konfirmasi Password
-          </label>
-
-          <input type="password" [(ngModel)]="confirmPassword" placeholder="••••••••" />
-
+          <label for="confirm-password">Konfirmasi Password Baru</label>
+          <input id="confirm-password" type="password" [(ngModel)]="confirmPassword"
+            placeholder="Ulangi password baru" autocomplete="new-password"
+            [disabled]="isChangingPassword" />
         </div>
 
-
-        <button type="button" class="btn-primary" (click)="changePassword()">
-          Ubah Password
+        <button type="button" class="btn-primary" (click)="changePassword()"
+          [disabled]="isChangingPassword">
+          {{ isChangingPassword ? 'Memproses...' : 'Ubah Password' }}
         </button>
-
       </div>
-
     </div>
 
-
-    <!-- LOGOUT -->
     <div class="profile-card logout-card">
-
-      <h3>
-        Keluar
-      </h3>
-
-      <p>
-        Anda akan keluar dari sesi ini.
-      </p>
-
+      <h3>Keluar</h3>
       <button type="button" class="btn-danger" (click)="logout()">
         Keluar dari Akun
       </button>
-
     </div>
 
   </div>

@@ -4,14 +4,15 @@
     <!-- Header & Search Tracking Section -->
     <section class="search-card">
       <div class="search-copy">
-        <span class="search-kicker">PELACAKAN PENGAJUAN</span>
-        <h1>Periksa Status Pendaftaran</h1>
-        <p>Detail utama hanya menampilkan pengajuan yang masih menunggu persetujuan. Pengajuan yang sudah diputuskan akan tersimpan di riwayat.</p>
+        <h1>Status Pendaftaran Kos</h1>
       </div>
       <form class="search-form" (ngSubmit)="cariStatus()">
         <div class="search-input-row">
           <div class="input-icon-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
             <input
               id="kodePendaftaran"
               aria-label="Kode pendaftaran"
@@ -26,60 +27,76 @@
           <button type="submit" class="search-submit-btn" [disabled]="sedangCari">
             <span *ngIf="!sedangCari">Cari Status</span>
             <span *ngIf="sedangCari">Memeriksa...</span>
-            <svg *ngIf="!sedangCari" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg *ngIf="!sedangCari" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
           </button>
         </div>
-        <small id="kode-help">Masukkan kode jika ingin membuka detail pengajuan tertentu. Pengajuan yang menunggu persetujuan akan ditampilkan otomatis.</small>
       </form>
     </section>
 
     <!-- Initial State (Before Search) -->
     <section class="empty-card" *ngIf="!sudahCari && !tidakDitemukan && !belumAdaPengajuanMenunggu && !sedangCari && !pesanError" aria-live="polite">
-      <div class="empty-icon-wrap">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <div class="empty-icon-wrap" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
       </div>
       <h2>Pengajuan sewa Anda siap dilacak</h2>
-      <p>Setelah pencarian berhasil, detail properti kamar, status verifikasi pemilik, dan linimasa pengajuan akan ditampilkan secara lengkap.</p>
+      <p>Setelah pencarian berhasil, rincian properti kamar, status verifikasi pemilik, dan linimasa pengajuan akan ditampilkan di sini.</p>
     </section>
 
-    <!-- No pending application state: completed records stay in history only. -->
+    <!-- No pending application state -->
     <section class="empty-card no-pending-card" *ngIf="belumAdaPengajuanMenunggu && !sedangCari && !pesanError" aria-live="polite">
-      <div class="empty-icon-wrap pending-empty-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/></svg>
+      <div class="empty-icon-wrap pending-empty-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10" />
+          <path d="m8 12 2.5 2.5L16 9" />
+        </svg>
       </div>
-      <h2>Tidak ada pengajuan yang menunggu persetujuan</h2>
-      <p>Semua pengajuan Anda sudah selesai diproses. Pengajuan yang diterima, ditolak, atau dibatalkan dapat dilihat kembali pada bagian Riwayat Pengajuan di bawah.</p>
+      <h2>Tidak ada pengajuan menunggu persetujuan</h2>
       <button type="button" class="inline-action" (click)="kembali()">Cari Kos</button>
     </section>
 
     <div class="action-feedback success-feedback global-action-feedback" *ngIf="pesanAksi && !sudahCari && !sedangCari" role="status">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
       <span>{{ pesanAksi }}</span>
     </div>
 
     <!-- Loading State -->
     <section class="empty-card loading-card" *ngIf="sedangCari" aria-live="polite">
-      <div class="state-spinner"></div>
+      <div class="state-spinner" aria-hidden="true"></div>
       <h2>Memeriksa status pendaftaran...</h2>
-      <p>Sedang menghubungkan ke server untuk mengambil data pengajuan.</p>
+      <p>Mengambil data pengajuan terbaru dari server.</p>
     </section>
 
     <!-- Not Found State -->
     <section class="empty-card not-found-card" *ngIf="tidakDitemukan" aria-live="polite">
-      <div class="empty-icon-wrap error-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="empty-icon-wrap error-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
       </div>
       <h2>{{ belumAdaPengajuan ? 'Belum ada pengajuan' : 'Kode pendaftaran tidak ditemukan' }}</h2>
-      <p *ngIf="belumAdaPengajuan">Pengajuan sewa yang berhasil kamu kirim akan muncul otomatis di halaman ini. Mulai pengajuan dari menu Cari Kos.</p>
-      <p *ngIf="!belumAdaPengajuan">Pastikan kode yang dimasukkan sudah benar. Kamu hanya dapat melihat pengajuan yang terdaftar pada akun yang sedang login.</p>
-      <button type="button" class="inline-action" (click)="resetPencarian()" *ngIf="!belumAdaPengajuan">Coba Kode Lain</button>
+      <p *ngIf="belumAdaPengajuan">Pengajuan sewa yang Anda kirimkan akan muncul otomatis di halaman ini. Mulai pengajuan dari menu Cari Kos.</p>
+      <p *ngIf="!belumAdaPengajuan">Pastikan kode yang dimasukkan sudah sesuai. Anda hanya dapat melihat pengajuan yang terdaftar pada akun ini.</p>
       <button type="button" class="inline-action" (click)="kembali()" *ngIf="belumAdaPengajuan">Cari Kos</button>
     </section>
 
     <!-- Error State -->
     <section class="empty-card error-card" *ngIf="pesanError" aria-live="polite">
-      <div class="empty-icon-wrap error-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="empty-icon-wrap error-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
       </div>
       <h2>Status belum dapat dimuat</h2>
       <p>{{ pesanError }}</p>
@@ -90,7 +107,6 @@
     <section class="result-section" *ngIf="sudahCari">
       <div class="result-top">
         <div>
-          <span class="eyebrow">{{ melihatRiwayat ? 'RIWAYAT PENGAJUAN' : 'MENUNGGU PERSETUJUAN' }}</span>
           <h2>{{ melihatRiwayat ? 'Detail Riwayat Pengajuan' : 'Detail Pengajuan Menunggu' }}</h2>
           <button type="button" class="back-to-latest-btn" *ngIf="(melihatRiwayat || melihatPengajuanMenungguLain) && pengajuanTerbaru" (click)="lihatPengajuanMenunggu()">
             Kembali ke Pengajuan Menunggu
@@ -105,8 +121,11 @@
       <article class="application-card">
         <!-- Banner Code Header -->
         <div class="application-banner">
-          <div class="banner-icon-wrap">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div class="banner-icon-wrap" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
           </div>
           <div class="banner-code">
             <small>KODE PENDAFTARAN</small>
@@ -126,7 +145,10 @@
               <span class="detail-label">KOS TUJUAN</span>
               <h3>{{ pendaftaran.namaKos }}</h3>
               <p class="property-address">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
                 <span>{{ pendaftaran.alamatKos }}</span>
               </p>
             </div>
@@ -159,11 +181,12 @@
               <strong class="total-val">{{ formatRupiah(pendaftaran.total) }}</strong>
             </div>
           </div>
+
           <div class="application-bundle-summary" *ngIf="pendaftaran.bundleName">
             <strong>{{ pendaftaran.bundleName }}</strong>
             <span>{{ pendaftaran.durasiSewa }} bulan masa tinggal · pembayaran wajib lunas</span>
             <div>Harga normal: {{ formatRupiah(pendaftaran.bundleNormalPrice) }}</div>
-            <div>Potongan: −{{ formatRupiah(pendaftaran.bundleDiscount) }}</div>
+            <div>Potongan: -{{ formatRupiah(pendaftaran.bundleDiscount) }}</div>
             <b>Harga bundle: {{ formatRupiah(pendaftaran.bundlePrice) }}</b>
             <small>Total pengajuan di atas sudah termasuk deposit apabila dikenakan.</small>
           </div>
@@ -171,10 +194,19 @@
 
         <!-- Status Summary Message Box -->
         <div class="status-summary" [class.summary-accepted]="pendaftaran.status === 'diterima'" [class.summary-rejected]="pendaftaran.status === 'ditolak'" [class.summary-cancelled]="pendaftaran.status === 'dibatalkan'">
-          <div class="summary-icon-box">
-            <svg *ngIf="pendaftaran.status === 'diterima'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            <svg *ngIf="pendaftaran.status === 'menunggu'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <svg *ngIf="pendaftaran.status === 'ditolak' || pendaftaran.status === 'dibatalkan'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="summary-icon-box" aria-hidden="true">
+            <svg *ngIf="pendaftaran.status === 'diterima'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <svg *ngIf="pendaftaran.status === 'menunggu'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <svg *ngIf="pendaftaran.status === 'ditolak' || pendaftaran.status === 'dibatalkan'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
           </div>
           <div class="summary-text">
             <strong>{{ statusLabel }}</strong>
@@ -189,7 +221,9 @@
           <!-- Step 1: Sent -->
           <div class="timeline-item completed">
             <div class="timeline-marker">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
             <div class="timeline-copy">
               <strong>Pengajuan Dikirim</strong>
@@ -202,11 +236,13 @@
           <div class="timeline-item" [class.current]="pendaftaran.status === 'menunggu'" [class.completed]="pendaftaran.status !== 'menunggu'">
             <div class="timeline-marker">
               <span *ngIf="pendaftaran.status === 'menunggu'">2</span>
-              <svg *ngIf="pendaftaran.status !== 'menunggu'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg *ngIf="pendaftaran.status !== 'menunggu'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
             <div class="timeline-copy">
               <strong>Verifikasi Pemilik Kos</strong>
-              <p>{{ pendaftaran.status === 'menunggu' ? 'Pengelola sedang memeriksa kecocokan data dan ketersediaan kamar.' : 'Pemeriksaan pengajuan telah selesai.' }}</p>
+              <p>{{ pendaftaran.status === 'menunggu' ? 'Pengelola sedang memeriksa kelengkapan data dan ketersediaan kamar.' : 'Pemeriksaan pengajuan telah selesai.' }}</p>
             </div>
             <span class="timeline-status-pill" [class.active-pill]="pendaftaran.status === 'menunggu'" [class.completed-pill]="pendaftaran.status !== 'menunggu'">
               {{ pendaftaran.status === 'menunggu' ? 'Diproses' : 'Selesai' }}
@@ -217,12 +253,17 @@
           <div class="timeline-item" [class.current]="pendaftaran.status !== 'menunggu'" [class.rejected-step]="pendaftaran.status === 'ditolak'" [class.cancelled-step]="pendaftaran.status === 'dibatalkan'">
             <div class="timeline-marker">
               <span *ngIf="pendaftaran.status === 'menunggu'">3</span>
-              <svg *ngIf="pendaftaran.status === 'diterima'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-              <svg *ngIf="pendaftaran.status === 'ditolak' || pendaftaran.status === 'dibatalkan'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <svg *ngIf="pendaftaran.status === 'diterima'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <svg *ngIf="pendaftaran.status === 'ditolak' || pendaftaran.status === 'dibatalkan'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </div>
             <div class="timeline-copy">
               <strong>{{ pendaftaran.status === 'ditolak' ? 'Pengajuan Ditolak' : pendaftaran.status === 'dibatalkan' ? 'Pengajuan Dibatalkan' : 'Keputusan Pengajuan' }}</strong>
-              <p>{{ pendaftaran.status === 'menunggu' ? 'Keputusan verifikasi akan ditampilkan setelah diperiksa oleh pemilik kos.' : pendaftaran.status === 'diterima' ? 'Pengajuan diterima! Periksa menu Kontrak dan Tagihan untuk langkah pembayaran.' : pendaftaran.status === 'dibatalkan' ? 'Pengajuan ini telah dibatalkan.' : 'Pengajuan belum dapat disetujui. Hubungi pengelola kos untuk penjelasan lebih lanjut.' }}</p>
+              <p>{{ pendaftaran.status === 'menunggu' ? 'Keputusan verifikasi akan ditampilkan setelah diperiksa oleh pemilik kos.' : pendaftaran.status === 'diterima' ? 'Pengajuan diterima! Periksa menu Kontrak dan Tagihan untuk langkah pembayaran.' : pendaftaran.status === 'dibatalkan' ? 'Pengajuan ini telah dibatalkan.' : 'Pengajuan belum dapat disetujui. Hubungi pengelola kos untuk informasi lebih lanjut.' }}</p>
             </div>
             <span class="timeline-status-pill" [class.completed-pill]="pendaftaran.status === 'diterima'" [class.rejected-pill]="pendaftaran.status === 'ditolak'" [class.cancelled-pill]="pendaftaran.status === 'dibatalkan'">
               {{ pendaftaran.status === 'menunggu' ? 'Menunggu' : 'Selesai' }}
@@ -233,7 +274,11 @@
         <!-- Cancellation Note -->
         <div class="submission-note cancellation-note" *ngIf="pendaftaran.status === 'dibatalkan' && (pendaftaran.tglPembatalan || pendaftaran.alasanPembatalan)">
           <div class="note-head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             <strong>Informasi Pembatalan</strong>
           </div>
           <p *ngIf="pendaftaran.tglPembatalan">Tanggal: {{ pendaftaran.tglPembatalan }}</p>
@@ -250,27 +295,27 @@
       <!-- Action Buttons -->
       <div class="result-actions">
         <button type="button" class="danger-button" *ngIf="pendaftaran.bisaDibatalkan" (click)="batalkanPendaftaran()" [disabled]="sedangMembatalkan || sedangCari">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
           <span>{{ sedangMembatalkan ? 'Membatalkan...' : 'Batalkan Pendaftaran' }}</span>
         </button>
 
         <button type="button" class="primary-button" (click)="lihatKontrak()" *ngIf="pendaftaran.status === 'diterima'">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
           <span>Lihat Kontrak</span>
         </button>
 
         <button type="button" class="secondary-button" (click)="lihatTagihan()" *ngIf="pendaftaran.status === 'diterima'">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+          </svg>
           <span>Lihat Tagihan</span>
-        </button>
-
-        <button type="button" class="secondary-button" (click)="resetPencarian()">
-          <span>Cari Kode Lain</span>
-        </button>
-
-        <button type="button" class="refresh-button" (click)="muatUlangPengajuanMenunggu()" [disabled]="sedangCari || sedangMembatalkan">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          <span>{{ sedangCari ? 'Memeriksa...' : 'Perbarui Status' }}</span>
         </button>
       </div>
 
@@ -282,23 +327,29 @@
 
       <!-- Feedback Messages -->
       <div class="action-feedback success-feedback" *ngIf="pesanAksi" role="status">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         <span>{{ pesanAksi }}</span>
       </div>
 
       <div class="action-feedback error-feedback" *ngIf="errorAksi" role="alert">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
         <span>{{ errorAksi }}</span>
       </div>
     </section>
 
-    <!-- Other waiting applications are kept separate from history. -->
+    <!-- Other waiting applications -->
     <section class="application-history-section waiting-applications-section" *ngIf="!sedangCari && !pesanError && pengajuanMenungguLainnya.length > 0">
       <div class="application-history-heading">
         <div>
           <span class="eyebrow">MASIH MENUNGGU</span>
           <h2>Pengajuan Menunggu Lainnya</h2>
-          <p>Pengajuan berikut juga masih menunggu persetujuan dan belum masuk ke riwayat.</p>
+          <p>Pengajuan berikut juga masih menunggu persetujuan dan belum masuk ke arsip riwayat.</p>
         </div>
         <span class="history-record-count">{{ pengajuanMenungguLainnya.length }} pengajuan</span>
       </div>
@@ -314,9 +365,9 @@
             <p class="history-item-address">{{ item.alamatKos }}</p>
             <div class="history-item-meta">
               <span>Diajukan {{ item.tanggalPengajuan }}</span>
-              <span class="meta-separator">•</span>
+              <span class="meta-separator">·</span>
               <span>{{ item.nomorKamar }}</span>
-              <span class="meta-separator">•</span>
+              <span class="meta-separator">·</span>
               <span>{{ item.durasiSewa }} bulan</span>
             </div>
           </div>
@@ -330,24 +381,25 @@
       </div>
     </section>
 
-    <!-- Only completed applications appear in history. -->
+    <!-- Completed applications history -->
     <section class="application-history-section" *ngIf="!sedangCari && !pesanError">
       <div class="application-history-heading">
         <div>
-          <span class="eyebrow">ARSIP PENDAFTARAN</span>
           <h2>Riwayat Pengajuan</h2>
-          <p>Pengajuan yang sudah diterima, ditolak, atau dibatalkan akan tersimpan di sini dan tidak lagi muncul sebagai detail pengajuan aktif.</p>
         </div>
         <span class="history-record-count">{{ riwayatPengajuan.length }} pengajuan</span>
       </div>
 
       <div class="application-history-empty" *ngIf="riwayatPengajuan.length === 0">
-        <div class="history-empty-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <div class="history-empty-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M8 6h13M8 12h13M8 18h13" />
+            <path d="M3 6h.01M3 12h.01M3 18h.01" />
+          </svg>
         </div>
         <div>
           <strong>Belum ada riwayat pengajuan</strong>
-          <p>Pengajuan yang sudah diterima, ditolak, atau dibatalkan akan tercatat di bagian ini.</p>
+          <p>Pengajuan yang sudah diputuskan akan tercatat secara otomatis pada bagian ini.</p>
         </div>
       </div>
 
@@ -364,9 +416,9 @@
             <p class="history-item-address">{{ item.alamatKos }}</p>
             <div class="history-item-meta">
               <span>Diajukan {{ item.tanggalPengajuan }}</span>
-              <span class="meta-separator">•</span>
+              <span class="meta-separator">·</span>
               <span>{{ item.nomorKamar }}</span>
-              <span class="meta-separator">•</span>
+              <span class="meta-separator">·</span>
               <span>{{ item.durasiSewa }} bulan</span>
             </div>
             <p class="history-cancellation-reason" *ngIf="item.status === 'dibatalkan' && item.alasanPembatalan">
@@ -383,59 +435,52 @@
       </div>
     </section>
 
-    <!-- Help Card -->
-    <section class="help-card">
-      <div class="help-icon-wrap">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <div class="help-copy">
-        <strong>Butuh Bantuan Pelacakan?</strong>
-        <p>Jika status pengajuan tidak berubah setelah beberapa waktu, Anda dapat menghubungi pemilik kos secara langsung melalui kontak yang tersedia di halaman rincian kos.</p>
-      </div>
-      <button type="button" class="reset-help-btn" (click)="resetPencarian()">Reset Pencarian</button>
-    </section>
-
   </main>
 
 </ion-content>
 
+<!-- Cancellation Confirmation Modal -->
 <div class="cancel-modal-backdrop" *ngIf="showCancelModal" (click)="tutupModalPembatalan()">
-    <section class="cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title" (click)="$event.stopPropagation()">
-      <div class="cancel-modal-heading">
-        <div class="cancel-modal-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-        </div>
-        <button type="button" class="cancel-modal-close" aria-label="Tutup" (click)="tutupModalPembatalan()" [disabled]="sedangMembatalkan">×</button>
+  <section class="cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title" (click)="$event.stopPropagation()">
+    <div class="cancel-modal-heading">
+      <div class="cancel-modal-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+          <path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+        </svg>
       </div>
+      <button type="button" class="cancel-modal-close" aria-label="Tutup" (click)="tutupModalPembatalan()" [disabled]="sedangMembatalkan">×</button>
+    </div>
 
-      <h2 id="cancel-modal-title">Batalkan Pendaftaran?</h2>
-      <p class="cancel-modal-description">Pendaftaran untuk <strong>{{ pendaftaran.namaKos }}</strong> akan dibatalkan dan kamar yang dipesan akan dilepas kembali.</p>
+    <h2 id="cancel-modal-title">Batalkan Pendaftaran?</h2>
+    <p class="cancel-modal-description">Pendaftaran untuk <strong>{{ pendaftaran.namaKos }}</strong> akan dibatalkan dan kamar yang dipesan akan tersedia kembali untuk calon penghuni lain.</p>
 
-      <div class="cancel-modal-warning" *ngIf="pendaftaran.sudahBayar">
-        <strong>Perhatian terkait pembayaran</strong>
-        <p *ngIf="pendaftaran.deposit > 0">Pembayaran sudah diverifikasi. Deposit sebesar <strong>{{ formatRupiah(pendaftaran.deposit) }}</strong> tidak dikembalikan. Riwayat pembayaran tetap tersimpan dan tidak ada pengembalian dana otomatis.</p>
-        <p *ngIf="pendaftaran.deposit <= 0">Pembayaran yang sudah diverifikasi tetap tercatat. Pembatalan ini tidak memproses pengembalian dana secara otomatis.</p>
-      </div>
+    <div class="cancel-modal-warning" *ngIf="pendaftaran.sudahBayar">
+      <strong>Perhatian terkait pembayaran</strong>
+      <p *ngIf="pendaftaran.deposit > 0">Pembayaran sudah diverifikasi. Deposit sebesar <strong>{{ formatRupiah(pendaftaran.deposit) }}</strong> tidak dikembalikan. Riwayat pembayaran tetap tersimpan dan tidak ada pengembalian dana otomatis.</p>
+      <p *ngIf="pendaftaran.deposit <= 0">Pembayaran yang sudah diverifikasi tetap tercatat. Pembatalan ini tidak memproses pengembalian dana secara otomatis.</p>
+    </div>
 
-      <label class="cancel-reason-label" for="alasanPembatalan">Alasan pembatalan</label>
-      <textarea
-        id="alasanPembatalan"
-        name="alasanPembatalan"
-        rows="4"
-        maxlength="255"
-        [(ngModel)]="alasanPembatalanInput"
-        placeholder="Tuliskan alasan pembatalan (minimal 5 karakter)"
-        [disabled]="sedangMembatalkan"
-      ></textarea>
-      <div class="cancel-reason-meta">{{ alasanPembatalanInput.length }}/255 karakter</div>
+    <label class="cancel-reason-label" for="alasanPembatalan">Alasan pembatalan</label>
+    <textarea
+      id="alasanPembatalan"
+      name="alasanPembatalan"
+      rows="4"
+      maxlength="255"
+      [(ngModel)]="alasanPembatalanInput"
+      placeholder="Tuliskan alasan pembatalan (minimal 5 karakter)"
+      [disabled]="sedangMembatalkan"
+    ></textarea>
+    <div class="cancel-reason-meta">{{ alasanPembatalanInput.length }}/255 karakter</div>
 
-      <div class="cancel-modal-error" *ngIf="errorPembatalanModal" role="alert">{{ errorPembatalanModal }}</div>
+    <div class="cancel-modal-error" *ngIf="errorPembatalanModal" role="alert">{{ errorPembatalanModal }}</div>
 
-      <div class="cancel-modal-actions">
-        <button type="button" class="cancel-modal-secondary" (click)="tutupModalPembatalan()" [disabled]="sedangMembatalkan">Kembali</button>
-        <button type="button" class="cancel-modal-submit" (click)="konfirmasiPembatalan()" [disabled]="sedangMembatalkan">
-          {{ sedangMembatalkan ? 'Memproses...' : 'Ya, Batalkan Pendaftaran' }}
-        </button>
-      </div>
-    </section>
+    <div class="cancel-modal-actions">
+      <button type="button" class="cancel-modal-secondary" (click)="tutupModalPembatalan()" [disabled]="sedangMembatalkan">Kembali</button>
+      <button type="button" class="cancel-modal-submit" (click)="konfirmasiPembatalan()" [disabled]="sedangMembatalkan">
+        {{ sedangMembatalkan ? 'Memproses...' : 'Ya, Batalkan Pendaftaran' }}
+      </button>
+    </div>
+  </section>
 </div>

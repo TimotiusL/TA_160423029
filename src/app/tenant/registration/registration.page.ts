@@ -49,6 +49,7 @@ interface RoomOption {
 export class RegistrationPage implements OnInit {
   step = 0;
   submitted = false;
+  showSuccessModal = false;
   submitting = false;
   loading = true;
   errorMessage = '';
@@ -511,8 +512,9 @@ export class RegistrationPage implements OnInit {
 
         this.submitting = false;
         this.submitted = true;
-        this.showToast('Pendaftaran berhasil dikirim. Menunggu persetujuan pemilik kos.');
-        // Pastikan tampilan sukses dirender setelah respons API diterima.
+        this.showSuccessModal = true;
+        this.toastMessage = '';
+        // Modal hanya dibuka setelah backend mengonfirmasi pendaftaran berhasil.
         this.cdr.detectChanges();
       },
       error: (error: any) => {

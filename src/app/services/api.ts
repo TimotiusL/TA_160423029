@@ -928,14 +928,14 @@ export class ApiService {
   }
 
 
-  me() {
+  me(): Observable<any> {
     const token = localStorage.getItem('token');
-
-    return this.http.get(`${this.baseUrl}/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json'
     });
+
+    return this.http.get<any>(`${this.baseUrl}/me`, { headers });
   }
 
   updateTenantProfile(data: FormData): Observable<any> {
@@ -948,24 +948,30 @@ export class ApiService {
     return this.http.post<any>(`${this.baseUrl}/tenant/profile`, data, { headers });
   }
 
-  updateProfile(data: any) {
-    const token = localStorage.getItem('token');
-
-    return this.http.put(`${this.baseUrl}/profile`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  updateProfile(data: {
+    name: string;
+    email: string;
+    phone: string | null;
+  }): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
     });
+
+    return this.http.put<any>(`${this.baseUrl}/profile`, data, { headers });
   }
 
-  changePassword(data: any) {
-    const token = localStorage.getItem('token');
-
-    return this.http.put(`${this.baseUrl}/change-password`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  changePassword(data: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Accept: 'application/json'
     });
+
+    return this.http.put<any>(`${this.baseUrl}/change-password`, data, { headers });
   }
 
 

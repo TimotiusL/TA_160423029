@@ -1,22 +1,17 @@
 <ion-header class="tenant-header">
   <ion-toolbar>
     <header class="topbar">
-      <a class="brand" routerLink="/tenant/dashboard" aria-label="KostManager Dashboard">
-        <span class="brand-mark">
-          <div class="logo-box">
-            K
-          </div>
+      <a class="brand" routerLink="/tenant/dashboard" aria-label="Kos Manager Dashboard">
+        <img class="brand-mark" src="assets/images/logo.png" alt="" aria-hidden="true" />
+        <span class="brand-text">
+          <span class="brand-name">Kos Manager</span>
         </span>
-        <div class="brand-text">
-          <span class="brand-name">KostManager</span>
-          <span class="brand-badge">Penghuni</span>
-        </div>
       </a>
 
       <nav class="desktop-nav" aria-label="Navigasi penghuni">
         <a routerLink="/tenant/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
           class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="7" height="9" x="3" y="3" rx="1" />
             <rect width="7" height="5" x="14" y="3" rx="1" />
@@ -27,7 +22,7 @@
         </a>
 
         <a routerLink="/tenant/browse" routerLinkActive="active" class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
@@ -36,16 +31,16 @@
         </a>
 
         <a routerLink="/tenant/application-status" routerLinkActive="active" class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
-          <span>Status Pengajuan</span>
+          <span>Pengajuan</span>
         </a>
 
         <a routerLink="/tenant/billing" routerLinkActive="active" class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
             <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
@@ -55,7 +50,7 @@
         </a>
 
         <a routerLink="/tenant/payment-history" routerLinkActive="active" class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="20" height="14" x="2" y="5" rx="2" />
             <line x1="2" x2="22" y1="10" y2="10" />
@@ -64,19 +59,18 @@
         </a>
 
         <a routerLink="/tenant/contract-detail" routerLinkActive="active" class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <polyline points="14 2 14 8 20 8" />
             <line x1="16" x2="8" y1="13" y2="13" />
             <line x1="16" x2="8" y1="17" y2="17" />
-            <polyline points="10 9 9 9 8 9" />
           </svg>
           <span>Kontrak</span>
         </a>
 
         <a routerLink="/tenant/complaints" routerLinkActive="active" class="nav-link">
-          <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          <svg class="nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
           </svg>
@@ -87,8 +81,8 @@
       <div class="spacer"></div>
 
       <div class="header-actions">
-        <a class="notification-button" routerLink="/tenant/notifications" aria-label="Notifikasi">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        <a class="notification-button" routerLink="/tenant/notifications" routerLinkActive="active" aria-label="Notifikasi">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
             <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
@@ -110,53 +104,65 @@
 </main>
 
 <!-- Mobile More Menu Backdrop -->
-<button type="button" class="mobile-more-backdrop" *ngIf="showMoreMenu" (click)="closeMoreMenu()" aria-label="Tutup menu lainnya"></button>
+<button type="button" class="mobile-more-backdrop" *ngIf="showMoreMenu" (click)="closeMoreMenu()"
+  aria-label="Tutup menu lainnya"></button>
 
 <!-- Mobile More Menu Sheet -->
 <div class="mobile-more-menu" *ngIf="showMoreMenu" role="dialog" aria-modal="true" aria-label="Menu navigasi lainnya">
   <div class="mobile-more-header">
     <span>Menu Lainnya</span>
-    <button type="button" class="mobile-more-close" (click)="closeMoreMenu()" aria-label="Tutup menu">×</button>
+    <button type="button" class="mobile-more-close" (click)="closeMoreMenu()" aria-label="Tutup menu">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
   </div>
+
   <div class="mobile-more-items">
-    <a routerLink="/tenant/application-status" (click)="closeMoreMenu()">
+    <a routerLink="/tenant/application-status" routerLinkActive="active" (click)="closeMoreMenu()">
       <span class="menu-icon-wrap">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
       </span>
       <span>Status Pengajuan</span>
     </a>
-    <a routerLink="/tenant/payment-history" (click)="closeMoreMenu()">
+
+    <a routerLink="/tenant/payment-history" routerLinkActive="active" (click)="closeMoreMenu()">
       <span class="menu-icon-wrap">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect width="20" height="14" x="2" y="5" rx="2" />
           <line x1="2" x2="22" y1="10" y2="10" />
         </svg>
       </span>
       <span>Riwayat Pembayaran</span>
     </a>
-    <a routerLink="/tenant/contract-detail" (click)="closeMoreMenu()">
+
+    <a routerLink="/tenant/contract-detail" routerLinkActive="active" (click)="closeMoreMenu()">
       <span class="menu-icon-wrap">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
       </span>
       <span>Kontrak Sewa</span>
     </a>
-    <a routerLink="/tenant/complaints" (click)="closeMoreMenu()">
+
+    <a routerLink="/tenant/complaints" routerLinkActive="active" (click)="closeMoreMenu()">
       <span class="menu-icon-wrap">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
         </svg>
       </span>
-      <span>Komplain & Bantuan</span>
+      <span>Komplain &amp; Bantuan</span>
     </a>
-    <a routerLink="/tenant/notifications" (click)="closeMoreMenu()">
+
+    <a routerLink="/tenant/notifications" routerLinkActive="active" (click)="closeMoreMenu()">
       <span class="menu-icon-wrap">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
           <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
         </svg>
@@ -164,6 +170,8 @@
       <span>Notifikasi</span>
       <span class="badge-count" *ngIf="notifCount > 0">{{ notifCount }}</span>
     </a>
+
+    <div class="mobile-more-divider"></div>
   </div>
 </div>
 
@@ -171,7 +179,7 @@
 <nav class="mobile-nav" aria-label="Navigasi mobile penghuni">
   <a routerLink="/tenant/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
     class="mobile-link">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
       <rect width="7" height="9" x="3" y="3" rx="1" />
       <rect width="7" height="5" x="14" y="3" rx="1" />
@@ -182,7 +190,7 @@
   </a>
 
   <a routerLink="/tenant/browse" routerLinkActive="active" class="mobile-link">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
@@ -191,7 +199,7 @@
   </a>
 
   <a routerLink="/tenant/billing" routerLinkActive="active" class="mobile-link">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
       <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
@@ -202,17 +210,20 @@
 
   <button type="button" class="mobile-link mobile-more-toggle" [class.active]="showMoreMenu" (click)="toggleMoreMenu()"
     [attr.aria-expanded]="showMoreMenu">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="19" cy="12" r="1" />
-      <circle cx="5" cy="12" r="1" />
-    </svg>
+    <span class="mobile-icon-box">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1.2" />
+        <circle cx="19" cy="12" r="1.2" />
+        <circle cx="5" cy="12" r="1.2" />
+      </svg>
+      <span class="mobile-unread-dot" *ngIf="notifCount > 0"></span>
+    </span>
     <small>Lainnya</small>
   </button>
 
   <a routerLink="/tenant/profile" routerLinkActive="active" class="mobile-link">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />

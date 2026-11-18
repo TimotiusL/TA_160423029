@@ -155,8 +155,4 @@ export class PaymentHistoryPage implements OnInit {
   cetakDetail(): void {
     window.print();
   }
-
-  kembali(): void {
-    this.router.navigateByUrl('/tenant/billing');
-  }
 }

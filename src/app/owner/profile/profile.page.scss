@@ -1142,6 +1142,10 @@ td.empty-cell {
   &.info>span:first-child {
     background: $warning;
   }
+
+  &.toast-error>span:first-child {
+    background: $danger;
+  }
 }
 
 /* ---------- modal ---------- */

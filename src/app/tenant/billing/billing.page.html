@@ -1,29 +1,31 @@
 <ion-content class="billing-content">
   <main class="billing-page">
 
-    <!-- Page Header -->
+    <!-- Page Header & Scope Switch -->
     <header class="page-heading">
       <div>
-        <span class="eyebrow">KEUANGAN & SEWA</span>
         <h1>Tagihan Pembayaran</h1>
-        <p class="subtitle">Kelola dan pantau seluruh kewajiban pembayaran sewa kos Anda secara teratur.</p>
+      </div>
+
+      <div class="history-scope-switch" role="group" aria-label="Filter hunian tagihan">
+        <button type="button" [class.active]="scope === 'current'" (click)="changeScope('current')">Hunian Saat Ini</button>
+        <button type="button" [class.active]="scope === 'history'" (click)="changeScope('history')">Riwayat Kos</button>
       </div>
     </header>
 
-    <div class="history-scope-switch" role="group" aria-label="Filter hunian tagihan">
-      <button type="button" [class.active]="scope === 'current'" (click)="changeScope('current')">Hunian Saat Ini</button>
-      <button type="button" [class.active]="scope === 'history'" (click)="changeScope('history')">Riwayat Kos</button>
-    </div>
-
     <!-- Loading / Error States -->
-    <div class="panel state-card" *ngIf="loading">
-      <div class="state-spinner"></div>
+    <div class="panel state-card" *ngIf="loading" aria-live="polite">
+      <div class="state-spinner" aria-hidden="true"></div>
       <p>Memuat data tagihan dari server...</p>
     </div>
 
-    <div class="panel state-card state-error" *ngIf="errorMessage && !loading">
-      <div class="error-icon-box">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div class="panel state-card state-error" *ngIf="errorMessage && !loading" role="alert">
+      <div class="error-icon-box" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
       </div>
       <p>{{ errorMessage }}</p>
       <button type="button" class="retry-btn" (click)="loadTagihan()">Coba Lagi</button>
@@ -33,51 +35,65 @@
     <section class="summary-grid">
       <article class="summary-card due-card">
         <div class="summary-top">
-          <div class="summary-icon amber-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="summary-icon amber-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
           </div>
           <span class="summary-label">TOTAL BELUM LUNAS</span>
         </div>
         <strong class="summary-value">{{ formatRupiah(totalBelumLunas) }}</strong>
-        <p class="summary-status-line">
-          <span class="status-dot warning"></span> Perlu segera ditindaklanjuti
-        </p>
       </article>
 
       <article class="summary-card">
         <div class="summary-top">
-          <div class="summary-icon green-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <div class="summary-icon green-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
           </div>
           <span class="summary-label">TOTAL SUDAH DIBAYAR</span>
         </div>
         <strong class="summary-value">{{ formatRupiah(totalLunas) }}</strong>
-        <p class="muted-summary">Dari seluruh tagihan lunas</p>
       </article>
 
       <article class="summary-card">
         <div class="summary-top">
-          <div class="summary-icon blue-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+          <div class="summary-icon info-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" x2="8" y1="13" y2="13" />
+              <line x1="16" x2="8" y1="17" y2="17" />
+            </svg>
           </div>
           <span class="summary-label">JUMLAH TAGIHAN</span>
         </div>
         <strong class="summary-value">{{ tagihan.length }} <small>tagihan</small></strong>
-        <p class="muted-summary">Seluruh periode sewa tercatat</p>
       </article>
     </section>
 
     <!-- Current Outstanding Bill Banner -->
     <section class="current-bill" *ngIf="tagihanBerjalan as current">
-      <div class="current-icon-wrap">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="current-icon-wrap" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
       </div>
       <div class="current-copy">
         <span class="current-label">TAGIHAN BERJALAN SAAT INI</span>
         <h2>Tagihan Sewa Periode {{ current.periode }}</h2>
         <p class="current-due">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-          Jatuh tempo: <strong>{{ current.jatuhTempo }}</strong>. Lakukan pembayaran sebelum tenggat waktu.
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+            <line x1="16" x2="16" y1="2" y2="6" />
+            <line x1="8" x2="8" y1="2" y2="6" />
+            <line x1="3" x2="21" y1="10" y2="10" />
+          </svg>
+          <span>Jatuh tempo: <strong>{{ current.jatuhTempo }}</strong>. Lakukan pembayaran sebelum tenggat waktu.</span>
         </p>
       </div>
       <div class="current-action">
@@ -87,7 +103,10 @@
         </div>
         <button class="current-pay-btn" (click)="bayarTagihan(current.kode)" type="button">
           <span>Lihat Cara Bayar</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
         </button>
       </div>
     </section>
@@ -97,7 +116,6 @@
       <div class="table-heading">
         <div>
           <h2>Daftar Semua Tagihan</h2>
-          <p>{{ scope === 'current' ? 'Tagihan untuk hunian yang masih berjalan.' : 'Arsip tagihan dari kos yang sudah ditinggalkan.' }}</p>
         </div>
         <span class="record-count">{{ tagihanTerfilter.length }} tagihan</span>
       </div>
@@ -112,7 +130,9 @@
               <option value="belum_lunas">Belum Lunas</option>
               <option value="lunas">Lunas</option>
             </select>
-            <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </div>
         </label>
 
@@ -123,7 +143,9 @@
               <option value="semua">Semua Periode</option>
               <option *ngFor="let item of tagihan" [value]="item.periode">{{ item.periode }}</option>
             </select>
-            <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg class="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </div>
         </label>
       </div>
@@ -151,7 +173,12 @@
               <td>{{ item.periode }}</td>
               <td>
                 <span class="date-cell">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
                   {{ item.jatuhTempo }}
                 </span>
               </td>
@@ -215,21 +242,6 @@
           {{ scope === 'history' ? 'Belum ada arsip tagihan dari kos lama.' : 'Belum ada tagihan untuk hunian saat ini.' }}
         </div>
       </div>
-    </section>
-
-    <!-- Help Banner -->
-    <section class="help-banner">
-      <div class="help-icon-box">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <div class="help-text">
-        <strong>Butuh Bantuan Terkait Pembayaran?</strong>
-        <p>Hubungi pemilik atau pengelola kos jika terdapat nominal atau rincian tagihan yang tidak sesuai.</p>
-      </div>
-      <button class="help-action-btn" (click)="bantuanPembayaran()" type="button">
-        <span>Pusat Bantuan</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
     </section>
 
   </main>

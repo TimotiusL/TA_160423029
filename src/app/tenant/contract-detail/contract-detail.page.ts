@@ -130,7 +130,7 @@ export class ContractDetailPage implements OnInit {
       // Selalu matikan loading setelah sukses, gagal, atau timeout.
       finalize(() => {
         this.loading = false;
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       })
     ).subscribe({
       next: (response: any) => {
@@ -160,7 +160,7 @@ export class ContractDetailPage implements OnInit {
           if (!item) {
             this.contract = this.emptyContract();
             this.hasContract = false;
-            this.cdr.markForCheck();
+            this.cdr.detectChanges();
             return;
           }
 
@@ -208,13 +208,13 @@ export class ContractDetailPage implements OnInit {
 
           this.hasContract = true;
           this.exitRequestDate = this.minimumExitDate;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         } catch (error: any) {
           console.error('Gagal mengolah data kontrak tenant:', error);
           this.contract = this.emptyContract();
           this.hasContract = false;
           this.errorMessage = 'Data kontrak diterima, tetapi gagal ditampilkan. Silakan coba lagi.';
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       },
       error: (error: any) => {
@@ -231,7 +231,7 @@ export class ContractDetailPage implements OnInit {
         }
 
         this.hasContract = false;
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
     });
   }

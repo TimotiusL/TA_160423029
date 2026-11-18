@@ -7,10 +7,6 @@
 
       <div>
         <h1>Kos</h1>
-
-        <p>
-          Kelola semua properti kos Anda
-        </p>
       </div>
 
       <button type="button" class="primary-button" (click)="openAddModal()">
@@ -335,7 +331,7 @@
                   <label for="property-name">Nama Kos <span>*</span></label>
                   <input id="property-name" type="text" [(ngModel)]="form.name" (ngModelChange)="clearFieldError('name')"
                     [class.invalid-field]="formErrors['name']" [attr.aria-invalid]="!!formErrors['name']"
-                    placeholder="Contoh: Kost Griya 21" maxlength="150" />
+                    placeholder="Contoh: Kos Griya 21" maxlength="150" />
                   @if (formErrors['name']) { <small class="field-error">{{ formErrors['name'] }}</small> }
                 </div>
 

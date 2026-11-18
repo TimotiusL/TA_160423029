@@ -54,17 +54,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #5b86df; outline-offs
 .sidebar.collapsed .sidebar-header { justify-content: center; padding: 0; }
 
 .logo-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   flex: none;
   width: 34px;
   height: 34px;
-  border-radius: 9px;
-  background: $brand;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 800;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .logo-text {

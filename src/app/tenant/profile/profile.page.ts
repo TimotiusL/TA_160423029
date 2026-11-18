@@ -25,6 +25,7 @@ export class ProfilePage {
   loading = false;
   isSaving = false;
   isLoggingOut = false;
+  showLogoutModal = false;
   showPasswordForm = false;
   isChangingPassword = false;
   passwordForm = { oldPassword: '', newPassword: '', confirmPassword: '' };
@@ -206,8 +207,22 @@ export class ProfilePage {
   }
 
   logout(): void {
-    if (this.isLoggingOut || !confirm('Apakah kamu yakin ingin keluar dari akun?')) return;
+    if (this.isLoggingOut) return;
+    this.showLogoutModal = true;
+    this.cdr.detectChanges();
+  }
+
+  cancelLogout(): void {
+    if (this.isLoggingOut) return;
+    this.showLogoutModal = false;
+    this.cdr.markForCheck();
+  }
+
+  confirmLogout(): void {
+    if (this.isLoggingOut) return;
+
     this.isLoggingOut = true;
+    this.cdr.detectChanges();
     this.api.logout().subscribe({
       next: () => this.finishLogout(),
       error: () => this.finishLogout()
@@ -215,6 +230,7 @@ export class ProfilePage {
   }
 
   private finishLogout(): void {
+    this.showLogoutModal = false;
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.router.navigate(['/login'], { replaceUrl: true });

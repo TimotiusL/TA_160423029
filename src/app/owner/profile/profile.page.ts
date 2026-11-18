@@ -1,8 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { ApiService } from '../../services/api';
+
+interface OwnerProfile {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+}
 
 @Component({
   selector: 'app-profile',
@@ -12,33 +20,41 @@ import { ApiService } from '../../services/api';
   styleUrls: ['./profile.page.scss']
 })
 export class ProfilePage implements OnInit {
-  user = {
-    name: '',
-    email: '',
-    phone: '',
-    role: ''
-  };
+  user: OwnerProfile = { name: '', email: '', phone: '', role: '' };
 
   oldPassword = '';
   newPassword = '';
   confirmPassword = '';
+
   showToast = false;
   toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
+
+  isLoadingProfile = false;
   isSavingProfile = false;
   isChangingPassword = false;
 
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(
     private api: ApiService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadUser();
   }
 
-  loadUser(): void {
-    const savedUser = localStorage.getItem('user');
+  get avatarInitial(): string {
+    return this.user.name?.trim()?.charAt(0)?.toUpperCase() || 'U';
+  }
 
+  loadUser(): void {
+    this.isLoadingProfile = true;
+
+    // Tampilkan data tersimpan terlebih dahulu agar halaman tidak kosong.
+    const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
         this.setUserData(JSON.parse(savedUser));
@@ -47,24 +63,35 @@ export class ProfilePage implements OnInit {
       }
     }
 
-    this.api.me().subscribe({
-      next: (response: any) => {
-        const currentUser = response?.user ?? response?.data ?? response;
-        this.setUserData(currentUser);
-        localStorage.setItem('user', JSON.stringify(currentUser));
-      },
-      error: (error: any) => {
-        if (error?.status === 401) {
-          this.showToastMessage('Sesi login berakhir. Silakan login kembali.');
-          this.finishLogout();
-          return;
+    this.api.me()
+      .pipe(finalize(() => {
+        this.isLoadingProfile = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (response: any) => {
+          const currentUser = response?.user ?? response?.data ?? response;
+          this.setUserData(currentUser);
+          // Simpan bentuk data konsisten yang digunakan aplikasi.
+          localStorage.setItem('user', JSON.stringify({
+            name: this.user.name,
+            email: this.user.email,
+            phone: this.user.phone,
+            role: this.user.role
+          }));
+        },
+        error: (error: any) => {
+          if (error?.status === 401) {
+            this.showToastMessage('Sesi login berakhir. Silakan login kembali.', 'error');
+            this.finishLogout();
+            return;
+          }
+          this.showToastMessage(
+            error?.error?.message || 'Data profil gagal dimuat. Periksa koneksi backend.',
+            'error'
+          );
         }
-
-        if (!savedUser) {
-          this.showToastMessage('Data profil gagal dimuat. Periksa koneksi backend.');
-        }
-      }
-    });
+      });
   }
 
   private setUserData(data: any): void {
@@ -74,76 +101,106 @@ export class ProfilePage implements OnInit {
       phone: data?.phone ?? data?.no_telp ?? data?.telepon ?? '',
       role: data?.role ?? data?.nama_role ?? ''
     };
+    this.cdr.detectChanges();
   }
 
   saveProfile(): void {
-    if (!this.user.name.trim() || !this.user.email.trim()) {
-      this.showToastMessage('Nama dan email wajib diisi.');
+    const name = this.user.name.trim();
+    const email = this.user.email.trim();
+    const phone = this.user.phone.trim();
+
+    if (!name || !email) {
+      this.showToastMessage('Nama lengkap dan email wajib diisi.', 'error');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.showToastMessage('Format email tidak valid.', 'error');
       return;
     }
 
     this.isSavingProfile = true;
-
-    this.api.updateProfile({
-      name: this.user.name.trim(),
-      email: this.user.email.trim(),
-      phone: this.user.phone.trim() || null
-    }).subscribe({
-      next: (response: any) => {
-        const updatedUser = response?.user ?? {
-          ...this.user
-        };
-        this.setUserData(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        this.showToastMessage(response?.message ?? 'Profil berhasil diperbarui.');
+    this.api.updateProfile({ name, email, phone: phone || null })
+      .pipe(finalize(() => {
         this.isSavingProfile = false;
-      },
-      error: (error: any) => {
-        this.isSavingProfile = false;
-        this.showToastMessage(
-          error?.error?.message ?? 'Profil gagal diperbarui. Periksa data dan koneksi backend.'
-        );
-      }
-    });
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (response: any) => {
+          const updatedUser = response?.user ?? { ...this.user, name, email, phone };
+          this.setUserData(updatedUser);
+          localStorage.setItem('user', JSON.stringify({
+            name: this.user.name,
+            email: this.user.email,
+            phone: this.user.phone,
+            role: this.user.role
+          }));
+          this.showToastMessage(response?.message || 'Profil berhasil diperbarui.');
+        },
+        error: (error: any) => {
+          if (error?.status === 401) {
+            this.showToastMessage('Sesi login berakhir. Silakan login kembali.', 'error');
+            this.finishLogout();
+            return;
+          }
+          this.showToastMessage(this.getApiError(error, 'Profil gagal diperbarui.'), 'error');
+        }
+      });
   }
 
   changePassword(): void {
     if (!this.oldPassword || !this.newPassword || !this.confirmPassword) {
-      this.showToastMessage('Semua field password harus diisi.');
+      this.showToastMessage('Semua kolom password wajib diisi.', 'error');
       return;
     }
-
     if (this.newPassword.length < 8) {
-      this.showToastMessage('Password baru minimal 8 karakter.');
+      this.showToastMessage('Password baru minimal 8 karakter.', 'error');
       return;
     }
-
+    if (this.newPassword === this.oldPassword) {
+      this.showToastMessage('Password baru harus berbeda dari password lama.', 'error');
+      return;
+    }
     if (this.newPassword !== this.confirmPassword) {
-      this.showToastMessage('Konfirmasi password tidak sesuai.');
+      this.showToastMessage('Konfirmasi password tidak sesuai.', 'error');
       return;
     }
 
     this.isChangingPassword = true;
-
     this.api.changePassword({
       oldPassword: this.oldPassword,
       newPassword: this.newPassword,
       confirmPassword: this.confirmPassword
-    }).subscribe({
-      next: (response: any) => {
-        this.oldPassword = '';
-        this.newPassword = '';
-        this.confirmPassword = '';
-        this.showToastMessage(response?.message ?? 'Password berhasil diubah.');
+    })
+      .pipe(finalize(() => {
         this.isChangingPassword = false;
-      },
-      error: (error: any) => {
-        this.isChangingPassword = false;
-        this.showToastMessage(
-          error?.error?.message ?? 'Password gagal diubah. Periksa password lama dan koneksi backend.'
-        );
-      }
-    });
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (response: any) => {
+          this.oldPassword = '';
+          this.newPassword = '';
+          this.confirmPassword = '';
+          this.showToastMessage(response?.message || 'Password berhasil diubah.');
+        },
+        error: (error: any) => {
+          if (error?.status === 401) {
+            this.showToastMessage('Sesi login berakhir. Silakan login kembali.', 'error');
+            this.finishLogout();
+            return;
+          }
+          this.showToastMessage(this.getApiError(error, 'Password gagal diubah.'), 'error');
+        }
+      });
+  }
+
+  private getApiError(error: any, fallback: string): string {
+    const validationErrors = error?.error?.errors;
+    if (validationErrors && typeof validationErrors === 'object') {
+      const firstError = Object.values(validationErrors).flat()[0];
+      if (firstError) return String(firstError);
+    }
+    return error?.error?.message || fallback;
   }
 
   logout(): void {
@@ -159,11 +216,15 @@ export class ProfilePage implements OnInit {
     this.router.navigate(['/login'], { replaceUrl: true });
   }
 
-  showToastMessage(message: string): void {
+  showToastMessage(message: string, type: 'success' | 'error' = 'success'): void {
     this.toastMessage = message;
+    this.toastType = type;
     this.showToast = true;
-    setTimeout(() => {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
       this.showToast = false;
-    }, 2500);
+      this.cdr.detectChanges();
+    }, 3000);
+    this.cdr.detectChanges();
   }
 }

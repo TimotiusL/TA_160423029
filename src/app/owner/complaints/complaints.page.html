@@ -3,58 +3,181 @@
     <div class="toast" *ngIf="showToast" [class.success]="toastType === 'success'" [class.info]="toastType === 'info'">
       <span>{{ toastType === 'success' ? '✓' : 'ℹ' }}</span> {{ toastMessage }}
     </div>
-    <div class="page-header"><div><h1>Manajemen Komplain</h1><p>Kelola pengaduan dan respons penghuni</p></div></div>
+    <div class="page-header">
+      <div>
+        <h1>Manajemen Komplain</h1>
+      </div>
+    </div>
     <div class="summary-grid">
-      <div class="summary-card"><p class="summary-value total">{{ totalCount }}</p><p class="summary-label">Total Komplain</p></div>
-      <div class="summary-card"><p class="summary-value baru">{{ waitingCount }}</p><p class="summary-label">Menunggu</p></div>
-      <div class="summary-card"><p class="summary-value selesai">{{ answeredCount }}</p><p class="summary-label">Terjawab</p></div>
+      <div class="summary-card">
+        <p class="summary-value total">{{ totalCount }}</p>
+        <p class="summary-label">Total Komplain</p>
+      </div>
+      <div class="summary-card">
+        <p class="summary-value baru">{{ waitingCount }}</p>
+        <p class="summary-label">Menunggu</p>
+      </div>
+      <div class="summary-card">
+        <p class="summary-value selesai">{{ answeredCount }}</p>
+        <p class="summary-label">Terjawab</p>
+      </div>
     </div>
     <div class="tabs">
-      <button type="button" [class.active]="tab === 'all'" (click)="tab = 'all'">Semua <span>{{ totalCount }}</span></button>
-      <button type="button" [class.active]="tab === 'menunggu'" (click)="tab = 'menunggu'">Menunggu <span>{{ waitingCount }}</span></button>
-      <button type="button" [class.active]="tab === 'terjawab'" (click)="tab = 'terjawab'">Terjawab <span>{{ answeredCount }}</span></button>
+      <button type="button" [class.active]="tab === 'all'" (click)="tab = 'all'">Semua <span>{{ totalCount
+          }}</span></button>
+      <button type="button" [class.active]="tab === 'menunggu'" (click)="tab = 'menunggu'">Menunggu <span>{{
+          waitingCount }}</span></button>
+      <button type="button" [class.active]="tab === 'terjawab'" (click)="tab = 'terjawab'">Terjawab <span>{{
+          answeredCount }}</span></button>
     </div>
-    <div class="search-wrapper"><span class="search-icon"><ion-icon name="search-outline"></ion-icon></span><input type="text" [(ngModel)]="search" placeholder="Cari judul, penghuni, kos, atau kamar..." /></div>
+    <div class="search-wrapper"><span class="search-icon"><ion-icon name="search-outline"></ion-icon></span><input
+        type="text" [(ngModel)]="search" placeholder="Cari judul, penghuni, kos, atau kamar..." /></div>
     <div class="loading-state" *ngIf="loading">Memuat data komplain...</div>
     <div class="complaint-list" *ngIf="!loading">
       <div class="complaint-card" *ngFor="let complaint of filteredComplaints" (click)="selectComplaint(complaint)">
         <div class="complaint-avatar">{{ getInitial(complaint.tenantName) }}</div>
         <div class="complaint-content">
-          <div class="complaint-top"><div class="complaint-main"><h4>{{ complaint.title }}</h4><p class="complaint-meta">{{ complaint.tenantName }} · {{ complaint.propertyName }} · Kamar {{ complaint.roomNumber ?? '-' }}</p></div>
-            <div class="complaint-badges"><span class="status-badge" [ngClass]="complaint.status === 'menunggu' ? 'status-new' : 'status-completed'">{{ complaint.status === 'menunggu' ? 'Menunggu' : 'Terjawab' }}</span></div>
+          <div class="complaint-top">
+            <div class="complaint-main">
+              <h4>{{ complaint.title }}</h4>
+              <p class="complaint-meta">{{ complaint.tenantName }} · {{ complaint.propertyName }} · Kamar {{
+                complaint.roomNumber ?? '-' }}</p>
+            </div>
+            <div class="complaint-badges"><span class="status-badge"
+                [ngClass]="complaint.status === 'menunggu' ? 'status-new' : 'status-completed'">{{ complaint.status ===
+                'menunggu' ? 'Menunggu' : 'Terjawab' }}</span></div>
           </div>
           <p class="complaint-description">{{ complaint.description }}</p>
-          <div class="complaint-footer"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> {{ formatDate(complaint.date) }}</span><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> {{ complaint.responses.length }} respons</span></div>
+          <div class="complaint-footer"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg> {{ formatDate(complaint.date) }}</span><span><svg class="icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg> {{ complaint.responses.length }} respons</span></div>
         </div>
       </div>
-      <div class="empty-state" *ngIf="filteredComplaints.length === 0"><div class="empty-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><p>Tidak ada komplain</p></div>
+      <div class="empty-state" *ngIf="filteredComplaints.length === 0">
+        <div class="empty-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+            <path
+              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+          </svg></div>
+        <p>Tidak ada komplain</p>
+      </div>
     </div>
   </div>
-  <ion-modal class="owner-page-modal" *ngIf="selected" [isOpen]="true" (didDismiss)="closeModal()">
+  <ion-modal class="owner-page-modal owner-page-modal--large complaint-chat-modal" *ngIf="selected" [isOpen]="true" (didDismiss)="closeModal()">
     <ng-template>
-    <div class="modal">
-      <div class="modal-header"><h2>Detail Komplain</h2><button type="button" class="close-button" aria-label="Tutup" (click)="closeModal()">×</button></div>
-      <div class="modal-body" *ngIf="selected">
-        <div class="detail-title"><h3>{{ selected.title }}</h3><div class="detail-badges"><span class="status-badge" [ngClass]="selected.status === 'menunggu' ? 'status-new' : 'status-completed'">{{ selected.status === 'menunggu' ? 'Menunggu' : 'Terjawab' }}</span></div></div>
-        <div class="submitter-info">
-          <div><p>Nama Penghuni</p><strong>{{ selected.tenantName }}</strong></div>
-          <div><p>Nama Kos</p><strong>{{ selected.propertyName }}</strong></div>
-          <div><p>Nomor Kamar</p><strong>{{ selected.roomNumber ?? '-' }}</strong></div>
-          <div><p>Tanggal Lapor</p><strong>{{ formatDate(selected.date) }}</strong></div>
+      <div class="modal complaint-modal-shell" role="dialog" aria-labelledby="complaint-modal-title">
+        <div class="modal-header complaint-modal-header">
+          <div class="complaint-modal-heading">
+            <span class="complaint-modal-kicker">LAYANAN PENGHUNI</span>
+            <h2 id="complaint-modal-title">Detail Komplain</h2>
+            <p>Informasi laporan dan riwayat percakapan dengan penghuni.</p>
+          </div>
+          <div class="complaint-modal-header-actions">
+            <span class="status-badge"
+              [ngClass]="selected.status === 'menunggu' ? 'status-new' : 'status-completed'">
+              {{ selected.status === 'menunggu' ? 'Menunggu' : 'Terjawab' }}
+            </span>
+            <button type="button" class="close-button" aria-label="Tutup dialog" (click)="closeModal()">×</button>
+          </div>
         </div>
-        <div class="description-box"><p>Deskripsi Komplain</p><span>{{ selected.description }}</span></div>
-        <div class="timeline-section"><p class="timeline-title">Riwayat Respons</p>
-          <div class="message-row"><div class="message-avatar tenant-avatar">{{ getInitial(selected.tenantName) }}</div><div class="message-content"><div class="message-bubble tenant-bubble"><div class="message-header"><strong>{{ selected.tenantName }}</strong><span>{{ formatDate(selected.date) }}</span></div><p>{{ selected.description }}</p></div></div></div>
-          <div class="message-row" *ngFor="let resp of selected.responses" [class.owner-message]="resp.authorRole === 'admin'">
-            <div class="message-avatar" [class.owner-avatar]="resp.authorRole === 'admin'" [class.tenant-avatar]="resp.authorRole !== 'admin'">{{ getInitial(resp.authorName) }}</div>
-            <div class="message-content"><div class="message-bubble" [class.owner-bubble]="resp.authorRole === 'admin'" [class.tenant-bubble]="resp.authorRole !== 'admin'"><div class="message-header"><strong [class.owner-name]="resp.authorRole === 'admin'">{{ resp.authorName }} <span *ngIf="resp.authorRole === 'admin'">(Admin)</span></strong><span>{{ formatDate(resp.date) }}</span></div><p>{{ resp.content }}</p></div></div>
+
+        <div class="modal-body complaint-modal-body" *ngIf="selected">
+          <section class="complaint-overview">
+            <div class="complaint-overview-title">
+              <span class="complaint-field-label">SUBJEK KOMPLAIN</span>
+              <h3>{{ selected.title }}</h3>
             </div>
+            <div class="complaint-meta-grid">
+              <div class="complaint-meta-item">
+                <span>Nama Penghuni</span>
+                <strong>{{ selected.tenantName }}</strong>
+              </div>
+              <div class="complaint-meta-item">
+                <span>Nama Kos</span>
+                <strong>{{ selected.propertyName }}</strong>
+              </div>
+              <div class="complaint-meta-item">
+                <span>Nomor Kamar</span>
+                <strong>{{ selected.roomNumber ?? '-' }}</strong>
+              </div>
+              <div class="complaint-meta-item">
+                <span>Tanggal Lapor</span>
+                <strong>{{ formatDate(selected.date) }}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="conversation-section">
+            <div class="conversation-heading">
+              <div>
+                <h3>Riwayat Percakapan</h3>
+                <p>Pesan dari penghuni dan tanggapan pengelola.</p>
+              </div>
+              <span class="conversation-count">{{ selected.responses.length + 1 }} pesan</span>
+            </div>
+
+            <div class="conversation-list">
+              <div class="message-row tenant-message">
+                <div class="message-avatar tenant-avatar">{{ getInitial(selected.tenantName) }}</div>
+                <div class="message-content">
+                  <div class="message-bubble tenant-bubble">
+                    <div class="message-header">
+                      <strong>{{ selected.tenantName }}</strong>
+                      <span>{{ formatDate(selected.date) }}</span>
+                    </div>
+                    <p>{{ selected.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="message-row" *ngFor="let resp of selected.responses"
+                [class.owner-message]="resp.authorRole === 'admin'">
+                <div class="message-avatar" [class.owner-avatar]="resp.authorRole === 'admin'"
+                  [class.tenant-avatar]="resp.authorRole !== 'admin'">
+                  {{ getInitial(resp.authorName) }}
+                </div>
+                <div class="message-content">
+                  <div class="message-bubble" [class.owner-bubble]="resp.authorRole === 'admin'"
+                    [class.tenant-bubble]="resp.authorRole !== 'admin'">
+                    <div class="message-header">
+                      <strong [class.owner-name]="resp.authorRole === 'admin'">
+                        {{ resp.authorName }}<span *ngIf="resp.authorRole === 'admin'"> · Admin</span>
+                      </strong>
+                      <span>{{ formatDate(resp.date) }}</span>
+                    </div>
+                    <p>{{ resp.content }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-        <div class="response-section" *ngIf="selected.status === 'menunggu'"><label>Tulis Respons</label><textarea [(ngModel)]="response" rows="3" maxlength="100" placeholder="Tulis respons untuk penghuni..."></textarea>
-          <div class="response-actions"><button type="button" class="btn-outline" (click)="markAnswered()" [disabled]="savingStatus">{{ savingStatus ? 'Memperbarui...' : 'Tandai Terjawab' }}</button><div class="action-spacer"></div><button type="button" class="btn-primary" [disabled]="!response.trim() || savingResponse" (click)="sendResponse()">{{ savingResponse ? 'Mengirim...' : 'Kirim Respons' }}</button></div>
+
+        <div class="modal-footer complaint-modal-footer" *ngIf="selected?.status === 'menunggu'">
+          <div class="complaint-reply-field">
+            <label for="complaint-response">Tulis Tanggapan</label>
+            <textarea id="complaint-response" [(ngModel)]="response" rows="3" maxlength="100"
+              placeholder="Tulis respons untuk penghuni..."></textarea>
+            <span class="reply-hint">Maksimal 100 karakter.</span>
+          </div>
+          <div class="complaint-response-actions">
+            <button type="button" class="btn-outline" (click)="markAnswered()" [disabled]="savingStatus">
+              {{ savingStatus ? 'Memperbarui...' : 'Tandai Terjawab' }}
+            </button>
+            <button type="button" class="btn-primary" [disabled]="!response.trim() || savingResponse"
+              (click)="sendResponse()">
+              {{ savingResponse ? 'Mengirim...' : 'Kirim Respons' }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-      </ng-template>
-    </ion-modal>
+    </ng-template>
+  </ion-modal>
 </div>
