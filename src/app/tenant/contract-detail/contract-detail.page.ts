@@ -69,6 +69,10 @@ export class ContractDetailPage implements OnInit {
   hasContract = false;
   errorMessage = '';
   showExitRequestForm = false;
+  showExitConfirmModal = false;
+  showExitSuccessModal = false;
+  exitConfirmationMessage = '';
+  exitSuccessMessage = '';
   exitRequestLoading = false;
   exitRequestError = '';
   todayDate = this.localDateToday();
@@ -423,14 +427,21 @@ export class ContractDetailPage implements OnInit {
       return;
     }
 
-    const confirmation = this.contract.endDate && this.formatDateInput(this.contract.endDate) <= this.localDateToday()
-      ? 'Kirim permintaan konfirmasi keluar kepada owner? Kontrak tetap aktif sampai owner mengonfirmasi kamu benar-benar sudah keluar.'
-      : 'Kirim permintaan keluar lebih awal kepada owner? Kontrak tidak langsung berakhir dan kamar tidak langsung tersedia.';
+    this.exitConfirmationMessage = this.contract.endDate
+      && this.formatDateInput(this.contract.endDate) <= this.localDateToday()
+      ? 'Kirim permintaan konfirmasi keluar kepada pemilik kos? Kontrak tetap aktif sampai pemilik kos mengonfirmasi bahwa kamu benar-benar sudah keluar.'
+      : 'Kirim permintaan keluar lebih awal kepada pemilik kos? Kontrak tidak langsung berakhir dan kamar tidak langsung tersedia.';
 
-    if (!window.confirm(confirmation)) return;
+    this.showExitConfirmModal = true;
+    this.cdr.markForCheck();
+  }
+
+  confirmExitRequest(): void {
+    if (this.exitRequestLoading || !this.showExitConfirmModal) return;
 
     this.exitRequestLoading = true;
     this.cdr.markForCheck();
+
     this.api.createTenantPermintaanKeluar({
       tKontrak_id_kontrak: this.contract.id,
       tgl_rencana_keluar: this.exitRequestDate,
@@ -446,18 +457,34 @@ export class ContractDetailPage implements OnInit {
           exitReason: String(item.alasan_keluar || this.exitReason.trim()),
           exitOwnerNote: String(item.catatan_owner_keluar || ''),
         };
+
         this.exitRequestLoading = false;
+        this.showExitConfirmModal = false;
         this.showExitRequestForm = false;
         this.exitReason = '';
-        window.alert(response?.message || 'Permintaan keluar berhasil dikirim kepada owner.');
+        this.exitSuccessMessage = response?.message || 'Permintaan keluar berhasil dikirim kepada pemilik kos.';
+        this.showExitSuccessModal = true;
         this.cdr.markForCheck();
       },
       error: (error: any) => {
+        this.showExitConfirmModal = false;
         this.exitRequestError = error?.error?.message || 'Permintaan keluar gagal dikirim. Coba lagi.';
         this.exitRequestLoading = false;
         this.cdr.markForCheck();
       },
     });
+  }
+
+  closeExitConfirmModal(): void {
+    if (this.exitRequestLoading) return;
+    this.showExitConfirmModal = false;
+    this.cdr.markForCheck();
+  }
+
+  closeExitSuccessModal(): void {
+    this.showExitSuccessModal = false;
+    this.exitSuccessMessage = '';
+    this.cdr.markForCheck();
   }
 
   downloadContract(): void {

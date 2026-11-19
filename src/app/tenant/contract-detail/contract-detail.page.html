@@ -277,3 +277,77 @@
 
   </div>
 </ion-content>
+
+<!-- Modal Konfirmasi Permintaan Keluar -->
+<div
+  class="exit-modal-backdrop"
+  *ngIf="showExitConfirmModal"
+  (click)="closeExitConfirmModal()">
+  <section
+    class="exit-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="exitConfirmTitle"
+    aria-describedby="exitConfirmDescription"
+    (click)="$event.stopPropagation()">
+    <div class="exit-modal-icon exit-modal-icon-warning" aria-hidden="true">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+    </div>
+
+    <div class="exit-modal-content">
+      <h2 id="exitConfirmTitle">Konfirmasi Permintaan Keluar</h2>
+      <p id="exitConfirmDescription">{{ exitConfirmationMessage }}</p>
+    </div>
+
+    <div class="exit-modal-actions">
+      <button
+        type="button"
+        class="button button-outline"
+        (click)="closeExitConfirmModal()"
+        [disabled]="exitRequestLoading">
+        Batal
+      </button>
+      <button
+        type="button"
+        class="button button-exit"
+        (click)="confirmExitRequest()"
+        [disabled]="exitRequestLoading">
+        <ion-icon *ngIf="!exitRequestLoading" name="send-outline"></ion-icon>
+        {{ exitRequestLoading ? 'Mengirim...' : 'Ya, Kirim Permintaan' }}
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- Modal Berhasil Mengirim Permintaan Keluar -->
+<div
+  class="exit-modal-backdrop"
+  *ngIf="showExitSuccessModal"
+  (click)="closeExitSuccessModal()">
+  <section
+    class="exit-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="exitSuccessTitle"
+    aria-describedby="exitSuccessDescription"
+    (click)="$event.stopPropagation()">
+    <div class="exit-modal-icon exit-modal-icon-success" aria-hidden="true">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+    </div>
+
+    <div class="exit-modal-content">
+      <h2 id="exitSuccessTitle">Permintaan Berhasil Dikirim</h2>
+      <p id="exitSuccessDescription">{{ exitSuccessMessage }}</p>
+    </div>
+
+    <div class="exit-modal-actions exit-modal-actions-single">
+      <button
+        type="button"
+        class="button button-primary"
+        (click)="closeExitSuccessModal()">
+        Mengerti
+      </button>
+    </div>
+  </section>
+</div>
+
