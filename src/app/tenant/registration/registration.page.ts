@@ -354,16 +354,6 @@ export class RegistrationPage implements OnInit {
       : Number(this.form.durationMonths || 1);
   }
 
-  get selectedRentPrice(): number {
-    return this.selectedBundle
-      ? Number(this.selectedBundle.harga_bundle)
-      : Number(this.selectedRoom?.price || 0) * Number(this.form.durationMonths || 1);
-  }
-
-  get estimatedFirstPayment(): number {
-    return this.selectedRentPrice + Number(this.selectedProperty?.deposit || 0);
-  }
-
   onBundleChange(value: string): void {
     this.form.bundleId = value || '';
     if (this.selectedBundle) {

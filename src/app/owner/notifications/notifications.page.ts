@@ -70,26 +70,6 @@ export class NotificationsPage {
     });
   }
 
-  markAsRead(id: number): void {
-    const notification = this.notifs.find(item => item.id === id);
-
-    if (!notification || notification.read) {
-      return;
-    }
-
-    this.api.markNotifikasiAsRead(id).subscribe({
-      next: () => {
-        this.notifs = this.notifs.map(item =>
-          item.id === id ? { ...item, read: true } : item
-        );
-        this.cdr.detectChanges();
-      },
-      error: error => {
-        console.error('Gagal menandai notifikasi:', error);
-      }
-    });
-  }
-
   openNotification(item: Notification): void {
     const navigate = () => {
       if (item.link && item.link.startsWith('/') && !item.link.startsWith('//')) {

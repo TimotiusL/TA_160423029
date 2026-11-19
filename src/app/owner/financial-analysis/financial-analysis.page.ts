@@ -88,7 +88,6 @@ export class FinancialAnalysisPage
   @ViewChild('roiChart')
   roiChart!: ElementRef<HTMLCanvasElement>;
 
-
   grafikBulanan: any[] = [];
   rincianPendapatan: any[] = [];
   rincianPengeluaran: any[] = [];
@@ -105,26 +104,6 @@ export class FinancialAnalysisPage
   month = 0;
 
   availableYears = [2025, 2026];
-  selectedYear = 2026;
-  selectedMonth = 'all';
-
-  years = [2025, 2026, 2027];
-
-  months = [
-    { value: 'all', label: 'Semua Bulan' },
-    { value: '01', label: 'Januari' },
-    { value: '02', label: 'Februari' },
-    { value: '03', label: 'Maret' },
-    { value: '04', label: 'April' },
-    { value: '05', label: 'Mei' },
-    { value: '06', label: 'Juni' },
-    { value: '07', label: 'Juli' },
-    { value: '08', label: 'Agustus' },
-    { value: '09', label: 'September' },
-    { value: '10', label: 'Oktober' },
-    { value: '11', label: 'November' },
-    { value: '12', label: 'Desember' }
-  ];
 
   properties: Property[] = [];
 
@@ -154,7 +133,6 @@ export class FinancialAnalysisPage
   oerChartInstance?: Chart;
   roiChartInstance?: Chart;
   private routeQuerySubscription?: Subscription;
-
 
   ngOnInit(): void {
     this.routeQuerySubscription = this.route.queryParamMap.subscribe(params => {
@@ -467,7 +445,6 @@ export class FinancialAnalysisPage
     ).toFixed(2);
   }
 
-
   get averageMonthlyProfit(): number {
     if (!this.monthlyFinancials.length) return 0;
     return this.monthlyFinancials.reduce((sum, item) => sum + item.profit, 0)
@@ -503,11 +480,6 @@ export class FinancialAnalysisPage
     return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
   }
 
-  get averageRoi(): number {
-    const values = this.monthlyRatios.map(item => item.roi);
-    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
-  }
-
   get monthlyRatios() {
     return this.monthlyFinancials.map(item => {
       const investment = this.totalInvestment;
@@ -526,7 +498,6 @@ export class FinancialAnalysisPage
       };
     });
   }
-
 
   private createTrendChart(
     canvas: ElementRef<HTMLCanvasElement>,
@@ -628,7 +599,6 @@ export class FinancialAnalysisPage
     );
   }
 
-
   getPropertyInvestments(propertyId: string): Investment[] {
     return this.investments.filter(
       investment => investment.propertyId === propertyId
@@ -657,20 +627,8 @@ export class FinancialAnalysisPage
     }).format(value);
   }
 
-  formatPercent(value: number): string {
-    return `${value.toFixed(1)}%`;
-  }
-
   calculateBep(roi: number): number {
     return Math.round(100 / (roi || 1));
-  }
-
-  formatShortRupiah(value: number): string {
-    if (value >= 1000000) {
-      return `${value / 1000000}jt`;
-    }
-
-    return `${value}`;
   }
 
   getPropertyName(): string {
@@ -690,11 +648,6 @@ export class FinancialAnalysisPage
     this.loadFinancialAnalysis();
   }
 
-  printAnalysis(): void {
-    window.print();
-  }
-
-
   private destroyCharts(): void {
     this.financialChartInstance?.destroy();
     this.profitChartInstance?.destroy();
@@ -708,7 +661,6 @@ export class FinancialAnalysisPage
     this.roiChartInstance?.destroy();
 
   }
-
 
   private createCharts(): void {
     if (
@@ -731,7 +683,6 @@ export class FinancialAnalysisPage
     this.createExpenseChart();
     this.createComparisonChart();
   }
-
 
   private baseOptions(): any {
     return {
@@ -953,7 +904,6 @@ export class FinancialAnalysisPage
       }
     );
   }
-
 
   private createComparisonChart(): void {
     this.comparisonChartInstance = new Chart(

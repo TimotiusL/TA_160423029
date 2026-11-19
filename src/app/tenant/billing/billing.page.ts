@@ -153,7 +153,4 @@ export class BillingPage implements OnInit {
     this.router.navigate(['/tenant/bill-detail'], { queryParams: { kode, action: 'pay' } });
   }
 
-  bantuanPembayaran(): void {
-    this.router.navigateByUrl('/tenant/complaints');
-  }
 }

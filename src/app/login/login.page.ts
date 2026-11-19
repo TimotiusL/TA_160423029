@@ -55,8 +55,6 @@ export class LoginPage {
 
   showVerificationPopup = false;
 
-  shapes = Array.from({ length: 20 });
-
   constructor(
     private router: Router,
     private api: ApiService,

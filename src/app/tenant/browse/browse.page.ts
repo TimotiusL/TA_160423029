@@ -220,7 +220,4 @@ export class BrowsePage implements OnInit {
     });
   }
 
-  bukaHalaman(path: string) {
-    this.router.navigateByUrl(path);
-  }
 }

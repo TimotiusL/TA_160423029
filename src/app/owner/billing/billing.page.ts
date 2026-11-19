@@ -46,14 +46,6 @@ interface Property {
   name: string;
 }
 
-interface ContractOption {
-  id: number;
-  number: string;
-  tenantName: string;
-  propertyName: string;
-  roomNumber: string;
-}
-
 interface InstallmentRequest {
   id_persetujuanCicilan: number;
   jumlah_cicilan: number;
@@ -97,53 +89,11 @@ export class BillingPage implements OnInit {
   @ViewChild('detailModal') detailModal?: IonModal;
   private pendingPaymentNavigationId: string | null = null;
 
-  showGenerate = false;
-
-  loadContracts(): void {
-    this.loadingContracts = true;
-
-    this.apiService.getKontrak().subscribe({
-      next: (response: any[]) => {
-        const existingContractIds = new Set(
-          this.bills.map(bill => bill.contractId)
-        );
-
-        this.contracts = response
-          .filter(kontrak =>
-            !existingContractIds.has(String(kontrak.id_kontrak)) &&
-            kontrak.status === 'menunggu_pembayaran'
-          )
-          .map(kontrak => ({
-            id: Number(kontrak.id_kontrak),
-            number: kontrak.no_kontrak,
-            tenantName: kontrak.penghuni?.user?.nama ?? 'Penghuni',
-            propertyName: kontrak.kamar?.kos?.nama_kos ?? 'Properti',
-            roomNumber: String(kontrak.kamar?.no_kamar ?? '-')
-          }));
-
-        this.loadingContracts = false;
-        this.cdr.detectChanges();
-      },
-      error: error => {
-        console.error('Gagal mengambil kontrak:', error);
-        this.loadingContracts = false;
-        alert('Gagal mengambil daftar kontrak.');
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  generateContractId = '';
-  contracts: ContractOption[] = [];
-  loadingContracts = false;
-  generating = false;
-
   tenants: Tenant[] = [];
   properties: Property[] = [];
   bills: Bill[] = [];
   cicilanRequests: InstallmentRequest[] = [];
   processingCicilanId: number | null = null;
-
 
   loadProperties(): void {
     this.apiService.getKos().subscribe({
@@ -231,7 +181,6 @@ export class BillingPage implements OnInit {
           name: item.kontrak?.penghuni?.user?.nama ?? 'Penghuni',
         }));
 
-
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -241,8 +190,6 @@ export class BillingPage implements OnInit {
       },
     });
   }
-
-
 
   loadCicilanRequests(): void {
     this.apiService.getPersetujuanCicilan().subscribe({
@@ -342,7 +289,6 @@ export class BillingPage implements OnInit {
     });
   }
 
-
   /* =========================
      COUNTS
   ========================= */
@@ -386,7 +332,6 @@ export class BillingPage implements OnInit {
     ).length;
   }
 
-
   /* =========================
      TAB
   ========================= */
@@ -394,7 +339,6 @@ export class BillingPage implements OnInit {
   setTab(tab: string) {
     this.tab = tab;
   }
-
 
   /* =========================
      DETAIL
@@ -426,7 +370,6 @@ export class BillingPage implements OnInit {
     }
   }
 
-
   /* =========================
      DATA HELPERS
   ========================= */
@@ -446,7 +389,6 @@ export class BillingPage implements OnInit {
   getRoomNumber(bill: Bill): string {
     return bill.roomNumber || '-';
   }
-
 
   /* =========================
      FORMAT
@@ -480,7 +422,6 @@ export class BillingPage implements OnInit {
     ).format(new Date(date));
   }
 
-
   formatMonthYear(period: string): string {
     if (!period) return '-';
 
@@ -499,8 +440,6 @@ export class BillingPage implements OnInit {
     }).format(new Date(year, month - 1, 1));
   }
 
-
-
   /* =========================
      PAYMENT PROGRESS
   ========================= */
@@ -516,21 +455,6 @@ export class BillingPage implements OnInit {
     return Math.round(
       (bill.paidAmount / bill.totalDue) * 100
     );
-  }
-
-
-  /* =========================
-     GENERATE
-  ========================= */
-
-  openGenerate(): void {
-    this.generateContractId = '';
-    this.showGenerate = true;
-    this.loadContracts();
-  }
-
-  closeGenerate() {
-    this.showGenerate = false;
   }
 
   /* =========================

@@ -209,12 +209,6 @@ export class BillDetailPage implements OnInit {
     );
   }
 
-  get jumlahTerverifikasi(): number {
-    return this.tagihan.payments
-      .filter((p: any) => p.status === 'diverifikasi')
-      .reduce((total: number, p: any) => total + Number(p.total || 0), 0);
-  }
-
   get permintaanCicilanTerbaru(): any | null {
     if (this.tagihan.isBundle) return null;
     return [...(this.tagihan.installmentRequests || [])]
@@ -324,7 +318,6 @@ export class BillDetailPage implements OnInit {
     });
   }
 
-
   formatRupiah(value: number): string {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -341,7 +334,6 @@ export class BillDetailPage implements OnInit {
       day: 'numeric', month: 'long', year: 'numeric'
     }).format(date);
   }
-
 
   perkiraanCicilan(count: number): number {
     const total = Math.max(0, Math.round(Number(this.tagihan.nominal) || 0));

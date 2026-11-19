@@ -150,18 +150,6 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/register`, data);
   }
 
-  resetPassword(
-    email: string,
-    password: string,
-    passwordConfirmation: string
-  ) {
-    return this.http.post(`${this.baseUrl}/reset-password`, {
-      email: email,
-      password: password,
-      password_confirmation: passwordConfirmation
-    });
-  }
-
   sendResetOtp(email: string) {
     return this.http.post(
       `${this.baseUrl}/send-reset-otp`,
@@ -503,7 +491,6 @@ export class ApiService {
     );
   }
 
-
   endKontrak(id: string, data: {
     tgl_keluar: string;
     alasan_pengakhiran: 'kontrak_berakhir' | 'permintaan_penghuni' | 'keputusan_owner';
@@ -542,15 +529,6 @@ export class ApiService {
       status,
       catatan_owner: catatan_owner || ''
     }, { headers });
-  }
-
-  getTenantPermintaanKeluar(): Observable<any[]> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-      Accept: 'application/json'
-    });
-
-    return this.http.get<any[]>(`${this.baseUrl}/tenant/permintaan-keluar`, { headers });
   }
 
   createTenantPermintaanKeluar(data: {
@@ -723,7 +701,6 @@ export class ApiService {
     );
   }
 
-
   getPengeluaran(): Observable<any[]> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -735,7 +712,6 @@ export class ApiService {
       { headers }
     );
   }
-
 
   createPengeluaran(data: FormData): Observable<any> {
     const headers = new HttpHeaders({
@@ -764,7 +740,6 @@ export class ApiService {
       { headers }
     );
   }
-
 
   deletePengeluaran(id: number): Observable<any> {
     const headers = new HttpHeaders({
@@ -828,7 +803,6 @@ export class ApiService {
     );
   }
 
-
   getAnalisisKeuangan(
     kosId: number,
     tanggalMulai: string,
@@ -850,7 +824,6 @@ export class ApiService {
       { headers, params }
     );
   }
-
 
   // Endpoint komplain khusus tenant; endpoint /komplain tetap untuk admin.
   getTenantKomplain(): Observable<any> {
@@ -927,7 +900,6 @@ export class ApiService {
     );
   }
 
-
   me(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
@@ -973,7 +945,6 @@ export class ApiService {
 
     return this.http.put<any>(`${this.baseUrl}/change-password`, data, { headers });
   }
-
 
   getUnreadNotificationCount(): Observable<{ unread: number }> {
     const headers = new HttpHeaders({
@@ -1030,6 +1001,5 @@ export class ApiService {
       { headers }
     );
   }
-
 
 }

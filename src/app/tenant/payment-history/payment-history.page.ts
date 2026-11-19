@@ -144,15 +144,8 @@ export class PaymentHistoryPage implements OnInit {
     this.selectedPayment = this.pembayaran.find(item => item.kode === kode) || null;
   }
 
-  bukaBukti(url: string): void {
-    if (url) window.open(url, '_blank', 'noopener');
-  }
-
   tutupDetail(): void {
     this.selectedPayment = null;
   }
 
-  cetakDetail(): void {
-    window.print();
-  }
 }

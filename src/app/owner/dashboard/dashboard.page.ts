@@ -350,10 +350,6 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
       pengeluaran.some(item => this.number(item.jumlah) !== 0);
   }
 
-  get selectedPeriodLabel(): string {
-    return this.monthOptions.find(option => option.value === this.month)?.label || 'Periode dipilih';
-  }
-
   onPeriodChange(): void {
     this.updatePropertyFinancials();
     this.cdr.detectChanges();

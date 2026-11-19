@@ -187,10 +187,6 @@ export class DashboardPage implements OnInit {
     return this.unpaidBills.find(bill => bill.remaining > 0);
   }
 
-  get lastBills(): DashboardBill[] {
-    return this.bills;
-  }
-
   get myComplaints(): Complaint[] {
     return this.complaints;
   }

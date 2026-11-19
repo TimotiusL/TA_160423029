@@ -272,10 +272,6 @@ export class ContractDetailPage implements OnInit {
     return this.contract.statusCode === 'aktif';
   }
 
-  get hasPendingExitRequest(): boolean {
-    return this.contract.exitRequestStatus === 'menunggu' || this.contract.exitRequestStatus === 'disetujui';
-  }
-
   get canRequestExit(): boolean {
     return this.isActiveContract
       && this.contract.exitRequestStatus !== 'menunggu'

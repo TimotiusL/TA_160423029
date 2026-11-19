@@ -50,7 +50,6 @@ export class LayoutPage implements OnInit, OnDestroy {
     }
   }
 
-  selectedProperty = 'all';
   unreadNotifications = 0;
   private notificationRefreshTimer: ReturnType<typeof setInterval> | null = null;
   private routerSubscription?: Subscription;
@@ -219,7 +218,4 @@ export class LayoutPage implements OnInit, OnDestroy {
     console.log('Logout');
   }
 
-  selectProperty(): void {
-    console.log('Selected property:', this.selectedProperty);
-  }
 }

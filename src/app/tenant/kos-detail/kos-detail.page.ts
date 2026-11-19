@@ -396,10 +396,6 @@ export class KosDetailPage implements OnInit {
     this.fotoAktif = index;
   }
 
-  bukaBantuan(): void {
-    this.router.navigateByUrl('/tenant/complaints');
-  }
-
   pilihKamar(kamar?: RoomTypeOption): void {
     if (!kamar) return;
 
