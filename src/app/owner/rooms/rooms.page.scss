@@ -345,6 +345,11 @@ textarea:focus-visible {
 .summary-value.teal { color: $brand-dark; }
 .summary-value.completed, .summary-value.inactive { color: $muted; }
 
+/* Angka ringkasan status kamar selalu menggunakan warna hitam. */
+.status-summary .summary-card > strong {
+  color: #000;
+}
+
 .summary-note,
 .stat-sub,
 .stat-card small {

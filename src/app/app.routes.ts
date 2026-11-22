@@ -207,5 +207,9 @@ export const routes: Routes = [
         pathMatch: 'full'
       }
     ]
+  },  {
+    path: 'baru',
+    loadComponent: () => import('./owner/baru/baru.page').then( m => m.BaruPage)
   }
+
 ];
