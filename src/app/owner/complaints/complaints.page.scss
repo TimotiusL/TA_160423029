@@ -345,6 +345,10 @@ textarea:focus-visible {
 .summary-value.teal { color: $brand-dark; }
 .summary-value.completed, .summary-value.inactive { color: $muted; }
 
+/* Angka ringkasan Menunggu dan Terjawab menggunakan warna hitam. */
+.summary-value.baru,
+.summary-value.selesai { color: #000; }
+
 .summary-note,
 .stat-sub,
 .stat-card small {
