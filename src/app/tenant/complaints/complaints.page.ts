@@ -50,9 +50,9 @@ export class ComplaintsPage {
   }
 
   /**
-   * Komplain hanya tersedia jika penghuni memiliki kontrak aktif yang
-   * tanggal sewanya masih berjalan. Pemeriksaan ini mengikuti aturan
-   * yang juga diterapkan oleh endpoint storeTenant di Laravel.
+   * Komplain hanya tersedia untuk penghuni dengan kontrak berstatus aktif.
+   * Acuan status disamakan dengan halaman Kontrak dan Dashboard; tanggal akhir
+   * sewa tidak otomatis menonaktifkan kontrak selama status database masih aktif.
    */
   loadComplaints(): void {
     this.loading = true;
@@ -64,7 +64,9 @@ export class ComplaintsPage {
     ).subscribe({
       next: (response: any) => {
         const contracts = this.extractRows(response);
-        this.hasActiveContract = contracts.some((contract: any) => this.isCurrentActiveContract(contract));
+        this.hasActiveContract = contracts.some((contract: any) =>
+          String(contract?.status || '').toLowerCase() === 'aktif'
+        );
 
         if (!this.hasActiveContract) {
           this.complaints = [];
@@ -89,38 +91,20 @@ export class ComplaintsPage {
     });
   }
 
+  private applyComplaintRows(response: any): void {
+    const list = this.extractRows(response);
+    this.complaints = list.map((item: any) => this.mapComplaint(item));
+
+    if (this.selected) {
+      this.selected = this.complaints.find(item => item.id === this.selected?.id) || this.selected;
+    }
+  }
+
   private extractRows(response: any): any[] {
     const payload = response?.data ?? response?.kontrak ?? response;
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.data)) return payload.data;
     return [];
-  }
-
-  private isCurrentActiveContract(contract: any): boolean {
-    if (String(contract?.status || '').toLowerCase() !== 'aktif') return false;
-
-    const today = this.localDateToday();
-    const startDate = this.dateOnly(contract?.tgl_mulai);
-    const endDate = this.dateOnly(contract?.tgl_selesai);
-    const checkoutDate = this.dateOnly(contract?.tgl_keluar);
-
-    return !!startDate && !!endDate
-      && startDate <= today
-      && endDate >= today
-      && (!checkoutDate || checkoutDate >= today);
-  }
-
-  private dateOnly(value: unknown): string {
-    if (!value) return '';
-    return String(value).replace('T', ' ').slice(0, 10);
-  }
-
-  private localDateToday(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 
   private fetchComplaintList(showPageLoading: boolean): void {
@@ -134,13 +118,9 @@ export class ComplaintsPage {
       })
     ).subscribe({
       next: (response: any) => {
-        const list = this.extractRows(response);
-        this.complaints = list.map((item: any) => this.mapComplaint(item));
-
-        if (this.selected) {
-          this.selected = this.complaints.find(item => item.id === this.selected?.id) || this.selected;
-        }
-
+        // Kelayakan kontrak sudah diperiksa melalui GET /kontrak. Respons daftar
+        // komplain hanya dipakai untuk menyinkronkan riwayat, bukan mengubah statusnya.
+        this.applyComplaintRows(response);
         this.errorMessage = '';
         this.cdr.detectChanges();
       },
