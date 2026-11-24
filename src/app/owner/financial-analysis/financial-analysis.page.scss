@@ -1079,7 +1079,6 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   box-shadow: $shadow-card;
 
   .section-title { margin-bottom: 2px; font-size: 15px; }
-  .section-header { margin-bottom: 14px; }
 }
 
 .chart-grid .chart-card { margin-bottom: 0; }
@@ -1137,9 +1136,8 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
 .analysis-note {
   padding: 16px 18px;
   border: 1px solid $line;
-  border-left: 3px solid $brand;
   border-radius: $radius-control;
-  background: $bg-soft;
+  background: $surface;
 
   .note-label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: $brand-dark; }
   strong { display: block; color: $ink; }
@@ -1168,29 +1166,6 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
 .slate-text { color: $muted; }
 .teal-dark-text { color: $brand-dark; }
 .indigo-text { color: #4338ca; }
-
-.investment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-
-.investment-card {
-  padding: 16px 18px;
-  border: 1px solid $line;
-  border-radius: $radius-card;
-
-  h4 { margin: 0; font-size: 14px; font-weight: 600; color: $muted; }
-  .investment-total { margin: 4px 0 2px; font-size: 20px; font-weight: 700; color: $ink; }
-  p { margin: 0 0 12px; font-size: 12.5px; color: $muted; }
-}
-
-.investment-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid $line;
-
-  span { display: block; font-size: 12px; color: $muted; }
-  strong { font-size: 14px; color: $ink; }
-}
 
 @media (max-width: 1000px) {
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

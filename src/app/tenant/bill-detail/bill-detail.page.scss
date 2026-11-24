@@ -301,7 +301,7 @@
     color: var(--km-text-secondary);
 
     .remain-price {
-      color: var(--km-danger);
+      color: #000;
     }
   }
 }
@@ -335,7 +335,7 @@
     font-weight: 700;
 
     &.orange-text {
-      color: var(--km-warning);
+      color: #000;
     }
   }
 }
@@ -1274,7 +1274,7 @@
   strong {
     font-size: 18px;
     font-weight: 750;
-    color: var(--km-danger);
+    color: #000;
   }
 }
 

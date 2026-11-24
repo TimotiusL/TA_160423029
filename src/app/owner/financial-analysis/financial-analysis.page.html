@@ -14,7 +14,7 @@
 
       <!-- Pilih Kos -->
       <div class="select-wrapper">
-        <select [(ngModel)]="propertyFilter" (change)="changeProperty()">
+        <select [ngModel]="propertyFilter" (ngModelChange)="changeProperty($event)">
           <option value="all">Semua Kos</option>
 
           <option *ngFor="let property of properties" [value]="property.id">
@@ -26,7 +26,7 @@
 
       <!-- Filter Tahun -->
       <div class="select-wrapper">
-        <select [(ngModel)]="year" (change)="changePeriod()">
+        <select [ngModel]="year" (ngModelChange)="changeYear($event)">
           <option [ngValue]="'all'">Semua Periode</option>
           <option *ngFor="let y of availableYears" [ngValue]="y">
             Tahun {{ y }}
@@ -37,7 +37,7 @@
 
       <!-- Filter Bulan -->
       <div class="select-wrapper">
-        <select [(ngModel)]="month" (change)="changePeriod()" [disabled]="year === 'all'">
+        <select [ngModel]="month" (ngModelChange)="changeMonth($event)" [disabled]="year === 'all'">
           <option [ngValue]="0">Semua Bulan</option>
           <option [ngValue]="1">Januari</option>
           <option [ngValue]="2">Februari</option>
@@ -158,7 +158,7 @@
       <div class="chart-grid two-columns">
         <div class="chart-card">
           <div class="section-title">Tren Pendapatan</div>
-          <p class="card-description">Perubahan pendapatan dari bulan ke bulan pada periode yang dipilih.</p>
+          <p class="card-description">{{ month > 0 && year !== 'all' ? 'Perubahan pendapatan dari hari ke hari pada bulan yang dipilih.' : 'Perubahan pendapatan dari bulan ke bulan pada periode yang dipilih.' }}</p>
           <div class="chart-container"><canvas #incomeTrendChart></canvas></div>
         </div>
 
@@ -196,7 +196,7 @@
       <div class="chart-grid two-columns">
         <div class="chart-card">
           <div class="section-title">Tren Pengeluaran</div>
-          <p class="card-description">Perubahan pengeluaran dari bulan ke bulan pada periode yang dipilih.</p>
+          <p class="card-description">{{ month > 0 && year !== 'all' ? 'Perubahan pengeluaran dari hari ke hari pada bulan yang dipilih.' : 'Perubahan pengeluaran dari bulan ke bulan pada periode yang dipilih.' }}</p>
           <div class="chart-container"><canvas #expenseTrendChart></canvas></div>
         </div>
 
@@ -241,19 +241,19 @@
           <small>Seluruh biaya dalam periode terpilih</small>
         </div>
         <div class="detail-metric-card">
-          <span>Rata-rata Laba Bulanan</span><strong>{{ formatRupiah(averageMonthlyProfit) }}</strong>
-          <small>Rata-rata dari bulan yang ditampilkan</small>
+          <span>{{ month > 0 && year !== 'all' ? 'Rata-rata Laba Harian' : 'Rata-rata Laba Bulanan' }}</span><strong>{{ formatRupiah(averageMonthlyProfit) }}</strong>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata dari hari yang ditampilkan' : 'Rata-rata dari bulan yang ditampilkan' }}</small>
         </div>
         <div class="detail-metric-card">
-          <span>Bulan dengan Laba Tertinggi</span>
+          <span>{{ month > 0 && year !== 'all' ? 'Hari dengan Laba Tertinggi' : 'Bulan dengan Laba Tertinggi' }}</span>
           <strong>{{ bestProfitMonth ? formatRupiah(bestProfitMonth.profit) : formatRupiah(0) }}</strong>
           <small>{{ bestProfitMonth?.month || 'Belum ada data' }}</small>
         </div>
       </div>
 
       <div class="chart-card detail-chart-card">
-        <div class="section-title">Tren Laba Bersih Bulanan</div>
-        <p class="card-description">Laba dihitung dari pendapatan dikurangi pengeluaran pada setiap bulan.</p>
+        <div class="section-title">{{ month > 0 && year !== 'all' ? 'Tren Laba Bersih Harian' : 'Tren Laba Bersih Bulanan' }}</div>
+        <p class="card-description">{{ month > 0 && year !== 'all' ? 'Laba dihitung dari pendapatan dikurangi pengeluaran pada setiap hari.' : 'Laba dihitung dari pendapatan dikurangi pengeluaran pada setiap bulan.' }}</p>
         <div class="chart-container detail-chart-container"><canvas #profitChart></canvas></div>
       </div>
 
@@ -265,8 +265,8 @@
         </div>
         <div class="analysis-note">
           <span class="note-label">Ringkasan Periode</span>
-          <strong>{{ positiveProfitMonths }} dari {{ monthlyFinancials.length }} bulan mencatat laba positif</strong>
-          <p>Gunakan tren bulanan untuk melihat perubahan hasil usaha, bukan hanya total pada akhir periode.</p>
+          <strong>{{ positiveProfitMonths }} dari {{ monthlyFinancials.length }} {{ month > 0 && year !== 'all' ? 'hari' : 'bulan' }} mencatat laba positif</strong>
+          <p>{{ month > 0 && year !== 'all' ? 'Gunakan tren harian untuk melihat perubahan hasil usaha, bukan hanya total pada akhir bulan.' : 'Gunakan tren bulanan untuk melihat perubahan hasil usaha, bukan hanya total pada akhir periode.' }}</p>
         </div>
       </div>
     </section>
@@ -290,8 +290,8 @@
           <small>Laba bersih dibandingkan total pendapatan</small>
         </div>
         <div class="detail-metric-card">
-          <span>Rata-rata Margin Bulanan</span><strong>{{ averageProfitMargin.toFixed(2) }}%</strong>
-          <small>Rata-rata persentase tiap bulan</small>
+          <span>{{ month > 0 && year !== 'all' ? 'Rata-rata Margin Harian' : 'Rata-rata Margin Bulanan' }}</span><strong>{{ averageProfitMargin.toFixed(2) }}%</strong>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata persentase tiap hari' : 'Rata-rata persentase tiap bulan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>Laba Bersih</span><strong>{{ formatRupiah(profit) }}</strong>
@@ -331,8 +331,8 @@
           <small>Rasio pengeluaran terhadap pendapatan</small>
         </div>
         <div class="detail-metric-card">
-          <span>Rata-rata OER Bulanan</span><strong>{{ averageOer.toFixed(2) }}%</strong>
-          <small>Rata-rata persentase tiap bulan</small>
+          <span>{{ month > 0 && year !== 'all' ? 'Rata-rata OER Harian' : 'Rata-rata OER Bulanan' }}</span><strong>{{ averageOer.toFixed(2) }}%</strong>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata persentase tiap hari' : 'Rata-rata persentase tiap bulan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>Total Pengeluaran</span><strong>{{ formatRupiah(totalExpenses) }}</strong>
@@ -382,8 +382,8 @@
       </div>
 
       <div class="chart-card detail-chart-card">
-        <div class="section-title">Tren ROI Bulanan</div>
-        <p class="card-description">Perubahan laba bulanan dibandingkan total investasi pada properti yang dipilih.</p>
+        <div class="section-title">{{ month > 0 && year !== 'all' ? 'Tren ROI Harian' : 'Tren ROI Bulanan' }}</div>
+        <p class="card-description">{{ month > 0 && year !== 'all' ? 'Perubahan laba harian dibandingkan total investasi pada properti yang dipilih.' : 'Perubahan laba bulanan dibandingkan total investasi pada properti yang dipilih.' }}</p>
         <div class="chart-container detail-chart-container"><canvas #roiChart></canvas></div>
       </div>
 
@@ -476,70 +476,6 @@
     </div>
 
 
-    <!-- INVESTMENT SUMMARY -->
-    <div class="chart-card">
-
-      <div class="section-header">
-
-        <div class="section-title">
-          Ringkasan Investasi
-        </div>
-
-      </div>
-
-      <div class="investment-grid">
-
-        <div class="investment-card" *ngFor="let property of properties">
-
-          <h4>
-            {{ property.name }}
-          </h4>
-
-          <div class="investment-total">
-            {{ formatRupiah(
-            getInvestmentTotal(property.id)
-            ) }}
-          </div>
-
-          <p>
-            {{
-            getPropertyInvestments(property.id).length
-            }}
-            item investasi
-          </p>
-
-          <div class="investment-info">
-
-            <div>
-              <span>ROI Estimasi</span>
-
-              <strong>
-                {{
-                getPropertyAnalysis(property.id)?.roi || 0
-                }}%/tahun
-              </strong>
-            </div>
-
-            <div>
-              <span>BEP Estimasi</span>
-
-              <strong>
-                {{
-                calculateBep(
-                getPropertyAnalysis(property.id)?.roi || 0
-                )
-                }}
-                tahun
-              </strong>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
     </ng-container>
 
     <ng-template #noFinancialAnalysis>

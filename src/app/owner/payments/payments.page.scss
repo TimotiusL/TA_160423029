@@ -1296,3 +1296,82 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   font-size: 30px;
   font-weight: 800;
 }
+
+/* Backdrop modal konfirmasi/hasil disamakan dengan modal Detail Pembayaran. */
+:host ::ng-deep ion-modal.payment-action-modal {
+  --backdrop-opacity: 0.5 !important;
+  --ion-backdrop-color: #0f172a !important;
+}
+
+:host ::ng-deep ion-modal.payment-action-modal::part(backdrop) {
+  display: block !important;
+  background: #0f172a !important;
+  opacity: 0.5 !important;
+}
+
+.reject-reason-label {
+  display: block;
+  margin: 18px 0 8px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reject-reason-textarea {
+  display: block;
+  width: 100%;
+  min-height: 108px;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.reject-reason-textarea:focus {
+  outline: 2px solid rgba(13, 148, 136, 0.2);
+  border-color: #0d9488;
+}
+
+.reject-reason-textarea:disabled {
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+.reject-reason-hint {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.payment-reject-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 30px 26px 26px;
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+
+  h2 { margin: 0; color: #0f172a; font-size: 19px; font-weight: 750; }
+  p { margin: 0 0 6px; color: #475569; font-size: 14px; line-height: 1.5; }
+  button { min-width: 120px; }
+}
+
+.payment-reject-result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 30px;
+  font-weight: 800;
+}

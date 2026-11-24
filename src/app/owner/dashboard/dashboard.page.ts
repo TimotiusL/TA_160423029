@@ -163,7 +163,13 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
         const penghuni = this.toArray(result.penghuni);
         const pembayaran = this.toArray(result.pembayaran);
         const tagihan = this.toArray(result.tagihan);
-        const pemasukan = this.toArray(result.pemasukan);
+        // Response Laravel PemasukanController mengirim ID kos dengan nama `id_kos`,
+        // sedangkan perhitungan Dashboard menggunakan `tKos_id_kos`.
+        // Samakan nama field di frontend agar filter semua kos maupun per kos tetap cocok.
+        const pemasukan = this.toArray(result.pemasukan).map((item: any) => ({
+          ...item,
+          tKos_id_kos: item.tKos_id_kos ?? item.kos_id_kos ?? item.id_kos
+        }));
         const pengeluaran = this.toArray(result.pengeluaran);
         const pendaftaran = this.toArray(result.pendaftaran);
         const kontrak = this.toArray(result.kontrak);

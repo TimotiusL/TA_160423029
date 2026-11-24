@@ -41,6 +41,7 @@ export class PaymentsPage implements OnInit {
   @ViewChild('paymentDetailModal') private paymentDetailModal?: IonModal;
   @ViewChild('paymentVerifyConfirmModal') private paymentVerifyConfirmModal?: IonModal;
   @ViewChild('paymentVerifySuccessModal') private paymentVerifySuccessModal?: IonModal;
+  @ViewChild('paymentRejectModal') private paymentRejectModal?: IonModal;
 
   constructor(private apiService: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute) { }
 
@@ -57,7 +58,16 @@ export class PaymentsPage implements OnInit {
   processingPaymentId: string | null = null;
   verificationPayment: Payment | null = null;
   verificationError = '';
+  verificationFromDetail = false;
   verificationSuccessMessage = 'Pembayaran berhasil diverifikasi.';
+
+  // State khusus modal penolakan pembayaran.
+  rejectionPayment: Payment | null = null;
+  rejectionReason = '';
+  rejectionError = '';
+  rejectionSuccess = false;
+  rejectionSuccessMessage = 'Pembayaran berhasil ditolak.';
+  rejectionFromDetail = false;
 
   ngOnInit(): void {
     this.loadProperties();
@@ -231,20 +241,40 @@ export class PaymentsPage implements OnInit {
   async verify(payment: Payment): Promise<void> {
     if (this.processing) return;
 
+    // Simpan apakah tombol Verifikasi ditekan dari dalam modal Detail Pembayaran.
+    // Jika iya, tutup modal detail terlebih dahulu agar modal konfirmasi tidak bertumpuk.
+    this.verificationFromDetail = this.showProof && this.selectedPayment?.id === payment.id;
     this.verificationPayment = payment;
     this.verificationError = '';
+    this.cdr.detectChanges();
+
+    if (this.verificationFromDetail) {
+      await this.closeProof();
+    }
+
     this.cdr.detectChanges();
     await this.paymentVerifyConfirmModal?.present();
   }
 
   async cancelVerification(): Promise<void> {
+    // Simpan data sebelum modal ditutup karena event didDismiss akan membersihkan state.
+    const shouldReturnToDetail = this.verificationFromDetail;
+    const payment = this.verificationPayment;
+    this.verificationFromDetail = false;
+
     const dismissed = await this.paymentVerifyConfirmModal?.dismiss(null, 'cancel');
     if (!dismissed) this.onVerificationConfirmDidDismiss();
+
+    // Jika konfirmasi dibuka dari Detail Pembayaran, tampilkan detailnya kembali saat batal.
+    if (shouldReturnToDetail && payment) {
+      this.openProof(payment);
+    }
   }
 
   onVerificationConfirmDidDismiss(): void {
     this.verificationPayment = null;
     this.verificationError = '';
+    this.verificationFromDetail = false;
     this.cdr.detectChanges();
   }
 
@@ -277,10 +307,11 @@ export class PaymentsPage implements OnInit {
         this.verificationSuccessMessage = response?.message || 'Pembayaran berhasil diverifikasi.';
         this.cdr.detectChanges();
 
-        // Tutup modal konfirmasi terlebih dahulu, lalu detail pembayaran.
+        // Modal Detail Pembayaran sudah ditutup sebelum konfirmasi ditampilkan,
+        // jadi cukup tutup konfirmasi lalu tampilkan modal hasil dengan backdrop sendiri.
+        this.verificationFromDetail = false;
         await this.paymentVerifyConfirmModal?.dismiss({ verified: true }, 'verified');
         this.verificationPayment = null;
-        await this.closeProof();
 
         this.cdr.detectChanges();
         await this.paymentVerifySuccessModal?.present();
@@ -299,77 +330,119 @@ export class PaymentsPage implements OnInit {
     await this.paymentVerifySuccessModal?.dismiss(null, 'close');
   }
 
-  reject(payment: Payment): void {
-    const catatan = prompt(
-      'Masukkan alasan penolakan pembayaran:'
-    );
+  /**
+   * Membuka modal penolakan dan menyiapkan data pembayaran yang dipilih.
+   * Jika tombol ditekan dari Detail Pembayaran, tutup modal detail terlebih dahulu
+   * agar modal penolakan tampil sendiri dengan backdrop abu-abu di belakangnya.
+   */
+  async reject(payment: Payment): Promise<void> {
+    if (this.processing) return;
 
-    if (catatan === null) return;
+    this.rejectionPayment = payment;
+    this.rejectionReason = '';
+    this.rejectionError = '';
+    this.rejectionSuccess = false;
+    this.rejectionFromDetail = this.showProof && this.selectedPayment?.id === payment.id;
 
-    if (!catatan.trim()) {
-      alert('Alasan penolakan harus diisi.');
+    this.cdr.detectChanges();
+
+    if (this.rejectionFromDetail) {
+      await this.closeProof();
+    }
+
+    this.cdr.detectChanges();
+    await this.paymentRejectModal?.present();
+  }
+
+  /** Menutup modal penolakan saat Owner membatalkan tindakan. */
+  async cancelRejection(): Promise<void> {
+    // Simpan data karena didDismiss akan mengosongkan state modal penolakan.
+    const shouldReturnToDetail = this.rejectionFromDetail;
+    const payment = this.rejectionPayment;
+    this.rejectionFromDetail = false;
+
+    const dismissed = await this.paymentRejectModal?.dismiss(null, 'cancel');
+    if (!dismissed) this.onRejectionDidDismiss();
+
+    // Saat batal, kembalikan Owner ke Detail Pembayaran yang tadi sedang dibuka.
+    if (shouldReturnToDetail && payment) {
+      this.openProof(payment);
+    }
+  }
+
+  /** Membersihkan state modal setelah modal penolakan benar-benar ditutup. */
+  onRejectionDidDismiss(): void {
+    this.rejectionPayment = null;
+    this.rejectionReason = '';
+    this.rejectionError = '';
+    this.rejectionSuccess = false;
+    this.rejectionFromDetail = false;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Mengirim alasan penolakan ke endpoint verifikasi pembayaran.
+   * Endpoint dan susunan payload tetap sama: ID pembayaran, status ditolak,
+   * dan alasan yang ditulis Owner.
+   */
+  submitRejection(): void {
+    const payment = this.rejectionPayment;
+    const catatan = this.rejectionReason.trim();
+
+    if (!payment || this.processing) return;
+
+    if (!catatan) {
+      this.rejectionError = 'Alasan penolakan harus diisi.';
+      this.cdr.detectChanges();
       return;
     }
 
-    this.processPayment(payment, 'ditolak', catatan.trim());
-  }
-
-  private processPayment(
-    payment: Payment,
-    status: 'diverifikasi' | 'ditolak',
-    catatan: string
-  ): void {
-    if (this.processing) return;
-
-    const konfirmasi = status === 'diverifikasi'
-      ? 'Verifikasi pembayaran ini?'
-      : 'Tolak pembayaran ini?';
-
-    if (!confirm(konfirmasi)) return;
-
     this.processing = true;
     this.processingPaymentId = payment.id;
+    this.rejectionError = '';
     this.cdr.detectChanges();
 
     this.apiService.verifikasiPembayaran(
       Number(payment.id),
-      status,
+      'ditolak',
       catatan
     ).subscribe({
       next: response => {
-        // API sudah mengonfirmasi perubahan di database. Perbarui state
-        // lokal langsung agar UI tidak perlu menunggu refresh halaman.
-        const newStatus = this.mapStatus(response?.data?.status || status);
         const updatedPayment: Payment = {
           ...payment,
-          status: newStatus,
+          status: this.mapStatus(response?.data?.status || 'ditolak'),
           notes: catatan,
-          verifiedAt: new Date().toISOString()
+          verifiedAt: undefined
         };
 
         this.payments = this.payments.map(item =>
           item.id === payment.id ? updatedPayment : item
         );
 
+        // Jika modal detail sedang terbuka, sinkronkan status di dalamnya juga.
+        if (this.selectedPayment?.id === payment.id) {
+          this.selectedPayment = updatedPayment;
+        }
+
         this.processing = false;
         this.processingPaymentId = null;
-        this.showProof = false;
-        this.selectedPayment = null;
+        this.rejectionSuccessMessage = response?.message || 'Pembayaran berhasil ditolak.';
+        this.rejectionSuccess = true;
         this.cdr.detectChanges();
-
-        alert(response?.message || 'Status pembayaran berhasil diperbarui.');
       },
       error: error => {
+        console.error('Gagal menolak pembayaran:', error);
         this.processing = false;
         this.processingPaymentId = null;
-        console.error('Gagal memproses pembayaran:', error);
-        alert(
-          error.error?.message ||
-          'Pembayaran gagal diproses.'
-        );
+        this.rejectionError = error?.error?.message || 'Pembayaran gagal ditolak. Silakan coba lagi.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /** Menutup modal hasil penolakan setelah Owner selesai membaca pesannya. */
+  async closeRejectionSuccess(): Promise<void> {
+    await this.paymentRejectModal?.dismiss(null, 'done');
   }
 
   getTenant(payment: Payment) {

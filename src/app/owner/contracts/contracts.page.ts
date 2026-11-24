@@ -561,7 +561,7 @@ export class ContractsPage {
           // URL dibiarkan hidup lebih lama agar browser atau IDM sempat mengambil blob.
           window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 30000);
           this.downloadingContract = false;
-          this.contractDownloadNotice = 'Unduhan telah dimulai. Periksa daftar unduhan browser atau Internet Download Manager.';
+          this.contractDownloadNotice = 'Unduhan telah dimulai. Periksa daftar unduhan browser.';
           this.cdr.detectChanges();
         }).catch((error: any) => {
           console.error('Gagal memvalidasi file kontrak:', error);
@@ -578,7 +578,7 @@ export class ContractsPage {
         // Status 0 tidak cukup untuk menyimpulkan bahwa file gagal diunduh, jadi tampilkan
         // pemberitahuan netral dan minta pengguna memeriksa daftar unduhan.
         if (error?.status === 0) {
-          this.contractDownloadNotice = 'Aplikasi tidak menerima konfirmasi dari browser. Periksa daftar unduhan browser atau Internet Download Manager sebelum mencoba kembali.';
+          this.contractDownloadNotice = 'Aplikasi tidak menerima konfirmasi dari browser. Periksa daftar unduhan browser sebelum mencoba kembali.';
           this.cdr.detectChanges();
           return;
         }

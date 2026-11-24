@@ -574,8 +574,8 @@
 
 
   <!-- KONFIRMASI VERIFIKASI PEMBAYARAN -->
-  <ion-modal #paymentVerifyConfirmModal class="owner-page-modal owner-page-modal--small"
-    [backdropDismiss]="false" (didDismiss)="onVerificationConfirmDidDismiss()">
+  <ion-modal #paymentVerifyConfirmModal class="owner-page-modal owner-page-modal--small payment-action-modal"
+    [showBackdrop]="true" [backdropDismiss]="false" (didDismiss)="onVerificationConfirmDidDismiss()">
     <ng-template>
       <div class="modal">
         <div class="modal-header">
@@ -630,14 +630,87 @@
   </ion-modal>
 
   <!-- HASIL VERIFIKASI BERHASIL -->
-  <ion-modal #paymentVerifySuccessModal class="owner-page-modal owner-page-modal--small"
-    [backdropDismiss]="true">
+  <ion-modal #paymentVerifySuccessModal class="owner-page-modal owner-page-modal--small payment-action-modal"
+    [showBackdrop]="true" [backdropDismiss]="true">
     <ng-template>
       <div class="payment-verify-success">
         <div class="payment-verify-success-icon">✓</div>
         <h2>Pembayaran Terverifikasi</h2>
         <p>{{ verificationSuccessMessage }}</p>
         <button type="button" class="btn-primary" (click)="closeVerificationSuccess()">Selesai</button>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL PENOLAKAN PEMBAYARAN -->
+  <ion-modal #paymentRejectModal
+    class="owner-page-modal owner-page-modal--small payment-action-modal"
+    [showBackdrop]="true" [backdropDismiss]="false"
+    (didDismiss)="onRejectionDidDismiss()">
+    <ng-template>
+      <div class="modal" *ngIf="!rejectionSuccess">
+        <div class="modal-header">
+          <div>
+            <h2>Tolak Pembayaran</h2>
+            <p>Periksa transaksi dan tuliskan alasan penolakan.</p>
+          </div>
+          <button type="button" class="close-button" aria-label="Tutup"
+            [disabled]="processing" (click)="cancelRejection()">×</button>
+        </div>
+
+        <div class="modal-body" *ngIf="rejectionPayment as payment">
+          <div class="verification-summary">
+            <div class="info-row">
+              <span>Penghuni</span>
+              <strong>{{ payment.tenantName }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Kode Tagihan</span>
+              <strong>{{ payment.billNumber }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Jumlah Pembayaran</span>
+              <strong>{{ formatRupiah(payment.amount) }}</strong>
+            </div>
+            <div class="info-row">
+              <span>Metode</span>
+              <strong>{{ payment.method === 'langsung' ? 'Pembayaran langsung' : payment.method === 'transfer' ? 'Transfer Bank' : payment.method }}</strong>
+            </div>
+          </div>
+
+          <label class="reject-reason-label" for="paymentRejectionReason">
+            Alasan Penolakan
+          </label>
+          <textarea
+            id="paymentRejectionReason"
+            class="reject-reason-textarea"
+            [(ngModel)]="rejectionReason"
+            maxlength="100"
+            rows="4"
+            placeholder="Contoh: Nominal transfer tidak sesuai dengan jumlah tagihan..."
+            [disabled]="processing"></textarea>
+          <p class="verification-error" *ngIf="rejectionError" role="alert">
+            {{ rejectionError }}
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" [disabled]="processing"
+            (click)="cancelRejection()">Batal</button>
+          <button type="button" class="btn-danger" [disabled]="processing"
+            (click)="submitRejection()">
+            {{ processing ? 'Memproses...' : 'Ya, Tolak Pembayaran' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="payment-reject-result" *ngIf="rejectionSuccess">
+        <div class="payment-reject-result-icon">!</div>
+        <h2>Pembayaran Ditolak</h2>
+        <p>{{ rejectionSuccessMessage }}</p>
+        <button type="button" class="btn-primary" (click)="closeRejectionSuccess()">
+          Selesai
+        </button>
       </div>
     </ng-template>
   </ion-modal>

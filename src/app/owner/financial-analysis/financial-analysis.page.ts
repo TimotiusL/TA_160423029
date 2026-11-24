@@ -29,15 +29,6 @@ interface PropertyAnalysis {
   roi: number;
 }
 
-interface Investment {
-  id: string;
-  propertyId: string;
-  date: string;
-  category: string;
-  description: string;
-  amount: number;
-}
-
 @Component({
   selector: 'app-financial-analysis',
   standalone: true,
@@ -120,8 +111,6 @@ export class FinancialAnalysisPage
 
   expenseBreakdown: { name: string; value: number; color: string }[] = [];
 
-  investments: Investment[] = [];
-
   financialChartInstance?: Chart;
   profitChartInstance?: Chart;
   expenseChartInstance?: Chart;
@@ -133,6 +122,8 @@ export class FinancialAnalysisPage
   oerChartInstance?: Chart;
   roiChartInstance?: Chart;
   private routeQuerySubscription?: Subscription;
+  private analysisRequestId = 0;
+  private chartRenderTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.routeQuerySubscription = this.route.queryParamMap.subscribe(params => {
@@ -146,7 +137,6 @@ export class FinancialAnalysisPage
     });
 
     this.loadProperties();
-    this.loadInvestments();
   }
 
   private loadProperties(): void {
@@ -166,25 +156,6 @@ export class FinancialAnalysisPage
         console.error('Gagal mengambil daftar kos:', error);
         this.loadError = 'Gagal mengambil daftar properti.';
         this.cdr.detectChanges();
-      }
-    });
-  }
-
-  private loadInvestments(): void {
-    this.api.getInvestasi().subscribe({
-      next: (data: any[]) => {
-        this.investments = data.map(item => ({
-          id: String(item.id_investasi),
-          propertyId: String(item.tKos_id_kos),
-          date: String(item.tgl_masuk).substring(0, 10),
-          category: item.kategori,
-          description: item.deskripsi,
-          amount: Number(item.jumlah)
-        }));
-        this.cdr.detectChanges();
-      },
-      error: error => {
-        console.error('Gagal mengambil data investasi:', error);
       }
     });
   }
@@ -216,9 +187,18 @@ export class FinancialAnalysisPage
   }
 
   private loadFinancialAnalysis(): void {
-    if (!this.properties.length) {
-      this.propertyAnalysis = [];
-      this.updateChartData();
+    // Setiap perubahan filter mendapat ID request baru. Respons request lama
+    // diabaikan agar tidak menimpa hasil dari pilihan tanggal terbaru.
+    const requestId = ++this.analysisRequestId;
+
+    const selectedProperties = this.propertyFilter === 'all'
+      ? this.properties
+      : this.properties.filter(property => property.id === this.propertyFilter);
+
+    if (!selectedProperties.length) {
+      this.loading = false;
+      this.loadError = '';
+      this.clearAnalysisData();
       this.cdr.detectChanges();
       return;
     }
@@ -227,17 +207,10 @@ export class FinancialAnalysisPage
     this.loadError = '';
     const dates = this.getPeriodDates();
 
-    const selectedProperties = this.propertyFilter === 'all'
-      ? this.properties
-      : this.properties.filter(property => property.id === this.propertyFilter);
-
-    if (!selectedProperties.length) {
-      this.loading = false;
-      this.propertyAnalysis = [];
-      this.updateChartData();
-      this.cdr.detectChanges();
-      return;
-    }
+    // Kosongkan angka dan grafik periode sebelumnya saat filter berubah.
+    // Dengan begitu, data lama tidak tampak seperti hasil filter yang baru.
+    this.clearAnalysisData();
+    this.cdr.detectChanges();
 
     forkJoin(
       selectedProperties.map(property =>
@@ -249,6 +222,9 @@ export class FinancialAnalysisPage
       )
     ).subscribe({
       next: (results: any[]) => {
+        // Jangan gunakan hasil request yang sudah tidak sesuai filter aktif.
+        if (requestId !== this.analysisRequestId) return;
+
         this.propertyAnalysis = results.map((result, index) => {
           const property = selectedProperties[index];
 
@@ -265,27 +241,33 @@ export class FinancialAnalysisPage
           };
         });
 
-        // Gabungkan rincian semua kos yang sedang dipilih agar grafik
-        // "Semua Kos" tidak hanya menampilkan data kos pertama.
-        const monthlyMap = new Map<number, any>();
+        // Gabungkan data semua kos berdasarkan TAHUN-BULAN, bukan nomor bulan saja.
+        // Dengan begitu September 2025 dan September 2026 tidak tercampur.
+        const monthlyMap = new Map<string, any>();
         results.forEach(result => {
           (result.grafik_bulanan ?? []).forEach((item: any) => {
-            const monthNumber = Number(item.bulan);
-            const current = monthlyMap.get(monthNumber) ?? {
-              bulan: monthNumber,
-              label: item.label,
+            // Saat filter satu bulan, backend mengirim titik harian (YYYY-MM-DD).
+            // Untuk filter tahun/semua periode, backend mengirim titik bulanan (YYYY-MM).
+            const periodKey = String(item.periode || item.tahun_bulan || item.tanggal || '');
+            if (!/^\d{4}-\d{2}(?:-\d{2})?$/.test(periodKey)) return;
+
+            const current = monthlyMap.get(periodKey) ?? {
+              periode: periodKey,
+              label: item.label || periodKey,
               pendapatan: 0,
               pengeluaran: 0,
               laba: 0
             };
+
             current.pendapatan += Number(item.pendapatan || 0);
             current.pengeluaran += Number(item.pengeluaran || 0);
             current.laba = current.pendapatan - current.pengeluaran;
-            monthlyMap.set(monthNumber, current);
+            monthlyMap.set(periodKey, current);
           });
         });
+
         this.grafikBulanan = Array.from(monthlyMap.values())
-          .sort((a, b) => a.bulan - b.bulan);
+          .sort((a, b) => a.periode.localeCompare(b.periode));
 
         const combineBreakdown = (key: 'rincian_pendapatan' | 'rincian_pengeluaran') => {
           const totals = new Map<string, number>();
@@ -303,27 +285,62 @@ export class FinancialAnalysisPage
         this.rincianPendapatan = combineBreakdown('rincian_pendapatan');
         this.rincianPengeluaran = combineBreakdown('rincian_pengeluaran');
 
-        this.hunian = results[0]?.hunian ?? {
+        // Saat memilih Semua Kos, jumlahkan kapasitas semua properti,
+        // jangan hanya mengambil data hunian dari properti pertama.
+        this.hunian = results.reduce((total, result) => ({
+          total_kamar: total.total_kamar + Number(result.hunian?.total_kamar || 0),
+          kamar_terisi: total.kamar_terisi + Number(result.hunian?.kamar_terisi || 0),
+          persentase: 0
+        }), {
           total_kamar: 0,
           kamar_terisi: 0,
           persentase: 0
-        };
+        });
+        this.hunian.persentase = this.hunian.total_kamar > 0
+          ? Number(((this.hunian.kamar_terisi / this.hunian.total_kamar) * 100).toFixed(2))
+          : 0;
 
         this.loading = false;
         this.updateChartData();
         this.cdr.detectChanges();
-
-        setTimeout(() => {
-          this.createCharts();
-        }, 300);
+        this.scheduleChartsRefresh();
       },
       error: error => {
+        if (requestId !== this.analysisRequestId) return;
+
         console.error('Gagal mengambil analisis keuangan:', error);
         this.loading = false;
+        this.clearAnalysisData();
         this.loadError = error.error?.message || 'Gagal mengambil data analisis keuangan.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private clearAnalysisData(): void {
+    this.propertyAnalysis = [];
+    this.grafikBulanan = [];
+    this.rincianPendapatan = [];
+    this.rincianPengeluaran = [];
+    this.hunian = { total_kamar: 0, kamar_terisi: 0, persentase: 0 };
+    this.updateChartData();
+    this.destroyCharts();
+  }
+
+  private scheduleChartsRefresh(): void {
+    if (this.chartRenderTimer) {
+      clearTimeout(this.chartRenderTimer);
+    }
+
+    // Beri Angular kesempatan memperbarui DOM dan ViewChild setelah state berubah.
+    this.chartRenderTimer = setTimeout(() => {
+      this.chartRenderTimer = null;
+      if (this.hasAnalysisData) {
+        this.createCharts();
+      } else {
+        this.destroyCharts();
+      }
+    }, 0);
   }
 
   private updateChartData(): void {
@@ -359,16 +376,17 @@ export class FinancialAnalysisPage
   }
 
   ngOnDestroy(): void {
+    // Batalkan efek respons request yang masih berjalan saat halaman ditutup.
+    this.analysisRequestId++;
     this.routeQuerySubscription?.unsubscribe();
+    if (this.chartRenderTimer) clearTimeout(this.chartRenderTimer);
     this.destroyCharts();
   }
 
   get hasAnalysisData(): boolean {
-    return this.propertyAnalysis.some(property =>
-      property.income !== 0 ||
-      property.expense !== 0 ||
-      property.investment !== 0
-    );
+    // Satu periode tanpa transaksi tetap harus menampilkan angka nol dan area grafik,
+    // bukan mempertahankan tampilan periode sebelumnya atau menghilangkan seluruh halaman.
+    return this.propertiesLoaded && this.propertyAnalysis.length > 0;
   }
 
   get selectedProperty(): PropertyAnalysis | null {
@@ -516,9 +534,11 @@ export class FinancialAnalysisPage
           borderColor: color,
           backgroundColor: `${color}20`,
           borderWidth: 2.5,
-          pointRadius: 3,
+          pointRadius: values.length === 1 ? 5 : 2.5,
+          pointHoverRadius: 6,
           fill: true,
-          tension: 0.35
+          tension: 0.35,
+          spanGaps: true
         }]
       },
       options: {
@@ -599,36 +619,12 @@ export class FinancialAnalysisPage
     );
   }
 
-  getPropertyInvestments(propertyId: string): Investment[] {
-    return this.investments.filter(
-      investment => investment.propertyId === propertyId
-    );
-  }
-
-  getInvestmentTotal(propertyId: string): number {
-    return this.getPropertyInvestments(propertyId)
-      .reduce(
-        (total, investment) => total + investment.amount,
-        0
-      );
-  }
-
-  getPropertyAnalysis(propertyId: string): PropertyAnalysis | undefined {
-    return this.propertyAnalysis.find(
-      property => property.id === propertyId
-    );
-  }
-
   formatRupiah(value: number): string {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       maximumFractionDigits: 0
     }).format(value);
-  }
-
-  calculateBep(roi: number): number {
-    return Math.round(100 / (roi || 1));
   }
 
   getPropertyName(): string {
@@ -639,12 +635,21 @@ export class FinancialAnalysisPage
     return this.selectedProperty?.name || '-';
   }
 
-  changeProperty(): void {
+  changeProperty(value: string): void {
+    this.propertyFilter = value || 'all';
     this.loadFinancialAnalysis();
   }
 
-  changePeriod(): void {
-    if (this.year === 'all') this.month = 0;
+  changeYear(value: number | string): void {
+    this.year = value === 'all' ? 'all' : Number(value);
+    if (this.year === 'all') {
+      this.month = 0;
+    }
+    this.loadFinancialAnalysis();
+  }
+
+  changeMonth(value: number | string): void {
+    this.month = Number(value) || 0;
     this.loadFinancialAnalysis();
   }
 
@@ -660,6 +665,17 @@ export class FinancialAnalysisPage
     this.oerChartInstance?.destroy();
     this.roiChartInstance?.destroy();
 
+    // Kosongkan referensi agar tidak ada instance lama yang tertinggal.
+    this.financialChartInstance = undefined;
+    this.profitChartInstance = undefined;
+    this.expenseChartInstance = undefined;
+    this.incomeChartInstance = undefined;
+    this.comparisonChartInstance = undefined;
+    this.incomeTrendChartInstance = undefined;
+    this.expenseTrendChartInstance = undefined;
+    this.marginChartInstance = undefined;
+    this.oerChartInstance = undefined;
+    this.roiChartInstance = undefined;
   }
 
   private createCharts(): void {

@@ -227,7 +227,6 @@
             </div>
             <div class="timeline-copy">
               <strong>Pengajuan Dikirim</strong>
-              <p>Formulir pengajuan pendaftaran Anda telah tercatat di sistem.</p>
             </div>
             <span class="timeline-status-pill completed-pill">Selesai</span>
           </div>
@@ -242,7 +241,6 @@
             </div>
             <div class="timeline-copy">
               <strong>Verifikasi Pemilik Kos</strong>
-              <p>{{ pendaftaran.status === 'menunggu' ? 'Pengelola sedang memeriksa kelengkapan data dan ketersediaan kamar.' : 'Pemeriksaan pengajuan telah selesai.' }}</p>
             </div>
             <span class="timeline-status-pill" [class.active-pill]="pendaftaran.status === 'menunggu'" [class.completed-pill]="pendaftaran.status !== 'menunggu'">
               {{ pendaftaran.status === 'menunggu' ? 'Diproses' : 'Selesai' }}
@@ -263,7 +261,6 @@
             </div>
             <div class="timeline-copy">
               <strong>{{ pendaftaran.status === 'ditolak' ? 'Pengajuan Ditolak' : pendaftaran.status === 'dibatalkan' ? 'Pengajuan Dibatalkan' : 'Keputusan Pengajuan' }}</strong>
-              <p>{{ pendaftaran.status === 'menunggu' ? 'Keputusan verifikasi akan ditampilkan setelah diperiksa oleh pemilik kos.' : pendaftaran.status === 'diterima' ? 'Pengajuan diterima! Periksa menu Kontrak dan Tagihan untuk langkah pembayaran.' : pendaftaran.status === 'dibatalkan' ? 'Pengajuan ini telah dibatalkan.' : 'Pengajuan belum dapat disetujui. Hubungi pengelola kos untuk informasi lebih lanjut.' }}</p>
             </div>
             <span class="timeline-status-pill" [class.completed-pill]="pendaftaran.status === 'diterima'" [class.rejected-pill]="pendaftaran.status === 'ditolak'" [class.cancelled-pill]="pendaftaran.status === 'dibatalkan'">
               {{ pendaftaran.status === 'menunggu' ? 'Menunggu' : 'Selesai' }}
