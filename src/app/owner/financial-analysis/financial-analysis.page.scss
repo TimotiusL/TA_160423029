@@ -1131,8 +1131,6 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   small { font-size: 12px; color: $subtle; }
 }
 
-.analysis-note-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-
 .analysis-note {
   padding: 16px 18px;
   border: 1px solid $line;
@@ -1171,7 +1169,7 @@ ion-modal.property-modal { --width: min(640px, calc(100vw - 32px)); }
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-metric-grid.three-metrics { grid-template-columns: 1fr; }
-  .chart-grid.two-columns, .analysis-note-grid { grid-template-columns: 1fr; }
+  .chart-grid.two-columns { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {

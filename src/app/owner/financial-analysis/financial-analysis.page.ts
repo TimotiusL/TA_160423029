@@ -463,21 +463,29 @@ export class FinancialAnalysisPage
     ).toFixed(2);
   }
 
-  get averageMonthlyProfit(): number {
-    if (!this.monthlyFinancials.length) return 0;
-    return this.monthlyFinancials.reduce((sum, item) => sum + item.profit, 0)
-      / this.monthlyFinancials.length;
-  }
-
-  get bestProfitMonth(): { month: string; profit: number } | null {
-    if (!this.monthlyFinancials.length) return null;
-    return this.monthlyFinancials.reduce((best, item) =>
-      item.profit > best.profit ? item : best
+  // Periode aktif adalah hari/bulan yang memiliki pendapatan atau pengeluaran.
+  // Periode tanpa transaksi tetap dipertahankan pada grafik, tetapi tidak masuk rata-rata.
+  get activeFinancialPeriods() {
+    return this.monthlyFinancials.filter(
+      item => item.income !== 0 || item.expense !== 0
     );
   }
 
-  get positiveProfitMonths(): number {
-    return this.monthlyFinancials.filter(item => item.profit > 0).length;
+  get averageMonthlyProfit(): number {
+    const activePeriods = this.activeFinancialPeriods;
+    if (!activePeriods.length) return 0;
+
+    return activePeriods.reduce((sum, item) => sum + item.profit, 0)
+      / activePeriods.length;
+  }
+
+  get bestProfitMonth(): { month: string; profit: number } | null {
+    const activePeriods = this.activeFinancialPeriods;
+    if (!activePeriods.length) return null;
+
+    return activePeriods.reduce((best, item) =>
+      item.profit > best.profit ? item : best
+    );
   }
 
   get incomeBreakdownTotal(): number {
@@ -489,13 +497,30 @@ export class FinancialAnalysisPage
   }
 
   get averageProfitMargin(): number {
-    const values = this.monthlyRatios.map(item => item.profitMargin);
-    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    // Profit Margin membutuhkan pendapatan sebagai pembagi.
+    // Periode tanpa pendapatan tidak memiliki persentase yang valid.
+    const periodsWithIncome = this.monthlyFinancials.filter(item => item.income !== 0);
+    if (!periodsWithIncome.length) return 0;
+
+    const total = periodsWithIncome.reduce(
+      (sum, item) => sum + (item.profit / item.income) * 100,
+      0
+    );
+
+    return total / periodsWithIncome.length;
   }
 
   get averageOer(): number {
-    const values = this.monthlyRatios.map(item => item.oer);
-    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    // OER juga hanya dirata-ratakan pada periode yang memiliki pendapatan.
+    const periodsWithIncome = this.monthlyFinancials.filter(item => item.income !== 0);
+    if (!periodsWithIncome.length) return 0;
+
+    const total = periodsWithIncome.reduce(
+      (sum, item) => sum + (item.expense / item.income) * 100,
+      0
+    );
+
+    return total / periodsWithIncome.length;
   }
 
   get monthlyRatios() {

@@ -242,7 +242,7 @@
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Rata-rata Laba Harian' : 'Rata-rata Laba Bulanan' }}</span><strong>{{ formatRupiah(averageMonthlyProfit) }}</strong>
-          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata dari hari yang ditampilkan' : 'Rata-rata dari bulan yang ditampilkan' }}</small>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata dari hari aktif' : 'Rata-rata dari bulan aktif' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Hari dengan Laba Tertinggi' : 'Bulan dengan Laba Tertinggi' }}</span>
@@ -257,17 +257,10 @@
         <div class="chart-container detail-chart-container"><canvas #profitChart></canvas></div>
       </div>
 
-      <div class="analysis-note-grid">
-        <div class="analysis-note">
-          <span class="note-label">Rumus</span>
-          <strong>Laba Bersih = Pendapatan − Pengeluaran</strong>
-          <p>Nilai positif menunjukkan pendapatan lebih besar daripada pengeluaran. Nilai negatif menandakan biaya melebihi pemasukan.</p>
-        </div>
-        <div class="analysis-note">
-          <span class="note-label">Ringkasan Periode</span>
-          <strong>{{ positiveProfitMonths }} dari {{ monthlyFinancials.length }} {{ month > 0 && year !== 'all' ? 'hari' : 'bulan' }} mencatat laba positif</strong>
-          <p>{{ month > 0 && year !== 'all' ? 'Gunakan tren harian untuk melihat perubahan hasil usaha, bukan hanya total pada akhir bulan.' : 'Gunakan tren bulanan untuk melihat perubahan hasil usaha, bukan hanya total pada akhir periode.' }}</p>
-        </div>
+      <div class="analysis-note">
+        <span class="note-label">Rumus</span>
+        <strong>Laba Bersih = Pendapatan − Pengeluaran</strong>
+        <p>Nilai positif menunjukkan pendapatan lebih besar daripada pengeluaran. Nilai negatif menandakan biaya melebihi pemasukan.</p>
       </div>
     </section>
 
@@ -291,7 +284,7 @@
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Rata-rata Margin Harian' : 'Rata-rata Margin Bulanan' }}</span><strong>{{ averageProfitMargin.toFixed(2) }}%</strong>
-          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata persentase tiap hari' : 'Rata-rata persentase tiap bulan' }}</small>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata hari aktif yang memiliki pendapatan' : 'Rata-rata bulan aktif yang memiliki pendapatan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>Laba Bersih</span><strong>{{ formatRupiah(profit) }}</strong>
@@ -332,7 +325,7 @@
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Rata-rata OER Harian' : 'Rata-rata OER Bulanan' }}</span><strong>{{ averageOer.toFixed(2) }}%</strong>
-          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata persentase tiap hari' : 'Rata-rata persentase tiap bulan' }}</small>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata hari aktif yang memiliki pendapatan' : 'Rata-rata bulan aktif yang memiliki pendapatan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>Total Pengeluaran</span><strong>{{ formatRupiah(totalExpenses) }}</strong>
