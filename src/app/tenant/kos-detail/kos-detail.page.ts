@@ -98,8 +98,6 @@ export class KosDetailPage implements OnInit {
     this.route.queryParamMap.subscribe(params => {
       const id = Number(params.get('propertyId'));
 
-      // Detail kos boleh dilihat dari Browse atau tautan langsung.
-      // Status pendaftaran tidak digunakan untuk memblokir akses baca detail.
       if (!id || !Number.isFinite(id) || id <= 0) {
         this.errorMessage = 'ID kos tidak valid. Silakan kembali ke Cari Kos dan pilih kos lagi.';
         this.loading = false;
@@ -175,7 +173,6 @@ export class KosDetailPage implements OnInit {
     this.api.getTenantKatalogById(this.propertyId).subscribe({
       next: (response: any) => {
         try {
-          // Endpoint detail mengembalikan satu kos agar browser tidak perlu mengunduh seluruh katalog.
           const kos = response?.data ?? response;
           if (!kos || Number(kos?.id_kos ?? kos?.id) !== this.propertyId) {
             this.errorMessage = `Kos dengan ID ${this.propertyId} tidak ditemukan pada katalog.`;
@@ -190,7 +187,6 @@ export class KosDetailPage implements OnInit {
             Array.isArray(type?.kamar) ? type.kamar : []
           );
 
-          // Gabungkan relasi kamar langsung dan relasi melalui jenis kamar tanpa duplikasi.
           const roomsById = new Map<number, any>();
           [...directRooms, ...nestedRooms].forEach((room: any) => {
             const roomId = Number(room?.id_kamar);
@@ -225,8 +221,6 @@ export class KosDetailPage implements OnInit {
             bundleAktif: this.toBoolean(kos.bundle_aktif)
           };
 
-          // Bundle aktif dikirim bersama detail kos oleh endpoint katalog tenant.
-          // Tampilkan hanya jika fitur bundle di tingkat kos dan paketnya sama-sama aktif.
           const bundleRows: any[] = Array.isArray(kos.bundles) ? kos.bundles : [];
           const activeBundleRows = bundleRows.filter((bundle: any) =>
             String(bundle?.status || '').toLowerCase() === 'aktif'
@@ -266,8 +260,6 @@ export class KosDetailPage implements OnInit {
           this.fotoAktif = 0;
           this.mapsUrl = this.resolveMapsUrl(kos.link_gmaps, kos.alamat);
 
-          // Kelompokkan kamar berdasarkan tipe, tetapi tetap simpan ID kamar fisik
-          // agar pengajuan selalu mengirim ID yang tepat ke backend.
           const grouped = new Map<string, RoomTypeOption>();
           availableRooms.forEach((room: any) => {
             const roomTypeId = Number(room.tJenisKamar_id_jenisKamar

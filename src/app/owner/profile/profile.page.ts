@@ -53,7 +53,6 @@ export class ProfilePage implements OnInit {
   loadUser(): void {
     this.isLoadingProfile = true;
 
-    // Tampilkan data tersimpan terlebih dahulu agar halaman tidak kosong.
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
@@ -72,7 +71,6 @@ export class ProfilePage implements OnInit {
         next: (response: any) => {
           const currentUser = response?.user ?? response?.data ?? response;
           this.setUserData(currentUser);
-          // Simpan bentuk data konsisten yang digunakan aplikasi.
           localStorage.setItem('user', JSON.stringify({
             name: this.user.name,
             email: this.user.email,

@@ -118,8 +118,7 @@ export class ComplaintsPage {
       })
     ).subscribe({
       next: (response: any) => {
-        // Kelayakan kontrak sudah diperiksa melalui GET /kontrak. Respons daftar
-        // komplain hanya dipakai untuk menyinkronkan riwayat, bukan mengubah statusnya.
+
         this.applyComplaintRows(response);
         this.errorMessage = '';
         this.cdr.detectChanges();
@@ -131,7 +130,6 @@ export class ComplaintsPage {
             ? 'Pengambilan daftar komplain memerlukan waktu lebih dari 15 detik. Silakan coba lagi.'
             : error?.error?.message || 'Komplain gagal dimuat. Pastikan kamu sudah login dan memiliki profil penghuni.';
         } else {
-          // Refresh latar belakang tidak menghapus pesan yang sudah tampil secara optimistis.
           this.toast('Pesan sudah diproses, tetapi riwayat chat belum berhasil diperbarui. Coba buka kembali percakapan.');
         }
         this.cdr.detectChanges();
@@ -241,9 +239,7 @@ export class ComplaintsPage {
       })
     ).subscribe({
       next: (response: any) => {
-        // Tampilkan pesan segera setelah POST berhasil, tanpa menunggu GET ulang.
-        // Refresh dilakukan setelahnya untuk mengganti ID/timestamp sementara
-        // dengan data resmi dari database.
+
         const optimisticReply: ComplaintResponse = {
           id: -Date.now(),
           authorName: this.currentTenantName(),
@@ -271,8 +267,7 @@ export class ComplaintsPage {
         this.toast(error?.name === 'TimeoutError'
           ? 'Belum menerima konfirmasi dari server. Riwayat percakapan sedang diperiksa kembali.'
           : error?.error?.message || 'Pesan gagal dikirim. Silakan coba lagi.');
-        // Jika server sempat menyimpan pesan sebelum koneksi terputus,
-        // GET ulang akan menyinkronkan chat tanpa membuat balasan ganda.
+
         this.fetchComplaintList(false);
         this.cdr.detectChanges();
       }

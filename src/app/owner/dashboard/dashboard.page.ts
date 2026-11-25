@@ -134,7 +134,6 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
   }
 
   ionViewWillEnter(): void {
-    // Jika view sudah siap, refresh setiap kali dashboard dibuka.
     if (this.viewReady) {
       this.loadDashboard();
     }
@@ -163,9 +162,7 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
         const penghuni = this.toArray(result.penghuni);
         const pembayaran = this.toArray(result.pembayaran);
         const tagihan = this.toArray(result.tagihan);
-        // Response Laravel PemasukanController mengirim ID kos dengan nama `id_kos`,
-        // sedangkan perhitungan Dashboard menggunakan `tKos_id_kos`.
-        // Samakan nama field di frontend agar filter semua kos maupun per kos tetap cocok.
+
         const pemasukan = this.toArray(result.pemasukan).map((item: any) => ({
           ...item,
           tKos_id_kos: item.tKos_id_kos ?? item.kos_id_kos ?? item.id_kos
@@ -184,7 +181,7 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
         }
 
         this.properties = kos.map((item: any) => {
-          // Endpoint /kos sudah mengembalikan ringkasan tiap kos.
+
           const roomsForKos = kamar.filter((room: any) =>
             Number(room.tKos_id_kos) === Number(item.id_kos)
           );
@@ -442,7 +439,7 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
       const [year, month] = keys[0].split('-').map(Number);
       earliestDate = new Date(year, month - 1, 1);
     } else {
-      // Tetap sediakan pilihan bulan meskipun belum ada transaksi keuangan.
+
       earliestDate = new Date(
         currentDate.getFullYear(), currentDate.getMonth() - 11, 1
       );
@@ -461,7 +458,6 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
       options.push({ value: key, label: this.formatMonthLabel(key) });
     }
 
-    // Pastikan bulan berjalan selalu tersedia.
     if (!options.some(option => option.value === currentKey)) {
       options.push({ value: currentKey, label: this.formatMonthLabel(currentKey) });
     }
@@ -559,7 +555,6 @@ export class DashboardPage implements AfterViewInit, OnDestroy {
 
     let normalized = String(value).trim().replace(/\s/g, '');
     if (normalized.includes(',')) {
-      // Mendukung format 1.500.000,00 dari sumber data lokal.
       normalized = normalized.replace(/\./g, '').replace(',', '.');
     } else if (/^-?\d{1,3}(\.\d{3})+$/.test(normalized)) {
       normalized = normalized.replace(/\./g, '');

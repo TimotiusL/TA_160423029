@@ -102,7 +102,6 @@ export class RegistrationPage implements OnInit {
     const propertyId = this.route.snapshot.queryParamMap.get('propertyId');
     const roomId = this.route.snapshot.queryParamMap.get('roomId');
 
-    // Form pendaftaran hanya dibuka melalui tombol Mau Daftar pada Detail Kos.
     if (!fromKosDetail || !propertyId || !roomId) {
       this.router.navigateByUrl('/tenant/browse', { replaceUrl: true });
       return;
@@ -121,7 +120,6 @@ export class RegistrationPage implements OnInit {
         this.form.phone = savedUser.no_telp || savedUser.phone || '';
       }
     } catch {
-      // Form tetap bisa diisi secara manual bila data login tidak tersedia.
     }
 
     this.api.me().subscribe({
@@ -143,8 +141,6 @@ export class RegistrationPage implements OnInit {
           this.form.birthDate = String(user.tgl_lahir).slice(0, 10);
         }
 
-        // KTP yang sudah tersimpan di profil ditampilkan, bukan diisi ke input file.
-        // Browser tidak mengizinkan input file diprefill secara otomatis.
         this.existingKtpPath = user.foto_ktp || '';
         this.existingKtpName = this.existingKtpPath
           ? this.existingKtpPath.split('/').pop() || 'KTP tersimpan'
@@ -180,12 +176,9 @@ export class RegistrationPage implements OnInit {
       return;
     }
 
-    // Halaman registrasi datang dari Detail Kos, jadi cukup ambil satu kos yang dipilih.
-    // Endpoint detail lebih ringan daripada mengunduh seluruh katalog dan relasi kamar.
     this.api.getTenantKatalogById(kosId).pipe(
       timeout({ first: 15000 }),
       finalize(() => {
-        // Pastikan spinner berhenti baik request sukses, gagal, maupun timeout.
         this.loading = false;
         this.cdr.markForCheck();
       })
@@ -209,7 +202,6 @@ export class RegistrationPage implements OnInit {
             Array.isArray(type?.kamar) ? type.kamar : []
           );
 
-          // Gabungkan dua bentuk relasi kamar agar kamar yang sama tidak terhitung dua kali.
           const roomsById = new Map<number, any>();
           [...directRooms, ...nestedRooms].forEach((room: any) => {
             const id = Number(room?.id_kamar);
@@ -482,8 +474,7 @@ export class RegistrationPage implements OnInit {
     formData.append('nik', this.form.nik.trim());
     formData.append('tgl_lahir', this.form.birthDate);
     formData.append('jenis_kelamin', this.form.gender);
-    // Jika KTP sudah tersimpan di profil, gunakan file yang ada.
-    // File hanya dikirim lagi bila tenant memilih file pengganti.
+
     if (this.ktpFile) {
       formData.append('foto_ktp', this.ktpFile, this.ktpFile.name);
     }
@@ -504,7 +495,6 @@ export class RegistrationPage implements OnInit {
         this.submitted = true;
         this.showSuccessModal = true;
         this.toastMessage = '';
-        // Modal hanya dibuka setelah backend mengonfirmasi pendaftaran berhasil.
         this.cdr.detectChanges();
       },
       error: (error: any) => {

@@ -187,8 +187,6 @@ export class FinancialAnalysisPage
   }
 
   private loadFinancialAnalysis(): void {
-    // Setiap perubahan filter mendapat ID request baru. Respons request lama
-    // diabaikan agar tidak menimpa hasil dari pilihan tanggal terbaru.
     const requestId = ++this.analysisRequestId;
 
     const selectedProperties = this.propertyFilter === 'all'
@@ -207,8 +205,6 @@ export class FinancialAnalysisPage
     this.loadError = '';
     const dates = this.getPeriodDates();
 
-    // Kosongkan angka dan grafik periode sebelumnya saat filter berubah.
-    // Dengan begitu, data lama tidak tampak seperti hasil filter yang baru.
     this.clearAnalysisData();
     this.cdr.detectChanges();
 
@@ -222,7 +218,6 @@ export class FinancialAnalysisPage
       )
     ).subscribe({
       next: (results: any[]) => {
-        // Jangan gunakan hasil request yang sudah tidak sesuai filter aktif.
         if (requestId !== this.analysisRequestId) return;
 
         this.propertyAnalysis = results.map((result, index) => {
@@ -241,13 +236,9 @@ export class FinancialAnalysisPage
           };
         });
 
-        // Gabungkan data semua kos berdasarkan TAHUN-BULAN, bukan nomor bulan saja.
-        // Dengan begitu September 2025 dan September 2026 tidak tercampur.
         const monthlyMap = new Map<string, any>();
         results.forEach(result => {
           (result.grafik_bulanan ?? []).forEach((item: any) => {
-            // Saat filter satu bulan, backend mengirim titik harian (YYYY-MM-DD).
-            // Untuk filter tahun/semua periode, backend mengirim titik bulanan (YYYY-MM).
             const periodKey = String(item.periode || item.tahun_bulan || item.tanggal || '');
             if (!/^\d{4}-\d{2}(?:-\d{2})?$/.test(periodKey)) return;
 
@@ -285,8 +276,6 @@ export class FinancialAnalysisPage
         this.rincianPendapatan = combineBreakdown('rincian_pendapatan');
         this.rincianPengeluaran = combineBreakdown('rincian_pengeluaran');
 
-        // Saat memilih Semua Kos, jumlahkan kapasitas semua properti,
-        // jangan hanya mengambil data hunian dari properti pertama.
         this.hunian = results.reduce((total, result) => ({
           total_kamar: total.total_kamar + Number(result.hunian?.total_kamar || 0),
           kamar_terisi: total.kamar_terisi + Number(result.hunian?.kamar_terisi || 0),
@@ -332,7 +321,6 @@ export class FinancialAnalysisPage
       clearTimeout(this.chartRenderTimer);
     }
 
-    // Beri Angular kesempatan memperbarui DOM dan ViewChild setelah state berubah.
     this.chartRenderTimer = setTimeout(() => {
       this.chartRenderTimer = null;
       if (this.hasAnalysisData) {
@@ -376,7 +364,6 @@ export class FinancialAnalysisPage
   }
 
   ngOnDestroy(): void {
-    // Batalkan efek respons request yang masih berjalan saat halaman ditutup.
     this.analysisRequestId++;
     this.routeQuerySubscription?.unsubscribe();
     if (this.chartRenderTimer) clearTimeout(this.chartRenderTimer);
@@ -384,8 +371,6 @@ export class FinancialAnalysisPage
   }
 
   get hasAnalysisData(): boolean {
-    // Satu periode tanpa transaksi tetap harus menampilkan angka nol dan area grafik,
-    // bukan mempertahankan tampilan periode sebelumnya atau menghilangkan seluruh halaman.
     return this.propertiesLoaded && this.propertyAnalysis.length > 0;
   }
 
@@ -463,8 +448,6 @@ export class FinancialAnalysisPage
     ).toFixed(2);
   }
 
-  // Periode aktif adalah hari/bulan yang memiliki pendapatan atau pengeluaran.
-  // Periode tanpa transaksi tetap dipertahankan pada grafik, tetapi tidak masuk rata-rata.
   get activeFinancialPeriods() {
     return this.monthlyFinancials.filter(
       item => item.income !== 0 || item.expense !== 0
@@ -497,8 +480,6 @@ export class FinancialAnalysisPage
   }
 
   get averageProfitMargin(): number {
-    // Profit Margin membutuhkan pendapatan sebagai pembagi.
-    // Periode tanpa pendapatan tidak memiliki persentase yang valid.
     const periodsWithIncome = this.monthlyFinancials.filter(item => item.income !== 0);
     if (!periodsWithIncome.length) return 0;
 
@@ -511,7 +492,6 @@ export class FinancialAnalysisPage
   }
 
   get averageOer(): number {
-    // OER juga hanya dirata-ratakan pada periode yang memiliki pendapatan.
     const periodsWithIncome = this.monthlyFinancials.filter(item => item.income !== 0);
     if (!periodsWithIncome.length) return 0;
 
@@ -690,7 +670,6 @@ export class FinancialAnalysisPage
     this.oerChartInstance?.destroy();
     this.roiChartInstance?.destroy();
 
-    // Kosongkan referensi agar tidak ada instance lama yang tertinggal.
     this.financialChartInstance = undefined;
     this.profitChartInstance = undefined;
     this.expenseChartInstance = undefined;
@@ -980,8 +959,7 @@ export class FinancialAnalysisPage
             ...this.baseOptions().scales,
             y: {
               ...this.baseOptions().scales.y,
-              // Skala grafik perbandingan properti dimulai dari nol.
-              // Nilai laba asli tetap dipertahankan pada data dan ringkasan.
+
               min: 0,
               beginAtZero: true,
               ticks: {

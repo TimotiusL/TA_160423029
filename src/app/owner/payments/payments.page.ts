@@ -61,7 +61,6 @@ export class PaymentsPage implements OnInit {
   verificationFromDetail = false;
   verificationSuccessMessage = 'Pembayaran berhasil diverifikasi.';
 
-  // State khusus modal penolakan pembayaran.
   rejectionPayment: Payment | null = null;
   rejectionReason = '';
   rejectionError = '';
@@ -241,8 +240,7 @@ export class PaymentsPage implements OnInit {
   async verify(payment: Payment): Promise<void> {
     if (this.processing) return;
 
-    // Simpan apakah tombol Verifikasi ditekan dari dalam modal Detail Pembayaran.
-    // Jika iya, tutup modal detail terlebih dahulu agar modal konfirmasi tidak bertumpuk.
+  
     this.verificationFromDetail = this.showProof && this.selectedPayment?.id === payment.id;
     this.verificationPayment = payment;
     this.verificationError = '';
@@ -257,7 +255,6 @@ export class PaymentsPage implements OnInit {
   }
 
   async cancelVerification(): Promise<void> {
-    // Simpan data sebelum modal ditutup karena event didDismiss akan membersihkan state.
     const shouldReturnToDetail = this.verificationFromDetail;
     const payment = this.verificationPayment;
     this.verificationFromDetail = false;
@@ -265,7 +262,6 @@ export class PaymentsPage implements OnInit {
     const dismissed = await this.paymentVerifyConfirmModal?.dismiss(null, 'cancel');
     if (!dismissed) this.onVerificationConfirmDidDismiss();
 
-    // Jika konfirmasi dibuka dari Detail Pembayaran, tampilkan detailnya kembali saat batal.
     if (shouldReturnToDetail && payment) {
       this.openProof(payment);
     }
@@ -354,9 +350,7 @@ export class PaymentsPage implements OnInit {
     await this.paymentRejectModal?.present();
   }
 
-  /** Menutup modal penolakan saat Owner membatalkan tindakan. */
   async cancelRejection(): Promise<void> {
-    // Simpan data karena didDismiss akan mengosongkan state modal penolakan.
     const shouldReturnToDetail = this.rejectionFromDetail;
     const payment = this.rejectionPayment;
     this.rejectionFromDetail = false;
@@ -364,13 +358,11 @@ export class PaymentsPage implements OnInit {
     const dismissed = await this.paymentRejectModal?.dismiss(null, 'cancel');
     if (!dismissed) this.onRejectionDidDismiss();
 
-    // Saat batal, kembalikan Owner ke Detail Pembayaran yang tadi sedang dibuka.
     if (shouldReturnToDetail && payment) {
       this.openProof(payment);
     }
   }
 
-  /** Membersihkan state modal setelah modal penolakan benar-benar ditutup. */
   onRejectionDidDismiss(): void {
     this.rejectionPayment = null;
     this.rejectionReason = '';

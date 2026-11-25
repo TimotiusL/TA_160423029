@@ -524,8 +524,7 @@ export class PropertiesPage implements OnInit {
           this.applyPropertySaveError(error);
           return;
         }
-        // Beberapa kondisi koneksi/server dapat membuat data tersimpan tetapi
-        // respons gagal diterima browser. Verifikasi daftar kos terlebih dahulu.
+
         this.api.getKos().subscribe({
           next: (data: any[]) => {
             const saved = (Array.isArray(data) ? data : []).some(kos => {
@@ -645,9 +644,7 @@ export class PropertiesPage implements OnInit {
   private async completePropertySave(): Promise<void> {
     this.savingProperty = false;
 
-    // Dismiss modal form melalui API Ionic dan tunggu sampai animasi serta
-    // event didDismiss selesai sebelum membuka modal sukses. Cara ini membuat
-    // siklus buka-tutup bisa diulang tanpa bergantung pada perubahan isOpen.
+
     if (this.propertyFormModal) {
       await this.propertyFormModal.dismiss({ saved: true }, 'saved');
     } else {
@@ -659,8 +656,7 @@ export class PropertiesPage implements OnInit {
     this.showSaveSuccess = true;
     this.cdr.detectChanges();
 
-    // Setiap penyimpanan menggunakan instance ion-modal yang sama, tetapi
-    // dipresentasikan kembali setelah benar-benar tertutup pada proses sebelumnya.
+
     await this.propertySaveSuccessModal?.present();
   }
 

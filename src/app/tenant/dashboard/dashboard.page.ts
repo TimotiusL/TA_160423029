@@ -105,7 +105,6 @@ export class DashboardPage implements OnInit {
   }
 
   loadDashboard(): void {
-    // Mencegah request dashboard bertumpuk jika tombol diclick berkali-kali.
     if (this.loading) return;
 
     this.loading = true;
@@ -119,8 +118,7 @@ export class DashboardPage implements OnInit {
         this.email = user.email || this.email;
 
         const contract = response?.kontrak_aktif;
-        // Kontrak berstatus aktif tetap ditampilkan setelah tanggal akhir,
-        // karena penghuni mungkin masih tinggal dan perlu membayar perpanjangan.
+
         const currentContract = contract && contract.status === 'aktif' ? contract : null;
 
         this.contract = currentContract ? {
@@ -157,7 +155,6 @@ export class DashboardPage implements OnInit {
         this.unpaidBillCount = Number(response?.tagihan_belum_lunas || 0);
         this.totalComplaints = Number(response?.jumlah_komplain || 0);
         this.loading = false;
-        // Komponen memakai OnPush, jadi tandai ulang setelah data API diterapkan.
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -183,7 +180,6 @@ export class DashboardPage implements OnInit {
   }
 
   get currentBill(): DashboardBill | undefined {
-    // Backend telah mengurutkan tagihan belum lunas berdasarkan jatuh tempo terdekat.
     return this.unpaidBills.find(bill => bill.remaining > 0);
   }
 
@@ -222,7 +218,6 @@ export class DashboardPage implements OnInit {
   }
 
   private formatPeriod(value: string): string {
-    // Database menyimpan periode umumnya dalam format MM/YYYY.
     const match = value.match(/^(\d{1,2})\/(\d{4})$/);
     if (!match) return value || '-';
 

@@ -459,7 +459,6 @@ export class RoomsPage implements OnInit {
 
     const roomId = Number(this.roomToDelete.id);
 
-    // Tutup semua modal
     this.closeDeleteModal();
     this.closeDetail();
 

@@ -27,7 +27,6 @@ export class NotificationsPage {
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, private router: Router) {}
 
-  // Dipanggil setiap kali halaman akan ditampilkan
   ionViewWillEnter(): void {
     this.loadNotifications();
   }

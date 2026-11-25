@@ -75,7 +75,6 @@ export class LoginPage {
   }
 
   handleLogin(): void {
-    // Cegah pengiriman request berulang saat proses login masih berjalan.
     if (this.isLoggingIn) return;
 
     this.error = '';
@@ -92,8 +91,6 @@ export class LoginPage {
 
     this.api.login(this.email.trim(), this.password)
       .pipe(finalize(() => {
-        // Pastikan tombol tidak tertinggal pada status "Memeriksa..."
-        // baik API berhasil maupun mengembalikan error.
         this.isLoggingIn = false;
         this.cdr.detectChanges();
       }))
@@ -119,7 +116,6 @@ export class LoginPage {
           this.error = '';
           this.needsEmailVerification = false;
 
-          // Do not leave credentials in the cached login page after sign-in.
           this.email = '';
           this.password = '';
           this.cdr.detectChanges();
@@ -143,8 +139,6 @@ export class LoginPage {
           if (error?.status === 401) {
             this.error = responseMessage || 'Email atau password salah.';
           } else if (error?.status === 403) {
-            // Pada endpoint login aplikasi ini, 403 dipakai untuk menolak
-            // akun yang emailnya belum diverifikasi.
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             this.needsEmailVerification = true;
@@ -171,7 +165,6 @@ export class LoginPage {
   }
 
   handleForgotPassword(): void {
-    // Cegah request ganda jika tombol diklik berulang.
     if (this.forgotSubmitting) return;
     this.error = '';
 
@@ -188,8 +181,6 @@ export class LoginPage {
       this.forgotSubmitting = true;
       this.cdr.detectChanges();
 
-      // Cek email dan kirim OTP secara berurutan. Pindah ke tahap OTP
-      // hanya setelah server mengonfirmasi OTP berhasil dikirim.
       this.api.checkResetEmail(email).pipe(
         switchMap(() => this.api.sendResetOtp(email)),
         finalize(() => {
@@ -203,7 +194,6 @@ export class LoginPage {
           this.forgotInfo = response?.message ||
             `Kode verifikasi sudah dikirim ke ${email}. Periksa Inbox dan folder Spam/Junk.`;
           this.error = '';
-          // Paksa Angular mengganti form email menjadi form OTP.
           this.cdr.detectChanges();
         },
         error: (error: any) => {

@@ -60,7 +60,6 @@ export class ApplicationStatusPage {
   errorPembatalanModal = '';
   pesanAksi = '';
   errorAksi = '';
-  // Semua pengajuan yang masih menunggu dipisahkan dari pengajuan yang sudah selesai.
   pengajuanMenungguLainnya: ApplicationStatusData[] = [];
   riwayatPengajuan: ApplicationStatusData[] = [];
   pengajuanTerbaru: ApplicationStatusData | null = null;
@@ -95,8 +94,7 @@ export class ApplicationStatusPage {
     rawDate: ''
   };
 
-  // Ionic memanggil lifecycle ini setiap kali halaman dibuka kembali,
-  // termasuk ketika halaman sudah pernah dibuka dan masih tersimpan di router outlet.
+
   ionViewWillEnter(): void {
     const kode = this.route.snapshot.queryParamMap.get('kode')?.trim();
 
@@ -106,8 +104,6 @@ export class ApplicationStatusPage {
       return;
     }
 
-    // Jika halaman dibuka dari menu tanpa kode, tampilkan pengajuan terbaru
-    // milik akun yang sedang login secara otomatis.
     this.kodePendaftaran = '';
     this.loadLatestApplication();
   }
@@ -147,11 +143,8 @@ export class ApplicationStatusPage {
         const menunggu = mapped.filter(item => item.status === 'menunggu');
         const selesai = mapped.filter(item => item.status !== 'menunggu');
 
-        // Detail utama hanya mengambil pengajuan berstatus menunggu yang paling baru.
-        // Pengajuan menunggu lainnya tetap dipisah, bukan dicampur ke riwayat.
         this.pengajuanTerbaru = menunggu[0] || null;
         this.pengajuanMenungguLainnya = menunggu.slice(1);
-        // Riwayat hanya berisi pengajuan yang sudah diterima, ditolak, atau dibatalkan.
         this.riwayatPengajuan = selesai;
         this.sedangCari = false;
 
@@ -198,7 +191,6 @@ export class ApplicationStatusPage {
           this.belumAdaPengajuanMenunggu = false;
           this.tampilkanDataPengajuan(this.pengajuanTerbaru);
         } else {
-          // Jika semua pengajuan sudah diputuskan, jangan tampilkan detail dari record terbaru.
           this.kodePendaftaran = '';
           this.sudahCari = false;
           this.belumAdaPengajuanMenunggu = true;

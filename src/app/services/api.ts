@@ -141,8 +141,6 @@ export class ApiService {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
       Accept: 'application/json'
     });
-
-    // Jangan set Content-Type manual; browser akan mengisi multipart boundary.
     return this.http.post<any>(`${this.baseUrl}/tenant/pendaftaran`, data, { headers });
   }
 
@@ -216,7 +214,6 @@ export class ApiService {
       Accept: 'application/json'
     });
 
-    // Laravel lebih konsisten membaca upload file melalui POST + method spoofing.
     data.append('_method', 'PUT');
 
     return this.http.post<any>(
@@ -825,7 +822,6 @@ export class ApiService {
     );
   }
 
-  // Endpoint komplain khusus tenant; endpoint /komplain tetap untuk admin.
   getTenantKomplain(): Observable<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -916,7 +912,6 @@ export class ApiService {
       Accept: 'application/json'
     });
 
-    // Content-Type tidak diatur manual agar boundary multipart dibuat browser.
     return this.http.post<any>(`${this.baseUrl}/tenant/profile`, data, { headers });
   }
 

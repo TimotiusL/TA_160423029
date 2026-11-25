@@ -88,7 +88,6 @@ export class LayoutPage implements OnInit, OnDestroy {
         this.expandSectionForCurrentRoute();
       });
 
-    // Perbarui badge secara berkala agar notifikasi baru tetap terlihat.
     this.notificationRefreshTimer = window.setInterval(
       () => this.loadUnreadNotifications(),
       30000
@@ -176,8 +175,7 @@ export class LayoutPage implements OnInit, OnDestroy {
   ];
 
   toggleSection(section: NavSection): void {
-    // Pada sidebar yang sedang diperkecil, klik ikon akan membuka sidebar
-    // sekaligus membuka kelompok menu yang dipilih.
+
     if (!this.sidebarOpen) {
       this.sidebarOpen = true;
       this.expandedSection = section.title;

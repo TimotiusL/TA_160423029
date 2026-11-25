@@ -251,8 +251,7 @@ export class ContractsPage {
   loadExitRequests(): void {
     this.api.getPermintaanKeluar().subscribe({
       next: (data: any[]) => {
-        // Endpoint mengembalikan kontrak yang menyimpan permintaan keluar,
-        // bukan baris dari tabel permintaan terpisah.
+
         this.exitRequests = (Array.isArray(data) ? data : []).filter(item => item.status_permintaan_keluar === 'menunggu').map(item => ({
           id: String(item.id_kontrak),
           contractId: String(item.id_kontrak),
@@ -558,7 +557,6 @@ export class ContractsPage {
           link.click();
           link.remove();
 
-          // URL dibiarkan hidup lebih lama agar browser atau IDM sempat mengambil blob.
           window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 30000);
           this.downloadingContract = false;
           this.contractDownloadNotice = 'Unduhan telah dimulai. Periksa daftar unduhan browser.';
@@ -574,9 +572,6 @@ export class ContractsPage {
         console.error('Gagal download kontrak:', error);
         this.downloadingContract = false;
 
-        // Beberapa integrasi download manager memutus respons XHR setelah mengambil file.
-        // Status 0 tidak cukup untuk menyimpulkan bahwa file gagal diunduh, jadi tampilkan
-        // pemberitahuan netral dan minta pengguna memeriksa daftar unduhan.
         if (error?.status === 0) {
           this.contractDownloadNotice = 'Aplikasi tidak menerima konfirmasi dari browser. Periksa daftar unduhan browser sebelum mencoba kembali.';
           this.cdr.detectChanges();

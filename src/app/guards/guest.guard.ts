@@ -11,18 +11,15 @@ export const guestGuard: CanActivateFn = () => {
 
   const token = localStorage.getItem('token');
 
-  // Belum login → boleh masuk halaman login
   if (!token) {
     return true;
   }
 
-  // Sudah punya token → cek ke Laravel
   return api.me().pipe(
     map((response: any) => {
 
       const user = response.user;
 
-      // Token masih valid → jangan masuk login
       if (user.role === 'admin') {
         return router.createUrlTree(['/owner/dashboard']);
       }
@@ -35,7 +32,6 @@ export const guestGuard: CanActivateFn = () => {
     }),
 
     catchError(() => {
-      // Token ternyata sudah tidak valid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 

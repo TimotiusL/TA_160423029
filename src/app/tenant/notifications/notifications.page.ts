@@ -91,7 +91,6 @@ export class NotificationsPage {
       },
       error: (error: any) => {
         console.error('Gagal menandai notifikasi:', error);
-        // Notifikasi tetap bisa dibuka bila endpoint baca sedang bermasalah.
         this.router.navigateByUrl(item.target);
       }
     });

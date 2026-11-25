@@ -386,8 +386,6 @@ export class BillDetailPage implements OnInit {
   metodeDiubah(value: string): void {
     this.metode = value === 'langsung' ? 'langsung' : 'transfer';
 
-    // Bukti transfer tidak ikut terkirim jika penghuni mengganti metode
-    // menjadi pembayaran langsung.
     if (this.metode === 'langsung') {
       this.hapusFile();
     }
@@ -413,7 +411,6 @@ export class BillDetailPage implements OnInit {
     }
 
     if (this.metode === 'langsung') {
-      // Pembayaran langsung tetap perlu diajukan agar owner memverifikasinya.
       this.showConfirmation = true;
       this.cdr.markForCheck();
       return;

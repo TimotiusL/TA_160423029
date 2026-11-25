@@ -465,8 +465,6 @@ export class BillingPage implements OnInit {
     const tagihanId = this.selectedBill?.id;
     if (!tagihanId) return;
 
-    // Simpan tujuan navigasi, lalu tunggu modal detail benar-benar selesai
-    // ditutup. Navigasi dilakukan dari handleDetailDidDismiss().
     this.pendingPaymentNavigationId = tagihanId;
 
     if (this.detailModal?.isOpen) {
@@ -477,7 +475,6 @@ export class BillingPage implements OnInit {
       return;
     }
 
-    // Fallback jika elemen modal belum tersedia pada saat tombol dipencet.
     this.handleDetailDidDismiss();
   }
 

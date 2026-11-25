@@ -129,9 +129,7 @@ export class ContractDetailPage implements OnInit {
     this.cdr.markForCheck();
 
     this.api.getKontrak().pipe(
-      // Hindari halaman terus menampilkan spinner jika API tidak merespons.
       timeout({ first: 15000 }),
-      // Selalu matikan loading setelah sukses, gagal, atau timeout.
       finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();
@@ -139,8 +137,7 @@ export class ContractDetailPage implements OnInit {
     ).subscribe({
       next: (response: any) => {
         try {
-          // Mendukung respons array langsung, Laravel { data: [...] },
-          // maupun pembungkus { kontrak: [...] }.
+
           const payload = response?.data ?? response?.kontrak ?? response;
           const rows: any[] = Array.isArray(payload)
             ? payload
@@ -148,8 +145,6 @@ export class ContractDetailPage implements OnInit {
               ? payload.data
               : [];
 
-          // Kontrak aktif tetap ditampilkan walaupun tanggal akhir sudah lewat,
-          // supaya penghuni dapat melihat tagihan perpanjangan dan denda berjalan.
           const currentRows = rows.filter((row: any) => this.isCurrentTenantContract(row));
 
           currentRows.sort((a: any, b: any) => {
@@ -496,8 +491,7 @@ export class ContractDetailPage implements OnInit {
 
     this.api.downloadKontrak(String(this.contract.id)).subscribe({
       next: (blob: Blob) => {
-        // Unduh melalui tautan sementara agar PDF langsung diunduh,
-        // bukan dibuka pada tab atau jendela pratinjau.
+
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         const fileName = `${this.contract.number || 'kontrak'}.pdf`;
