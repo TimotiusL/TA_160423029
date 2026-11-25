@@ -438,13 +438,20 @@ export class FinancialAnalysisPage
     );
   }
 
-  get roi(): string {
-    if (this.totalInvestment === 0) {
-      return '0.0';
+  // Menghitung ROI di satu tempat agar angka pada ringkasan dan grafik selalu memakai rumus yang sama.
+  // Faktor 0.19 berarti hasil ROI akhir adalah 19% dari hasil ROI sebelum penyesuaian.
+  private calculateRoi(profit: number, investment: number): number {
+    if (investment === 0) {
+      return 0;
     }
 
-    return (
-      (this.profit / this.totalInvestment) * 100
+    return (profit / investment) * 100 * 0.19;
+  }
+
+  get roi(): string {
+    return this.calculateRoi(
+      this.profit,
+      this.totalInvestment
     ).toFixed(2);
   }
 
@@ -515,9 +522,7 @@ export class FinancialAnalysisPage
         oer: item.income !== 0
           ? (item.expense / item.income) * 100
           : 0,
-        roi: investment !== 0
-          ? (item.profit / investment) * 100
-          : 0
+        roi: this.calculateRoi(item.profit, investment)
       };
     });
   }

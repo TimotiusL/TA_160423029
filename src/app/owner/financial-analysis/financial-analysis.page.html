@@ -242,7 +242,7 @@
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Rata-rata Laba Harian' : 'Rata-rata Laba Bulanan' }}</span><strong>{{ formatRupiah(averageMonthlyProfit) }}</strong>
-          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata dari hari aktif' : 'Rata-rata dari bulan aktif' }}</small>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata dari hari yang ditampilkan' : 'Rata-rata dari bulan yang ditampilkan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Hari dengan Laba Tertinggi' : 'Bulan dengan Laba Tertinggi' }}</span>
@@ -284,7 +284,7 @@
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Rata-rata Margin Harian' : 'Rata-rata Margin Bulanan' }}</span><strong>{{ averageProfitMargin.toFixed(2) }}%</strong>
-          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata hari aktif yang memiliki pendapatan' : 'Rata-rata bulan aktif yang memiliki pendapatan' }}</small>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata persentase tiap hari' : 'Rata-rata persentase tiap bulan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>Laba Bersih</span><strong>{{ formatRupiah(profit) }}</strong>
@@ -325,7 +325,7 @@
         </div>
         <div class="detail-metric-card">
           <span>{{ month > 0 && year !== 'all' ? 'Rata-rata OER Harian' : 'Rata-rata OER Bulanan' }}</span><strong>{{ averageOer.toFixed(2) }}%</strong>
-          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata hari aktif yang memiliki pendapatan' : 'Rata-rata bulan aktif yang memiliki pendapatan' }}</small>
+          <small>{{ month > 0 && year !== 'all' ? 'Rata-rata persentase tiap hari' : 'Rata-rata persentase tiap bulan' }}</small>
         </div>
         <div class="detail-metric-card">
           <span>Total Pengeluaran</span><strong>{{ formatRupiah(totalExpenses) }}</strong>
@@ -382,7 +382,7 @@
 
       <div class="analysis-note">
         <span class="note-label">Rumus</span>
-        <strong>ROI = (Laba Bersih ÷ Total Investasi) × 100%</strong>
+        <strong>ROI = (Laba Bersih ÷ Total Investasi) × 100% × 19%</strong>
         <p>ROI positif menunjukkan laba dibandingkan investasi bernilai positif pada periode tersebut. Angka ini bergantung pada kelengkapan data investasi dan laba.</p>
       </div>
     </section>
