@@ -113,7 +113,6 @@ export class KosDetailPage implements OnInit {
     });
   }
 
-  /** Periksa kelayakan mendaftar tiap kali halaman detail dibuka kembali. */
   ionViewWillEnter(): void {
     this.checkRegistrationEligibility();
   }

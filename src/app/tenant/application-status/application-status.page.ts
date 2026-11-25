@@ -128,7 +128,6 @@ export class ApplicationStatusPage {
     this.loadAllApplications('', false);
   }
 
-  /** Memuat seluruh pengajuan, lalu memisahkan yang masih menunggu dari riwayat final. */
   private loadAllApplications(targetCode: string, preserveActionMessage: boolean): void {
     this.mulaiMemuatStatus(preserveActionMessage);
     this.api.getTenantPendaftaran().subscribe({

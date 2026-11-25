@@ -49,11 +49,6 @@ export class ComplaintsPage {
     this.loadComplaints();
   }
 
-  /**
-   * Komplain hanya tersedia untuk penghuni dengan kontrak berstatus aktif.
-   * Acuan status disamakan dengan halaman Kontrak dan Dashboard; tanggal akhir
-   * sewa tidak otomatis menonaktifkan kontrak selama status database masih aktif.
-   */
   loadComplaints(): void {
     this.loading = true;
     this.errorMessage = '';

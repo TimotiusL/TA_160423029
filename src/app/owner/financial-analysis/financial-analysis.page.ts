@@ -438,8 +438,6 @@ export class FinancialAnalysisPage
     );
   }
 
-  // Menghitung ROI di satu tempat agar angka pada ringkasan dan grafik selalu memakai rumus yang sama.
-  // Faktor 0.19 berarti hasil ROI akhir adalah 19% dari hasil ROI sebelum penyesuaian.
   private calculateRoi(profit: number, investment: number): number {
     if (investment === 0) {
       return 0;

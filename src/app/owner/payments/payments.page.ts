@@ -326,11 +326,6 @@ export class PaymentsPage implements OnInit {
     await this.paymentVerifySuccessModal?.dismiss(null, 'close');
   }
 
-  /**
-   * Membuka modal penolakan dan menyiapkan data pembayaran yang dipilih.
-   * Jika tombol ditekan dari Detail Pembayaran, tutup modal detail terlebih dahulu
-   * agar modal penolakan tampil sendiri dengan backdrop abu-abu di belakangnya.
-   */
   async reject(payment: Payment): Promise<void> {
     if (this.processing) return;
 
@@ -372,11 +367,6 @@ export class PaymentsPage implements OnInit {
     this.cdr.detectChanges();
   }
 
-  /**
-   * Mengirim alasan penolakan ke endpoint verifikasi pembayaran.
-   * Endpoint dan susunan payload tetap sama: ID pembayaran, status ditolak,
-   * dan alasan yang ditulis Owner.
-   */
   submitRejection(): void {
     const payment = this.rejectionPayment;
     const catatan = this.rejectionReason.trim();
@@ -432,7 +422,6 @@ export class PaymentsPage implements OnInit {
     });
   }
 
-  /** Menutup modal hasil penolakan setelah Owner selesai membaca pesannya. */
   async closeRejectionSuccess(): Promise<void> {
     await this.paymentRejectModal?.dismiss(null, 'done');
   }

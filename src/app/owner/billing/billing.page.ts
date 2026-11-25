@@ -243,9 +243,7 @@ export class BillingPage implements OnInit {
     return this.formatRupiah(Number(item.tagihan?.total_tagihan || 0));
   }
 
-  /* =========================
-     FILTERED DATA
-  ========================= */
+
 
   get filteredBills(): Bill[] {
 
@@ -289,9 +287,7 @@ export class BillingPage implements OnInit {
     });
   }
 
-  /* =========================
-     COUNTS
-  ========================= */
+
 
   get totalUnpaid(): number {
 
@@ -332,17 +328,10 @@ export class BillingPage implements OnInit {
     ).length;
   }
 
-  /* =========================
-     TAB
-  ========================= */
 
   setTab(tab: string) {
     this.tab = tab;
   }
-
-  /* =========================
-     DETAIL
-  ========================= */
 
   openDetail(bill: Bill) {
     this.selectedBill = bill;
@@ -370,9 +359,6 @@ export class BillingPage implements OnInit {
     }
   }
 
-  /* =========================
-     DATA HELPERS
-  ========================= */
 
   getTenant(bill: Bill): Tenant | undefined {
     return this.tenants.find(
@@ -390,9 +376,7 @@ export class BillingPage implements OnInit {
     return bill.roomNumber || '-';
   }
 
-  /* =========================
-     FORMAT
-  ========================= */
+
 
   formatRupiah(
     value: number
@@ -440,9 +424,6 @@ export class BillingPage implements OnInit {
     }).format(new Date(year, month - 1, 1));
   }
 
-  /* =========================
-     PAYMENT PROGRESS
-  ========================= */
 
   getPaymentProgress(
     bill: Bill
@@ -457,9 +438,6 @@ export class BillingPage implements OnInit {
     );
   }
 
-  /* =========================
-     OTHER ACTIONS
-  ========================= */
 
   async viewPayments(): Promise<void> {
     const tagihanId = this.selectedBill?.id;

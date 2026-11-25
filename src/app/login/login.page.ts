@@ -61,11 +61,6 @@ export class LoginPage {
     private cdr: ChangeDetectorRef
   ) { }
 
-  /**
-   * Ionic keeps routed pages alive between navigations. Clear the login
-   * credentials whenever this page becomes active again (for example,
-   * after an owner or tenant logs out).
-   */
   ionViewWillEnter(): void {
     this.email = '';
     this.password = '';
